@@ -7,7 +7,8 @@ const tn = document.createElement('template');
 const reg = /(\$_h\[\d+\])/g;
 
 export function render(tree, parent) {
-	preactRender(tree, parent, parent.firstChild);
+	let prev = parent.$_h;
+	parent.$_h = preactRender(tree, parent, prev && prev._component && prev._component.base || prev);
 }
 
 export { h, Component };
@@ -37,12 +38,12 @@ function walk(n) {
 		if (n.nodeType === 3 && n.data) return field(n.data.trim(), ',');
 		return 'null';
 	}
-	const attrs = n.getAttributeNames();
-	let str = 'h(' + (attrs[0] == 'c@' ? n.getAttribute(attrs.shift()) : `"${n.localName}"`) + ',', val;
-	for (const name of attrs) {
+	let str = 'h(' + (n.getAttribute('c@') || `"${n.localName}"`) + ',', val, name;
+	for (let i=0; i<n.attributes.length; i++) {
+		if ((name = n.attributes[i].name)=='c@') continue;
 		str += val === undefined ? '{' : ',';
-		val = n.getAttribute(name);
-		str += `"${name.replace(/^on-/, 'on')}":${val === '' ? 'true' : field(val, '+')}`;
+		val = n.attributes[i].value;
+		str += `"${name.replace(/^on-/, 'on')}":${!val ? 'true' : field(val, '+')}`;
 	}
 	str += val === undefined ? 'null' : '}';
 	let child = n.firstChild;
@@ -59,7 +60,7 @@ function field(value, sep) {
 	let strValue = JSON.stringify(value);
 	if (matches != null) {
 		if (matches[0] === value) return value;
-		strValue = strValue.replace(reg, `"${sep}$1${sep}"`).replace(/(^""[+,]|[+,]""$)/g, '');
+		strValue = strValue.replace(reg, `"${sep}$1${sep}"`).replace(/"[+,]"/g, '');
 		if (sep === ',') strValue = `[${strValue}]`;
 	}
 	return strValue;
