@@ -1,6 +1,10 @@
 This is a crazy experiment to implement an interface for Preact that roughly matches that of `lit-html`.
 
-The goal is to create a wrapper around Preact that feels natural for use untranspiled in the browser:
+The goal is to create a wrapper around Preact that feels natural for use untranspiled in the browser.
+
+Basically, it's preact but instead of JSX, you use tagged template literals. The browser parses the HTML.
+
+The neat part is, when bundled together with Preact this mode only adds 600 bytes.
 
 ```html
 <!DOCTYPE html>
@@ -30,7 +34,7 @@ The goal is to create a wrapper around Preact that feels natural for use untrans
         }
       }
   
-      render(html`<${App} page="To-Do's" />`);
+      render(html`<${App} page="To-Do's" />`, document.body);
     </script>
   </body>
 </html>
