@@ -11,7 +11,7 @@ The neat part is, when bundled together with Preact this mode only adds 600 byte
 > That also means to work with examples you must use this gist's URL:
 >
 > ```js
-> import { html, render } from 'https://cdn.rawgit.com/developit/ce062586e3fc7247dbb9ccc4f6acc4e1/raw/bf1ef4b38f43702dddd14118f54f3677cfa62560/preact-html.mjs'
+> import { html, render } from 'https://cdn.rawgit.com/developit/ce062586e3fc7247dbb9ccc4f6acc4e1/raw/2a8d8769cf06c606721600b0dbe077c3a3195681/preact-html.mjs'
 > ```
 
 ```html
