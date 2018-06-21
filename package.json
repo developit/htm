@@ -1,0 +1,37 @@
+{
+  "name": "preact-html",
+  "version": "0.1.0",
+  "description": "A lit-style frontend to Preact. No browser-incompatible syntax.",
+  "main": "preact-html.umd.js",
+  "module": "preact-html.mjs",
+  "scripts": {
+    "build": "microbundle src.js -f es,umd --no-sourcemap --target web",
+    "test": "eslint src.js test.js && jest test.js"
+  },
+  "eslintConfig": {
+    "extends": "developit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gist.github.com/ce062586e3fc7247dbb9ccc4f6acc4e1.git"
+  },
+  "keywords": [
+    "preact",
+    "html",
+    "lit",
+    "tagged template literals",
+    "module"
+  ],
+  "author": "Jason Miller <jason@developit.ca>",
+  "license": "Apache-2.0",
+  "homepage": "https://gist.github.com/ce062586e3fc7247dbb9ccc4f6acc4e1",
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-developit": "^1.1.1",
+    "jest": "^23.1.0",
+    "microbundle": "^0.4.4"
+  },
+  "dependencies": {
+    "preact": "^8.2.9"
+  }
+}
