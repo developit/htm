@@ -1,6 +1,6 @@
 import { h, Component, render as preactRender } from 'preact';
 
-const CACHE = new Map();
+// const CACHE = new Map();
 
 const tn = document.createElement('template');
 
@@ -13,10 +13,12 @@ export function render(tree, parent) {
 export { h, Component };
 
 export function html(statics, ...holes) {
-	let tpl = CACHE.get(statics);
-	if (tpl==null) {
-		CACHE.set(statics, tpl = build(statics));
-	}
+	// let tpl = CACHE.get(statics);
+	// if (tpl==null) {
+	// 	CACHE.set(statics, tpl = build(statics));
+	// }
+	// return tpl(holes, h);
+	const tpl = statics.$_h || (statics.$_h = build(statics));
 	return tpl(holes, h);
 }
 
@@ -34,7 +36,7 @@ function build(statics) {
 /** Traverse a DOM tree and serialize it to hyperscript function calls */
 function walk(n) {
 	if (n.nodeType !== 1) {
-		if (n.nodeType === 3 && n.data) return field(n.data.trim(), ',');
+		if (n.nodeType === 3 && n.data) return field(n.data, ',');
 		return 'null';
 	}
 	let str = 'h(' + (n.getAttribute('c@') || `"${n.localName}"`) + ',', val, name;
