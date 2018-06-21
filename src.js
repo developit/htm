@@ -8,7 +8,7 @@ const reg = /(\$_h\[\d+\])/g;
 
 export function render(tree, parent) {
 	let prev = parent.$_h;
-	parent.$_h = preactRender(tree, parent, prev && prev._component && prev._component.base || prev);
+	parent.$_h = preactRender(tree, parent, prev && prev._component && prev._component.base || prev || parent.firstChild);
 }
 
 export { h, Component };
