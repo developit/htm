@@ -1,12 +1,13 @@
 {
-  "name": "preact-html",
-  "version": "0.1.0",
-  "description": "A lit-style frontend to Preact. No browser-incompatible syntax.",
-  "main": "preact-html.umd.js",
-  "module": "preact-html.mjs",
+  "name": "htm",
+  "version": "1.0.0",
+  "description": "The Tagged Template Literal syntax for Virtual DOM. Only browser-compatible syntax.",
+  "main": "dist.umd.js",
+  "module": "dist.mjs",
   "scripts": {
-    "build": "microbundle src.js -f es,umd --no-sourcemap --target web",
-    "test": "eslint src.js test.js && jest test.js"
+    "build": "microbundle src.js -f es,umd --no-sourcemap --target web && npm run -s build:preact",
+    "build:preact": "microbundle src-preact.js -o dist-preact.js -f es,umd --no-sourcemap --target web",
+    "test": "eslint src.js src-preact.js test.js && jest test.js"
   },
   "eslintConfig": {
     "extends": "developit"
@@ -16,11 +17,12 @@
     "url": "git+ssh://git@gist.github.com/ce062586e3fc7247dbb9ccc4f6acc4e1.git"
   },
   "keywords": [
-    "preact",
-    "html",
-    "lit",
+    "Hyperscript Tagged Markup",
     "tagged template literals",
-    "module"
+    "html",
+    "htm",
+    "preact",
+    "lit"
   ],
   "author": "Jason Miller <jason@developit.ca>",
   "license": "Apache-2.0",
@@ -29,9 +31,7 @@
     "eslint": "^4.19.1",
     "eslint-config-developit": "^1.1.1",
     "jest": "^23.1.0",
-    "microbundle": "^0.4.4"
-  },
-  "dependencies": {
+    "microbundle": "^0.4.4",
     "preact": "^8.2.9"
   }
 }

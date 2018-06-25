@@ -1,4 +1,4 @@
-const { html, Component, render } = require('.');
+const { html, Component, render } = require('./dist-preact.umd.js');
 
 describe('preact-html', () => {
 	let scratch = document.createElement('div');
@@ -77,5 +77,36 @@ describe('preact-html', () => {
 
 		render(html`<div is-before ...${props} is-after="blah" />`, scratch);
 		expect(scratch.innerHTML).toBe(`<div is-before="true" a="1" b="2" c="3" is-after="blah"></div>`);
+	});
+});
+
+describe('performance', () => {
+	test('creation', () => {
+		const results = [];
+		const Foo = ({ name }) => html`<div class="foo">${name}</div>`;
+		const statics = [
+			'\n<div id=app data-loading="true">\n\t<h1>Hello World</h1>\n\t<ul class="items" id=', '>\n\t',
+			'\n\t</ul>\n\t\n\t<', ' name="foo" />\n\t<', ' name="other">content</', '>\n\n</div>'
+		];
+		let count = 0;
+		function go(count) {
+			return html(
+				statics.concat(['count:', count]),
+				`id${count}`,
+				html(['<li data-id="','">', '</li>'], 'i'+count, 'some text #'+count),
+				Foo, Foo, Foo
+			);
+		}
+		let now = performance.now();
+		const start = now;
+		while ((now = performance.now()) < start+2000) {
+			count++;
+			if (results.push(String(go(count)))===10) results.length = 0;
+		}
+		let elapsed = now - start;
+		let hz = count / elapsed * 1000;
+		console.log(`Creation: ${hz|0}/s, average: ${elapsed/count.toFixed(4)}ms`);
+		expect(elapsed).toBeGreaterThan(999);
+		expect(hz).toBeGreaterThan(10);
 	});
 });

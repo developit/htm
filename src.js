@@ -1,4 +1,4 @@
-import { h, Component, render as preactRender } from 'preact';
+// import { h, Component, render as preactRender } from 'preact';
 
 // const CACHE = new Map();
 const CACHE = {};
@@ -7,36 +7,49 @@ const tn = document.createElement('template');
 
 const reg = /(\$_h\[\d+\])/g;
 
-export function render(tree, parent) {
-	preactRender(tree, parent, parent.firstElementChild);
+// export function render(tree, parent) {
+// 	preactRender(tree, parent, parent.firstElementChild);
+// }
+
+// export { h, Component };
+
+export default function htm(h) {
+	return function (statics) {
+		const tpl = CACHE[statics] || (CACHE[statics] = build(statics));
+		// eslint-disable-next-line prefer-rest-params
+		return tpl(h, arguments);
+	};
 }
 
-export { h, Component };
-
-export function html(statics, ...holes) {
-	// let tpl = CACHE.get(statics);
-	// if (tpl==null) {
-	// 	CACHE.set(statics, tpl = build(statics));
-	// }
-	// return tpl(holes, h);
-
-	const tpl = CACHE[statics] || (CACHE[statics] = build(statics));
-	return tpl(holes, h);
-
-	// const tpl = statics.$_h || (statics.$_h = build(statics));
-	// return tpl(holes, h);
-}
+// export function html(statics) {
+// 	const tpl = CACHE[statics] || (CACHE[statics] = build(statics));
+// 	// return tpl(holes, h);
+// 	// eslint-disable-next-line prefer-rest-params
+// 	return tpl(h, arguments);
+// }
 
 /** Create a template function given strings from a tagged template literal. */
 function build(statics) {
-	let str = '', i = 0;
+	let str = statics[0], i = 1;
 	while (i < statics.length) {
-		if (i !== 0) str += `$_h[${i - 1}]`;
-		str += statics[i++];
+		str += '$_h[' + i + ']' + statics[i++];
 	}
-	tn.innerHTML = str.replace(/<(\$_h\[\d+\])/g, '<c@ c@=$1').replace(/<\/\$_h\[\d+\]/g, '</c@').replace(/<([a-z0-9:@-]+)(\s.*?)?\/>/gi, '<$1$2></$1>').trim();
-	// console.log(walk((tn.content || tn).firstChild));
-	return Function('$_h', 'h', 'return ' + walk((tn.content || tn).firstChild));
+	// let str = '', i = 0;
+	// while (i < statics.length) {
+	// 	// if (i !== 0) str += `$_h[${i - 1}]`;
+	// 	if (i !== 0) str += `$_h[${i}]`;
+	// 	str += statics[i++];
+	// }
+
+	// tn.innerHTML = str.replace(/<(\$_h\[\d+\])/g, '<c c@=$1').replace(/<\/\$_h\[\d+\]/g, '</c').replace(/<([a-z0-9:@-]+)(\s.*?)?\/>/gi, '<$1$2></$1>').trim();
+	// tn.innerHTML = str.replace(/<(\/?)(\$_h\[\d+\])/g, '<$1c c@=$2').replace(/<([a-z0-9:@-]+)(\s.*?)?\/>/gi, '<$1$2></$1>').trim();
+	// tn.innerHTML = str.replace(/<(\/?)(\$_h\[\d+\])/g, '<$1c c@=$2').replace(/<([\w-]+)(\s.*?)?\/>/gi, '<$1$2></$1>').replace(RegExp(str.match(/\n\s*/)[0]));
+	// tn.innerHTML = str.replace(/<(\/?)(\$_h\[\d+\])/g, '<$1c c@=$2').replace(/\/>/g, '></c>').trim();
+	// tn.innerHTML = str.replace(/<(\/?)(\$_h\[\d+\])((\s.*?)?\/>)?/g, (s, slash, name, closing) => (slash ? '' : `<c c@=${name}${closing}${closing?`</${name}>`:''}`) + (slash || closing ? `</${name}>` : '')).trim();
+	tn.innerHTML = str.replace(/<(\/?)(\$_h\[\d+\])/g, '<$1c c@=$2').replace(/<([\w:-]+)(\s.*?)?\/>/gi, '<$1$2></$1>').trim();
+	return Function('h', '$_h', 'return ' + walk((tn.content || tn).firstChild));
+	// const dom = new DOMParser().parseFromString(str.replace(/<(\$_h\[\d+\])/g, '<c@ c@=$1').replace(/<\/\$_h\[\d+\]/g, '</c@').replace(/<([a-z0-9:@-]+)(\s.*?)?\/>/gi, '<$1$2></$1>').trim(), 'text/html').body.firstChild;
+	// return Function('h', '$_h', 'return ' + walk(dom));
 }
 
 /** Traverse a DOM tree and serialize it to hyperscript function calls */
