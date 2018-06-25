@@ -1,5 +1,7 @@
 # HTM (Hyperscript Tagged Markup)
 
+<img src="https://i.imgur.com/09ih11e.jpg" align="center" width="715">
+
 `htm` is an implementation of JSX-like syntax in plain JavaScript, using [Tagged Template Literals].
 It lets your build apps using Preact/React/etc directly in the browser.
 JSX can be converted to `htm` with only a few tiny modifications.
@@ -25,6 +27,7 @@ Here's some ergonomic features you get for free that aren't present in JSX:
 - HTML's self-closing tags: `<img src=${url}>`
 - Optional end-tags: `<section><h1>this is the whole template!`
 - Convenient implicit end-tags: `<${Footer}>footer content<//>`
+- Support for HTML comments: `<div><!-- don't delete this! --></div>`
 
 ## Project Status
 

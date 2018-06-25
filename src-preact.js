@@ -7,4 +7,4 @@ export function render(tree, parent) {
 	preactRender(tree, parent, parent.firstElementChild);
 }
 
-export const html = htm(h);
+export const html = htm.bind(h);
