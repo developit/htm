@@ -17,7 +17,11 @@ function build(statics) {
 	while (i < statics.length) {
 		str += '$_h[' + i + ']' + statics[i++];
 	}
-	TEMPLATE.innerHTML = str.replace(/<(\/?)(\$_h\[\d+\])/g, '<$1c c@=$2').replace(/<([\w:-]+)(\s[^<>]*?)?\/>/gi, '<$1$2></$1>').trim();
+	// Template literal preprocessing:
+	// - replace <${Foo}> with <c c@=${Foo}>
+	// - replace <x /> with <x></x>
+	// - replace <${Foo}>a<//>b with <c c@=${Foo}>a</c>b
+	TEMPLATE.innerHTML = str.replace(/<(\/?)(\/|\$_h\[\d+\])/g, '<$1c c@=$2').replace(/<([\w:-]+)(\s[^<>]*?)?\/>/gi, '<$1$2></$1>').trim();
 	return Function('h', '$_h', 'return ' + walk((TEMPLATE.content || TEMPLATE).firstChild));
 }
 
