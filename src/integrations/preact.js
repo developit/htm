@@ -1,5 +1,5 @@
 import { h, Component, render as preactRender } from 'preact';
-import htm from './src';
+import htm from '../htm';
 
 export { h, Component };
 

@@ -10,7 +10,6 @@ export default function html(statics) {
 	return tpl(this, arguments);
 }
 
-
 /** Create a template function given strings from a tagged template literal. */
 function build(statics) {
 	let str = statics[0], i = 1;

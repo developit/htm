@@ -1,4 +1,4 @@
-const { html, Component, render } = require('./dist-preact.umd.js');
+const { html, Component, render } = require('../preact/index.js');
 
 describe('preact-html', () => {
 	let scratch = document.createElement('div');

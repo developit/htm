@@ -2,12 +2,13 @@
   "name": "htm",
   "version": "1.0.0",
   "description": "The Tagged Template Literal syntax for Virtual DOM. Only browser-compatible syntax.",
-  "main": "dist.umd.js",
-  "module": "dist.mjs",
+  "main": "dist/htm.js",
+  "umd:main": "dist/htm.js",
+  "module": "dist/htm.mjs",
   "scripts": {
-    "build": "microbundle src.js -f es,umd --no-sourcemap --target web && npm run -s build:preact",
-    "build:preact": "microbundle src-preact.js -o dist-preact.js -f es,umd --no-sourcemap --target web",
-    "test": "eslint src.js src-preact.js test.js && jest test.js"
+    "build": "microbundle src/htm.js -f es,umd --no-sourcemap --target web && npm run -s build:preact",
+    "build:preact": "microbundle src/integrations/preact.js -o preact/index.js -f es,umd --no-sourcemap --target web",
+    "test": "eslint src test && jest test"
   },
   "eslintConfig": {
     "extends": "developit"
