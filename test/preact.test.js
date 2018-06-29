@@ -105,6 +105,7 @@ describe('performance', () => {
 		}
 		let elapsed = now - start;
 		let hz = count / elapsed * 1000;
+		// eslint-disable-next-line no-console
 		console.log(`Creation: ${hz|0}/s, average: ${elapsed/count.toFixed(4)}ms`);
 		expect(elapsed).toBeGreaterThan(999);
 		expect(hz).toBeGreaterThan(10);
