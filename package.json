@@ -11,7 +11,10 @@
     "test": "eslint src test && jest test"
   },
   "eslintConfig": {
-    "extends": "developit"
+    "extends": "developit",
+    "rules": {
+      "prefer-const": 2
+    }
   },
   "repository": {
     "type": "git",

@@ -32,7 +32,7 @@ function walk(n) {
 	}
 	let nodeName = `"${n.localName}"`, str = '{', sub='', end='}';
 	for (let i=0; i<n.attributes.length; i++) {
-		let { name, value } = n.attributes[i];
+		const { name, value } = n.attributes[i];
 		if (name=='c@') {
 			nodeName = value;
 			continue;
@@ -61,7 +61,7 @@ function upper (s, i) {
 
 /** Serialize a field to a String or reference for use in generated code. */
 function field(value, sep) {
-	let matches = value.match(reg);
+	const matches = value.match(reg);
 	let strValue = JSON.stringify(value);
 	if (matches != null) {
 		if (matches[0] === value) return value;
