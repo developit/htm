@@ -16,10 +16,7 @@
       "prefer-const": 2
     }
   },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@gist.github.com/ce062586e3fc7247dbb9ccc4f6acc4e1.git"
-  },
+  "repository": "developit/htm",
   "keywords": [
     "Hyperscript Tagged Markup",
     "tagged template literals",

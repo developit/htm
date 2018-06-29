@@ -1,6 +1,10 @@
-# HTM (Hyperscript Tagged Markup)
-
-<img src="https://i.imgur.com/09ih11e.jpg" align="center" width="715">
+<p align="center">
+  <img src="https://i.imgur.com/09ih11e.jpg" width="715" alt="hyperscript tagged markup demo">
+  <h1 align="center">
+  	HTM (Hyperscript Tagged Markup)
+	  <a href="https://www.npmjs.org/package/htm"><img src="https://img.shields.io/npm/v/htm.svg?style=flat" alt="npm"></a>
+  </h1>
+</p>
 
 `htm` is an implementation of JSX-like syntax in plain JavaScript, using [Tagged Template Literals].
 It lets your build apps using Preact/React/etc directly in the browser.
@@ -26,31 +30,29 @@ Here's some ergonomic features you get for free that aren't present in JSX:
 - HTML's optional quotes: `<div class=foo>`
 - HTML's self-closing tags: `<img src=${url}>`
 - Optional end-tags: `<section><h1>this is the whole template!`
-- Convenient implicit end-tags: `<${Footer}>footer content<//>`
+- Component end-tags: `<${Footer}>footer content<//>`
 - Support for HTML comments: `<div><!-- don't delete this! --></div>`
 
 ## Project Status
 
-The original goal with `htm` was to create a wrapper around Preact that felt natural for use untranspiled in the browser.
+The original goal for `htm` was to create a wrapper around Preact that felt natural for use untranspiled in the browser. I wanted to use Virtual DOM, but I wanted to eschew build tooling and use ES Modules directly.
 
-I wanted to use Preact, but I wanted to eschew build tooling and use ES Modules. That meant I couldn't use JSX, leaving only [Tagged Template Literals] in its place. So I wrote this library to patch up the differences between the two as much as possible. As it turns out, the technique is framework-agnostic, so it should work great with most Virtual DOM libraries.
-
-**Note: `htm` isn't public yet. If you're here it's because I wanted to show you, please don't share it.**
+This meant giving up JSX, and the closest alternative was [Tagged Template Literals]. So, I wrote this library to patch up the differences between the two as much as possible. As it turns out, the technique is framework-agnostic, so it should work great with most Virtual DOM libraries.
 
 ## Installation
 
-Since `htm` isn't yet published, you must install/download/hotlink it from Gist instead.
+`htm` is published to npm, and accessible via the unpkg.com CDN:
 
 **For npm:**
 
 ```js
-npm i -D git@gist.github.com:ce062586e3fc7247dbb9ccc4f6acc4e1.git
+npm i htm
 ```
 
 **To hotlink:**
 
 ```js
-import { html, render } from 'https://rawgit.com/developit/ce062586e3fc7247dbb9ccc4f6acc4e1/raw/preact-html.mjs'
+import { html, render } from 'https://unpkg.com/htm?module'
 ```
 
 ## Example
