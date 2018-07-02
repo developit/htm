@@ -27,7 +27,7 @@
   ],
   "author": "Jason Miller <jason@developit.ca>",
   "license": "Apache-2.0",
-  "homepage": "https://gist.github.com/ce062586e3fc7247dbb9ccc4f6acc4e1",
+  "homepage": "https://github.com/developit/htm",
   "devDependencies": {
     "eslint": "^4.19.1",
     "eslint-config-developit": "^1.1.1",
