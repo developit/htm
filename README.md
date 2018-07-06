@@ -63,37 +63,33 @@ Here's a working app! It's just an HTML file, there is no build or tooling. You 
 ```html
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>htm Demo</title>
-  </head>
-  <body>
-    <script type="module">
-      import { html, Component, render } from 'https://unpkg.com/htm/preact?module';
-  
-      class App extends Component {
-        addTodo() {
-          const { todos } = this.state;
-          this.setState({ todos: todos.concat(`Item ${todos.length}`) });
-        }
-        render({ page }, { todos = [] }) {
-          return html`
-            <div class="app">
-              <${Header} name="MyApp: ${page}" />
-              <ul>
-                ${todos.map(todo => html`
-                  <li>{todo}</li>
-                `)}
-              </ul>
-              <button onClick=${this.addTodo.bind(this)}>Add Todo</button>
-              <${Footer}>footer content here<//>
-            </div>
-          `;
-        }
+  <title>htm Demo</title>
+  <script type="module">
+    import { html, Component, render } from 'https://unpkg.com/htm/preact?module';
+
+    class App extends Component {
+      addTodo() {
+        const { todos } = this.state;
+        this.setState({ todos: todos.concat(`Item ${todos.length}`) });
       }
-  
-      render(html`<${App} page="To-Do's" />`, document.body);
-    </script>
-  </body>
+      render({ page }, { todos = [] }) {
+        return html`
+          <div class="app">
+            <${Header} name="MyApp: ${page}" />
+            <ul>
+              ${todos.map(todo => html`
+                <li>{todo}</li>
+              `)}
+            </ul>
+            <button onClick=${this.addTodo.bind(this)}>Add Todo</button>
+            <${Footer}>footer content here<//>
+          </div>
+        `;
+      }
+    }
+
+    render(html`<${App} page="To-Do's" />`, document.body);
+  </script>
 </html>
 ```
 
