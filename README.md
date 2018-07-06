@@ -6,7 +6,7 @@
   </h1>
 </p>
 
-`htm` is an implementation of JSX-like syntax in plain JavaScript, using [Tagged Template Literals].
+`htm` is an implementation of JSX-like syntax in plain JavaScript, using [Tagged Templates].
 It lets your build apps using Preact/React/etc directly in the browser.
 JSX can be converted to `htm` with only a few tiny modifications.
 Templates are parsed by the browser's HTML parser and cached, achieving minimal overhead.
@@ -37,7 +37,7 @@ Here's some ergonomic features you get for free that aren't present in JSX:
 
 The original goal for `htm` was to create a wrapper around Preact that felt natural for use untranspiled in the browser. I wanted to use Virtual DOM, but I wanted to eschew build tooling and use ES Modules directly.
 
-This meant giving up JSX, and the closest alternative was [Tagged Template Literals]. So, I wrote this library to patch up the differences between the two as much as possible. As it turns out, the technique is framework-agnostic, so it should work great with most Virtual DOM libraries.
+This meant giving up JSX, and the closest alternative was [Tagged Templates]. So, I wrote this library to patch up the differences between the two as much as possible. As it turns out, the technique is framework-agnostic, so it should work great with most Virtual DOM libraries.
 
 ## Installation
 
@@ -96,4 +96,4 @@ Here's a working app! It's just an HTML file, there is no build or tooling. You 
 
 How nifty is that?
 
-[Tagged Template Literals]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates
+[Tagged Templates]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates

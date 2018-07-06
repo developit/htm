@@ -1,7 +1,7 @@
 {
   "name": "htm",
   "version": "1.0.0",
-  "description": "The Tagged Template Literal syntax for Virtual DOM. Only browser-compatible syntax.",
+  "description": "The Tagged Template syntax for Virtual DOM. Only browser-compatible syntax.",
   "main": "dist/htm.js",
   "umd:main": "dist/htm.js",
   "module": "dist/htm.mjs",
@@ -19,7 +19,8 @@
   "repository": "developit/htm",
   "keywords": [
     "Hyperscript Tagged Markup",
-    "tagged template literals",
+    "tagged template",
+    "template literals",
     "html",
     "htm",
     "preact",

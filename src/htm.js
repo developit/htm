@@ -23,13 +23,13 @@ export default function html(statics) {
 	return tpl(this, arguments);
 }
 
-/** Create a template function given strings from a tagged template literal. */
+/** Create a template function given strings from a tagged template. */
 function build(statics) {
 	let str = statics[0], i = 1;
 	while (i < statics.length) {
 		str += '$_h[' + i + ']' + statics[i++];
 	}
-	// Template literal preprocessing:
+	// Template string preprocessing:
 	// - replace <${Foo}> with <c c@=${Foo}>
 	// - replace <x /> with <x></x>
 	// - replace <${Foo}>a<//>b with <c c@=${Foo}>a</c>b
