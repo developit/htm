@@ -63,6 +63,9 @@ Here's a working app! It's just an HTML file, there is no build or tooling. You 
 ```html
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <title>htm Demo</title>
+  </head>
   <body>
     <script type="module">
       import { html, Component, render } from 'https://unpkg.com/htm/preact?module';
