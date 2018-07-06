@@ -65,7 +65,7 @@ Here's a working app! It's just an HTML file, there is no build or tooling. You 
 <html lang="en">
   <body>
     <script type="module">
-      import { html, Component, render } from 'preact-html';
+      import { html, Component, render } from 'https://unpkg.com/preact-html?module';
   
       class App extends Component {
         addTodo() {
