@@ -15,6 +15,8 @@ Templates are parsed by the browser's HTML parser and cached, achieving minimal 
 
 ## Syntax: Like JSX but more lit
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/developit/htm.svg?token=efe544930c3507061f013ee68a97ea3c6d091205082de25f85369b49a210af59&ts=1532982792131)](https://greenkeeper.io/)
+
 The syntax is inspired by [lit-html], but includes features familiar to anyone who works with JSX:
 
 - Rest spread: `<div ...${props}>`
