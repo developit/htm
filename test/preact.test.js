@@ -47,12 +47,12 @@ describe('preact-html', () => {
 	const fullHtml = '<div class="foo">\n\t\t\t\t\t<h1>Name: jason</h1>\n\t\t\t\t\t<p>Hello world!</p>\n\t\t\t\t\t<button>Click Me</button>\n\t\t\t\t\t<pre>Count: 0</pre>\n\t\t\t\t\txml-style end tags:\n\t\t\t\t\t<div>\n\t\tValue of hello: true\n\t\t\n\t</div>\n\t\t\t\t\texplicit end tags:\n\t\t\t\t\t<div>\n\t\tValue of hello: true\n\t\tsome children (count=0)\n\t</div>\n\t\t\t\t\timplicit end tags: (&lt;//&gt;)\n\t\t\t\t\t<div>\n\t\tValue of hello: true\n\t\tsome children (count=0)\n\t</div>\n\t\t\t\t\tsome text at the end\n\t\t\t\t</div>';
 
 	test('initial render', () => {
-		render(html`<${Foo} name=jason />`, scratch, scratch.firstElementChild);
+		render(html`<${Foo} name=jason />`, scratch);
 		expect(scratch.innerHTML).toBe(fullHtml);
 	});
 
 	test('rerenders in-place', () => {
-		render(html`<${Foo} name=tom />`, scratch, scratch.firstElementChild);
+		render(html`<${Foo} name=tom />`, scratch);
 		expect(scratch.innerHTML).toBe(fullHtml.replace('jason', 'tom'));
 	});
 
@@ -69,19 +69,19 @@ describe('preact-html', () => {
 		scratch.textContent = '';
 
 		const props = { a: 1, b: 2, c: 3 };
-		render(html`<div ...${props} />`, scratch, scratch.firstElementChild);
+		render(html`<div ...${props} />`, scratch);
 		expect(scratch.innerHTML).toBe(`<div a="1" b="2" c="3"></div>`);
 		scratch.innerHTML = '';
 
-		render(html`<div is-before="blah" ...${props} />`, scratch, scratch.firstElementChild);
+		render(html`<div is-before="blah" ...${props} />`, scratch);
 		expect(scratch.innerHTML).toBe(`<div is-before="blah" a="1" b="2" c="3"></div>`);
 		scratch.innerHTML = '';
 
-		render(html`<div ...${props} is-after />`, scratch, scratch.firstElementChild);
+		render(html`<div ...${props} is-after />`, scratch);
 		expect(scratch.innerHTML).toBe(`<div a="1" b="2" c="3" is-after="true"></div>`);
 		scratch.innerHTML = '';
 
-		render(html`<div is-before ...${props} is-after="blah" />`, scratch, scratch.firstElementChild);
+		render(html`<div is-before ...${props} is-after="blah" />`, scratch);
 		expect(scratch.innerHTML).toBe(`<div is-before="true" a="1" b="2" c="3" is-after="blah"></div>`);
 	});
 });

@@ -11,9 +11,13 @@
  * limitations under the License.
  */
 
-import { h, Component, render } from 'preact';
+import { h, Component, render as preactRender } from 'preact';
 import htm from '../index.mjs';
+
+function render(tree, parent) {
+	preactRender(tree, parent, parent.firstElementChild);
+}
 
 const html = htm.bind(h);
 
-export { html, h, Component, render };
+export { h, html, render, Component };

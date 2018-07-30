@@ -10,7 +10,7 @@
     "build:main": "microbundle src/index.mjs -f es,umd --no-sourcemap --target web",
     "build:preact": "microbundle src/integrations/preact.mjs -o preact/index.js -f es,umd --no-sourcemap --target web",
     "build:babel": "microbundle src/babel.mjs -o babel/index.js -f es,cjs --target node --no-compress --no-sourcemap",
-    "test": "eslint src test && jest test"
+    "test": "eslint src/**/*.mjs test && jest test"
   },
   "eslintConfig": {
     "extends": "developit",
