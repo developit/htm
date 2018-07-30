@@ -10,8 +10,14 @@
     "build:main": "microbundle src/index.mjs -f es,umd --no-sourcemap --target web",
     "build:preact": "microbundle src/integrations/preact.mjs -o preact/index.js -f es,umd --no-sourcemap --target web",
     "build:babel": "microbundle src/babel.mjs -o babel/index.js -f es,cjs --target node --no-compress --no-sourcemap",
-    "test": "eslint src/**/*.mjs test && jest test"
+    "test": "eslint src/**/*.mjs test && jest test",
+    "postpublish": "tag-dist-files --overwrite-existing-tag"
   },
+  "files": [
+    "dist",
+    "preact",
+    "babel"
+  ],
   "eslintConfig": {
     "extends": "developit",
     "rules": {
@@ -37,6 +43,7 @@
     "eslint-config-developit": "^1.1.1",
     "jest": "^23.4.2",
     "microbundle": "^0.6.0",
-    "preact": "^8.2.9"
+    "preact": "^8.2.9",
+    "tag-dist-files": "^0.1.6"
   }
 }
