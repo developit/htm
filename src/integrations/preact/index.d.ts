@@ -1,9 +1,4 @@
-declare module "htm/preact" {
-	import { h, Component, VNode } from 'preact';
-
-	function render(tree: Component, parent: HTMLElement): void;
-
-	const html: (strings: string[], values: any[]) => VNode;
-
-	export { h, html, render, Component };
-}
+import { h, Component, VNode } from 'preact';
+declare function render(tree: Component, parent: HTMLElement): void;
+declare const html: (strings: TemplateStringsArray, ...values: any[]) => VNode;
+export { h, html, render, Component };
