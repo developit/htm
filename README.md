@@ -31,7 +31,6 @@ Here's some ergonomic features you get for free that aren't present in JSX:
 - HTML's self-closing tags: `<img src=${url}>`
 - Optional end-tags: `<section><h1>this is the whole template!`
 - Component end-tags: `<${Footer}>footer content<//>`
-- 
 - Support for HTML comments: `<div><!-- don't delete this! --></div>`
 
 ## Project Status
