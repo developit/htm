@@ -11,12 +11,13 @@
     "build:preact": "microbundle src/integrations/preact/index.mjs -o preact/index.js -f es,umd --no-sourcemap --target web && cp src/integrations/preact/{index.d.ts,package.json} preact/",
     "build:babel": "microbundle src/babel.mjs -o babel/index.js -f es,cjs --target node --no-compress --no-sourcemap",
     "test": "eslint src/**/*.mjs test && jest test",
-    "postpublish": "tag-dist-files --overwrite-existing-tag"
+    "postpublish": "git checkout --detach && git add -f babel dist preact && git commit -am \"$npm_package_version\" && git tag $npm_package_version && git push && git push --tags && git checkout master"
   },
   "files": [
     "dist",
     "preact",
-    "babel"
+    "babel",
+    "src"
   ],
   "eslintConfig": {
     "extends": "developit",
@@ -43,7 +44,6 @@
     "eslint-config-developit": "^1.1.1",
     "jest": "^23.4.2",
     "microbundle": "^0.6.0",
-    "preact": "^8.2.9",
-    "tag-dist-files": "^0.1.6"
+    "preact": "^8.2.9"
   }
 }
