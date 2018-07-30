@@ -6,8 +6,9 @@
   "umd:main": "dist/htm.js",
   "module": "dist/htm.mjs",
   "scripts": {
-    "build": "microbundle src/htm.js -f es,umd --no-sourcemap --target web && npm run -s build:preact",
-    "build:preact": "microbundle src/integrations/preact.js -o preact/index.js -f es,umd --no-sourcemap --target web",
+    "build": "npm run -s build:main && npm run -s build:preact",
+    "build:main": "microbundle src/index.mjs -f es,umd --no-sourcemap --target web",
+    "build:preact": "microbundle src/integrations/preact.mjs -o preact/index.js -f es,umd --no-sourcemap --target web",
     "test": "eslint src test && jest test"
   },
   "eslintConfig": {
@@ -30,10 +31,10 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/developit/htm",
   "devDependencies": {
-    "eslint": "^4.19.1",
+    "eslint": "^5.2.0",
     "eslint-config-developit": "^1.1.1",
-    "jest": "^23.1.0",
-    "microbundle": "^0.4.4",
+    "jest": "^23.4.2",
+    "microbundle": "^0.6.0",
     "preact": "^8.2.9"
   }
 }

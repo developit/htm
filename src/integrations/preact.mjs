@@ -12,7 +12,7 @@
  */
 
 import { h, Component, render } from 'preact';
-import htm from '../htm';
+import htm from '../index.mjs';
 
 const html = htm.bind(h);
 
