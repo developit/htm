@@ -25,8 +25,9 @@
     "template literals",
     "html",
     "htm",
-    "preact",
-    "lit"
+    "jsx",
+    "virtual dom",
+    "hyperscript"
   ],
   "author": "Jason Miller <jason@developit.ca>",
   "license": "Apache-2.0",
