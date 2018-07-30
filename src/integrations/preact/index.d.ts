@@ -1,4 +1,4 @@
-import { h, Component, VNode } from 'preact';
-declare function render(tree: Component, parent: HTMLElement): void;
+import { h, VNode } from 'preact';
+declare function render(tree: VNode, parent: HTMLElement): void;
 declare const html: (strings: TemplateStringsArray, ...values: any[]) => VNode;
-export { h, html, render, Component };
+export { h, html, render };
