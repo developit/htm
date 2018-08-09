@@ -25,7 +25,12 @@
     }
   },
   "jest": {
-    "testURL": "http://localhost"
+    "testURL": "http://localhost",
+    "moduleNameMapper": {
+      "^htm-babel-plugin$": "<rootDir>/packages/htm-babel-plugin/dist/htm-babel-plugin.js",
+      "^htm$": "<rootDir>/dist/htm.js",
+      "^htm/preact$": "<rootDir>/preact/index.js"
+    }
   },
   "repository": "developit/htm",
   "keywords": [
