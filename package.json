@@ -9,14 +9,13 @@
     "build": "npm run -s build:main && npm run -s build:preact && npm run -s build:babel",
     "build:main": "microbundle src/index.mjs -f es,umd --no-sourcemap --target web",
     "build:preact": "microbundle src/integrations/preact/index.mjs -o preact/index.js -f es,umd --no-sourcemap --target web && cp src/integrations/preact/{index.d.ts,package.json} preact/",
-    "build:babel": "microbundle src/babel.mjs -o babel/index.js -f es,cjs --target node --no-compress --no-sourcemap",
+    "build:babel": "cd packages/babel-plugin-htm && npm run build",
     "test": "eslint src/**/*.mjs test && jest test",
     "release": "npm run build && git checkout --detach && git add -f babel dist preact && git commit -am \"$npm_package_version\" && git tag $npm_package_version && git push --tags && git checkout master"
   },
   "files": [
     "dist",
     "preact",
-    "babel",
     "src"
   ],
   "eslintConfig": {
@@ -43,14 +42,10 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/developit/htm",
   "devDependencies": {
-    "@babel/core": "^7.0.0-rc.0",
     "eslint": "^5.2.0",
     "eslint-config-developit": "^1.1.1",
     "jest": "^23.4.2",
     "microbundle": "^0.6.0",
     "preact": "^8.2.9"
-  },
-  "dependencies": {
-    "jsdom": "^11.12.0"
   }
 }

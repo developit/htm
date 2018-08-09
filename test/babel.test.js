@@ -3,7 +3,7 @@
  */
 
 const { transform } = require('@babel/core');
-const htmBabelPlugin = require('../babel');
+const htmBabelPlugin = require('../packages/babel-plugin-htm');
 
 describe('htm/babel', () => {
 	test('basic transformation', () => {
