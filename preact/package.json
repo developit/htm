@@ -1,0 +1,5 @@
+{
+	"name": "htm_preact",
+	"module": "index.mjs",
+	"main": "index.js"
+}

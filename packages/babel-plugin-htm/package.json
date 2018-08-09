@@ -1,6 +1,6 @@
 {
 	"name": "babel-plugin-htm",
-	"version": "0.5.2",
+	"version": "0.6.0",
 	"description": "Babel plugin to compile htm's Tagged Template syntax to hyperscript or inline VNodes.",
 	"main": "dist/babel-plugin-htm.js",
 	"module": "dist/babel-plugin-htm.mjs",
