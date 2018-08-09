@@ -25,6 +25,9 @@
       "prefer-const": 2
     }
   },
+  "jest": {
+    "testURL": "http://localhost"
+  },
   "repository": "developit/htm",
   "keywords": [
     "Hyperscript Tagged Markup",
