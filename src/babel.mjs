@@ -80,7 +80,7 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 		};
 	}
 
-	function mapChildren(child, index, children) {
+	function childMapper(child, index, children) {
 		// JSX-style whitespace: (@TODO: remove? doesn't match the browser version)
 		if (typeof child==='string' && child.trim().length===0 || child==null) {
 			if (index===0 || index===children.length-1) return null;
@@ -94,7 +94,7 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 		return child;
 	}
 
-	function h(tag, props, ...children) {
+	function h(tag, props) {
 		if (typeof tag==='string') {
 			const matches = tag.match(/\$\$\$_h_\[(\d+)\]/);
 			if (matches) tag = currentExpressions[matches[1]];
@@ -129,10 +129,26 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 				return t.objectProperty(propertyName(key), value);
 			})
 		);
-    
-		if (Array.isArray(children)) {
-			children = t.arrayExpression(children.map(mapChildren).filter(Boolean));
+
+		// recursive iteration of possibly nested arrays of children.
+		let children = [];
+		if (arguments.length>2) {
+			const stack = [];
+			// eslint-disable-next-line prefer-rest-params
+			for (let i=arguments.length; i-->2; ) stack.push(arguments[i]);
+			while (stack.length) {
+				const child = stack.pop();
+				if (Array.isArray(child)) {
+					for (let i=child.length; i--; ) stack.push(child[i]);
+				}
+				else if (child!=null) {
+					children.push(child);
+				}
+			}
+			children = children.map(childMapper).filter(Boolean);
 		}
+		children = t.arrayExpression(children);
+
 		return createVNode(tag, propsNode, children);
 	}
   
