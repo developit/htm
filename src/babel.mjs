@@ -1,4 +1,8 @@
-import htm from './index.mjs';
+import { JSDOM } from 'jsdom';
+const before = global.document;
+global.document = new JSDOM().window.document;
+const htm = require('htm');
+global.document = before;
 
 // htm() uses the HTML parser, which serializes attribute values.
 // this is a problem, because composite values here can be made up
@@ -19,7 +23,7 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 	const pragma = options.pragma===false ? false : dottedIdentifier(options.pragma || 'h');
   
 	const inlineVNodes = options.monomorphic || pragma===false;
-  
+
 	function dottedIdentifier(keypath) {
 		const path = keypath.split('.');
 		let out;
@@ -96,6 +100,7 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 			if (matches) tag = currentExpressions[matches[1]];
 			else tag = t.stringLiteral(tag);
 		}
+
 		//const propsNode = props==null || Object.keys(props).length===0 ? t.nullLiteral() : t.objectExpression(
 		const propsNode = t.objectExpression(
 			Object.keys(props).map(key => {
