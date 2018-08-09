@@ -89,6 +89,8 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 			child = child.trim();
 		}
 		if (typeof child==='string') {
+			const matches = child.match(/\$\$\$_h_\[(\d+)\]/);
+			if (matches) return currentExpressions[matches[1]];
 			return stringValue(child);
 		}
 		return child;
