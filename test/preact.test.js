@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-const { html, Component, render } = require('../preact/index.js');
+const { html, Component, render } = require('../preact');
 
 describe('preact-html', () => {
 	const scratch = document.createElement('div');
