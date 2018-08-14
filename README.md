@@ -18,7 +18,7 @@ Templates are parsed by the browser's HTML parser and cached, achieving minimal 
 The syntax is inspired by [lit-html], but includes features familiar to anyone who works with JSX:
 
 - Rest spread: `<div ...${props}>`
-- Self-closing tags: `<div />
+- Self-closing tags: `<div />`
 - Components: `<${Foo}>` _(where `Foo` is a component reference)_
 - Boolean attributes: `<div draggable />`
 
