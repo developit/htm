@@ -16,6 +16,7 @@ const CACHE = {};
 const TEMPLATE = document.createElement('template');
 
 const reg = /(\$_h\[\d+\])/g;
+const nomExp = /([\w-]+)=/g;
 
 export default function html(statics) {
 	const tpl = CACHE[statics] || (CACHE[statics] = build(statics));
@@ -25,47 +26,59 @@ export default function html(statics) {
 
 /** Create a template function given strings from a tagged template. */
 function build(statics) {
-	let str = statics[0], i = 1;
+	const noms = {};
+	let str = '', i = 0;
 	while (i < statics.length) {
-		str += '$_h[' + i + ']' + statics[i++];
+		getNoms(statics[i], noms);
+		str += statics[i++] + (i < statics.length ? '$_h[' + i + ']' : '');
 	}
 	// Template string preprocessing:
 	// - replace <${Foo}> with <c c@=${Foo}>
 	// - replace <x /> with <x></x>
 	// - replace <${Foo}>a<//>b with <c c@=${Foo}>a</c>b
 	TEMPLATE.innerHTML = str.replace(/<(?:(\/)\/|(\/?)(\$_h\[\d+\]))/g, '<$1$2c c@=$3').replace(/<([\w:-]+)(\s[^<>]*?)?\/>/gi, '<$1$2></$1>').trim();
-	return Function('h', '$_h', 'return ' + walk((TEMPLATE.content || TEMPLATE).firstChild));
+	return Function('h', '$_h', 'return ' + walk((TEMPLATE.content || TEMPLATE).firstChild, noms));
 }
 
 /** Traverse a DOM tree and serialize it to hyperscript function calls */
-function walk(n) {
+function walk(n, noms) {
 	if (n.nodeType !== 1) {
 		if (n.nodeType === 3 && n.data) return field(n.data, ',');
 		return 'null';
 	}
-	let nodeName = `"${n.localName}"`, str = '{', sub='', end='}';
+	let nodeName = `"${n.localName}"`, str = '', pre, it, prevSpread, anySpread;
 	for (let i=0; i<n.attributes.length; i++) {
-		const { name, value } = n.attributes[i];
+		let { name } = n.attributes[i];
+		const { value } = n.attributes[i];
+		name = noms[name] || name;
 		if (name=='c@') {
 			nodeName = value;
 			continue;
 		}
 		if (name.substring(0,3)==='...') {
-			end = '})';
-			str = 'Object.assign(' + str + '},' + name.substring(3) + ',{';
-			sub = '';
-			continue;
+			it = name.substring(3);
+			pre = str ? (prevSpread ? ',' : '},') : '';
+			prevSpread = anySpread = true;
 		}
-		str += `${sub}"${name.replace(/:(\w)/g, upper)}":${value ? field(value, '+') : true}`;
-		sub = ',';
+		else {
+			it = `"${name.replace(/:(\w)/g, upper)}":${value ? field(value, '+') : true}`;
+			pre = str ? (prevSpread ? ',{' : ',') : '{';
+			prevSpread = false;
+		}
+		str += pre + it;
 	}
-	str = 'h(' + nodeName + ',' + str + end;
+	str = 'h(' + nodeName + ',' + (str ? (anySpread ? 'Object.assign({},' + str + (prevSpread ? '' : '}') + ')' : str + '}') : '{}');
 	let child = n.firstChild;
 	while (child) {
-		str += ',' + walk(child);
+		str += ',' + walk(child, noms);
 		child = child.nextSibling;
 	}
 	return str + ')';
+}
+
+function getNoms(str, noms) {
+	let nom;
+	while ((nom = nomExp.exec(str)) !== null) noms[nom[1].toLowerCase()] = nom[1];
 }
 
 function upper (s, i) {
