@@ -27,7 +27,8 @@
   "jest": {
     "testURL": "http://localhost",
     "moduleNameMapper": {
-      "^htm-babel-plugin$": "<rootDir>/packages/htm-babel-plugin/dist/htm-babel-plugin.js",
+      "^htm-babel-plugin$": "<rootDir>/packages/babel-plugin-htm/dist/babel-plugin-htm.js",
+      "^babel-plugin-htm$": "<rootDir>/packages/babel-plugin-htm/dist/babel-plugin-htm.js",
       "^htm$": "<rootDir>/dist/htm.js",
       "^htm/preact$": "<rootDir>/preact/index.js"
     }
@@ -47,10 +48,12 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/developit/htm",
   "devDependencies": {
+    "@babel/core": "^7.1.2",
     "eslint": "^5.2.0",
     "eslint-config-developit": "^1.1.1",
     "jest": "^23.4.2",
     "microbundle": "^0.6.0",
     "preact": "^8.2.9"
-  }
+  },
+  "dependencies": {}
 }
