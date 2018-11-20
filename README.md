@@ -6,21 +6,22 @@
   </h1>
 </p>
 
-`htm` is an implementation of JSX-like syntax in plain JavaScript, using [Tagged Templates].
-It lets your build apps using Preact/React/etc directly in the browser.
-JSX can be converted to `htm` with only a few tiny modifications.
-Templates are parsed by the browser's HTML parser and cached, achieving minimal overhead.
+`htm` is **JSX-like syntax in plain JavaScript** - no transpiler necessary.
+
+Develop with React/Preact directly in the browser, then compile `htm` away for production.
+
+It's built using [Tagged Templates] and the browser's HTML parser.
 
 ## `htm` by the numbers:
 
 🐣 **700 bytes** when used directly in the browser
 
-⚛️ **500 bytes** when used with Preact _(the magic of gzip 🌈)_
+⚛️ **500 bytes** when used with Preact _(thanks gzip 🌈)_
 
 🏅 **0 bytes** when compiled using [babel-plugin-htm]
 
 
-## Syntax: Like JSX but more lit
+## Syntax: like JSX but also lit
 
 The syntax is inspired by [lit-html], but includes features familiar to anyone who works with JSX:
 
@@ -29,11 +30,14 @@ The syntax is inspired by [lit-html], but includes features familiar to anyone w
 - Components: `<${Foo}>` _(where `Foo` is a component reference)_
 - Boolean attributes: `<div draggable />`
 
-## Syntax: better than JSX?
+
+## Improvements over JSX
 
 `htm` actually takes the JSX-style syntax a couple steps further!
+
 Here's some ergonomic features you get for free that aren't present in JSX:
 
+- **No transpiler necessary**
 - HTML's optional quotes: `<div class=foo>`
 - HTML's self-closing tags: `<img src=${url}>`
 - Optional end-tags: `<section><h1>this is the whole template!`
@@ -51,24 +55,29 @@ This meant giving up JSX, and the closest alternative was [Tagged Templates]. So
 
 `htm` is published to npm, and accessible via the unpkg.com CDN:
 
-**For npm:**
+**via npm:**
 
 ```js
 npm i htm
 ```
 
-**To hotlink:**
+**hotlinking from unpkg:** _(no build tool needed!)_
 
 ```js
 import htm from 'https://unpkg.com/htm?module'
-import { html, render } from 'https://unpkg.com/htm/preact?module'
+const html = htm.bind(React.createElement);
+```
+
+```js
+// just want htm + preact in a single file? there's a highly-optimized version of that:
+import { html, render } from 'https://unpkg.com/htm/preact/standalone.mjs'
 ```
 
 ## Usage
 
 Since `htm` is a generic library, we need to tell it what to "compile" our templates to.
 
-The target should be a function of the form `h(tag, props, ...children)`, and can return anything.
+The target should be a function of the form `h(tag, props, ...children)` _([hyperscript])_, and can return anything.
 
 ```js
 // this is our hyperscript function. for now, it just returns an description object.
@@ -117,20 +126,20 @@ It's a single HTML file, and there's no build or tooling. You can edit it with n
 <html lang="en">
   <title>htm Demo</title>
   <script type="module">
-    import { html, Component, render } from 'https://unpkg.com/htm/preact?module';
+    import { html, Component, render } from 'https://unpkg.com/htm/preact/standalone.mjs';
 
     class App extends Component {
       addTodo() {
-        const { todos } = this.state;
+        const { todos = [] } = this.state;
         this.setState({ todos: todos.concat(`Item ${todos.length}`) });
       }
       render({ page }, { todos = [] }) {
         return html`
           <div class="app">
-            <${Header} name="MyApp: ${page}" />
+            <${Header} name="ToDo's (${page})" />
             <ul>
               ${todos.map(todo => html`
-                <li>{todo}</li>
+                <li>${todo}</li>
               `)}
             </ul>
             <button onClick=${this.addTodo.bind(this)}>Add Todo</button>
@@ -140,14 +149,14 @@ It's a single HTML file, and there's no build or tooling. You can edit it with n
       }
     }
 
-    render(html`<${App} page="To-Do's" />`, document.body);
+    render(html`<${App} page="All" />`, document.body);
   </script>
 </html>
 ```
 
-How nifty is that?
+**Here's a [live version](https://htm-demo-preact.glitch.me/).**
 
-Notice there's only one import - here we're using the prebuilt Preact integration since it's easier to import and a little bit smaller.
+How nifty is that?  Notice there's only one import - here we're using the prebuilt Preact integration since it's easier to import and a bit smaller.
 
 The same example works fine without the prebuilt version, just using two imports:
 
@@ -157,7 +166,7 @@ import htm from 'htm';
 
 const html = htm.bind(h);
 
-render(html`<${App} page="To-Do's" />`, document.body);
+render(html`<${App} page="All" />`, document.body);
 ```
 
 ## Other Uses
@@ -204,3 +213,4 @@ console.log(html`
 [lit-html VSCode extension]: https://marketplace.visualstudio.com/items?itemName=bierner.lit-html
 [vhtml]: https://github.com/developit/vhtml
 [jsxobj]: https://github.com/developit/jsxobj
+[hyperscript]: https://github.com/hyperhype/hyperscript
