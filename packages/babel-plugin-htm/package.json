@@ -9,8 +9,7 @@
 		"prepare": "npm run build"
 	},
 	"files": [
-		"dist",
-		"index.mjs"
+		"dist"
 	],
 	"repository": "developit/htm",
 	"keywords": [
