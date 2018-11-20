@@ -1,5 +1,6 @@
 {
 	"name": "htm_preact",
 	"module": "index.mjs",
-	"main": "index.js"
+	"main": "index.js",
+	"unpkg": "standalone.js"
 }

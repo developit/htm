@@ -1,6 +1,6 @@
 {
   "name": "htm",
-  "version": "0.5.2",
+  "version": "1.0.0",
   "description": "The Tagged Template syntax for Virtual DOM. Only browser-compatible syntax.",
   "main": "dist/htm.js",
   "umd:main": "dist/htm.js",
@@ -8,7 +8,8 @@
   "scripts": {
     "build": "npm run -s build:main && npm run -s build:preact && npm run -s build:babel",
     "build:main": "microbundle src/index.mjs -f es,umd --no-sourcemap --target web",
-    "build:preact": "microbundle src/integrations/preact/index.mjs -o preact/index.js -f es,umd --no-sourcemap --target web && cp src/integrations/preact/{index.d.ts,package.json} preact/",
+    "build:preact": "microbundle src/integrations/preact/index.mjs -o preact/index.js -f es,umd --external preact,htm --no-sourcemap --target web && cp src/integrations/preact/{index.d.ts,package.json} preact/ && npm run -s build:preact:standalone",
+    "build:preact:standalone": "microbundle src/integrations/preact/standalone.mjs -o preact/standalone.js -f es,umd --no-sourcemap --target web",
     "build:babel": "cd packages/babel-plugin-htm && npm run build",
     "test": "eslint src/**/*.mjs test && jest test",
     "release": "npm run build && git checkout --detach && git add -f babel dist preact && git commit -am \"$npm_package_version\" && git tag $npm_package_version && git push --tags && git checkout master"

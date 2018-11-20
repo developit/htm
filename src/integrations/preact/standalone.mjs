@@ -12,7 +12,7 @@
  */
 
 import { h, Component, render as preactRender } from 'preact';
-import htm from 'htm';
+import htm from '../../index.mjs';
 
 function render(tree, parent) {
 	preactRender(tree, parent, parent.firstElementChild);
