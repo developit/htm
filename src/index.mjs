@@ -35,10 +35,6 @@ function build(statics) {
 	// - replace <${Foo}>a<//>b with <c c@=${Foo}>a</c>b
 	TEMPLATE.innerHTML = str
 		.replace(/<(?:(\/)\/|(\/?)(\$_h\[\d+\]))/g, '<$1$2c c@=$3')
-		// .replace(/<([\w:-]+)((?:\s[^<>]*?)?)(\/?)>/gi, (str, name, attrs, a) => {
-		// 	const casedAttrs = attrs.replace(/(?:'.*?'|".*?"|([A-Z]))/g, (s, c) => c ? ':::'+c : s);
-		// 	return '<' + name + casedAttrs + '>' + (a ? '</'+name+'>' : '');
-		// })
 		.replace(/<([\w:-]+)(?:\s[^<>]*?)?(\/?)>/g, (str, name, a) => (
 			str.replace(/(?:'.*?'|".*?"|([A-Z]))/g, (s, c) => c ? ':::'+c : s) + (a ? '</'+name+'>' : '')
 		))
