@@ -11,7 +11,14 @@ It lets your build apps using Preact/React/etc directly in the browser.
 JSX can be converted to `htm` with only a few tiny modifications.
 Templates are parsed by the browser's HTML parser and cached, achieving minimal overhead.
 
-`htm` is just _650 bytes_ standalone, or **only 500 bytes** when used with Preact! _(through the magic of gzip 🌈)_
+## `htm` by the numbers:
+
+🐣 **700 bytes** when used directly in the browser
+
+⚛️ **500 bytes** when used with Preact _(the magic of gzip 🌈)_
+
+🏅 **0 bytes** when compiled using [babel-plugin-htm]
+
 
 ## Syntax: Like JSX but more lit
 
@@ -32,6 +39,7 @@ Here's some ergonomic features you get for free that aren't present in JSX:
 - Optional end-tags: `<section><h1>this is the whole template!`
 - Component end-tags: `<${Footer}>footer content<//>`
 - Support for HTML comments: `<div><!-- don't delete this! --></div>`
+- Syntax highlighting and language support via the [lit-html VSCode extension].
 
 ## Project Status
 
@@ -192,5 +200,7 @@ console.log(html`
 
 [Tagged Templates]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates
 [lit-html]: https://github.com/Polymer/lit-html
+[babel-plugin-htm]: https://www.npmjs.com/package/babel-plugin-htm
+[lit-html VSCode extension]: https://marketplace.visualstudio.com/items?itemName=bierner.lit-html
 [vhtml]: https://github.com/developit/vhtml
 [jsxobj]: https://github.com/developit/jsxobj

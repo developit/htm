@@ -33,43 +33,52 @@ function build(statics) {
 	// - replace <${Foo}> with <c c@=${Foo}>
 	// - replace <x /> with <x></x>
 	// - replace <${Foo}>a<//>b with <c c@=${Foo}>a</c>b
-	TEMPLATE.innerHTML = str.replace(/<(?:(\/)\/|(\/?)(\$_h\[\d+\]))/g, '<$1$2c c@=$3').replace(/<([\w:-]+)(\s[^<>]*?)?\/>/gi, '<$1$2></$1>').trim();
+	TEMPLATE.innerHTML = str
+		.replace(/<(?:(\/)\/|(\/?)(\$_h\[\d+\]))/g, '<$1$2c c@=$3')
+		// .replace(/<([\w:-]+)((?:\s[^<>]*?)?)(\/?)>/gi, (str, name, attrs, a) => {
+		// 	const casedAttrs = attrs.replace(/(?:'.*?'|".*?"|([A-Z]))/g, (s, c) => c ? ':::'+c : s);
+		// 	return '<' + name + casedAttrs + '>' + (a ? '</'+name+'>' : '');
+		// })
+		.replace(/<([\w:-]+)(?:\s[^<>]*?)?(\/?)>/g, (str, name, a) => (
+			str.replace(/(?:'.*?'|".*?"|([A-Z]))/g, (s, c) => c ? ':::'+c : s) + (a ? '</'+name+'>' : '')
+		))
+		.trim();
 	return Function('h', '$_h', 'return ' + walk((TEMPLATE.content || TEMPLATE).firstChild));
 }
 
 /** Traverse a DOM tree and serialize it to hyperscript function calls */
 function walk(n) {
-	if (n.nodeType !== 1) {
-		if (n.nodeType === 3 && n.data) return field(n.data, ',');
+	if (n.nodeType != 1) {
+		if (n.nodeType == 3 && n.data) return field(n.data, ',');
 		return 'null';
 	}
-	let nodeName = `"${n.localName}"`, str = '{', sub='', end='}';
+	let str = '',
+		nodeName = field(n.localName, str),
+		sub = '',
+		start = ',({';
 	for (let i=0; i<n.attributes.length; i++) {
-		const { name, value } = n.attributes[i];
+		const name = n.attributes[i].name;
+		const value = n.attributes[i].value;
 		if (name=='c@') {
 			nodeName = value;
-			continue;
 		}
-		if (name.substring(0,3)==='...') {
-			end = '})';
-			str = 'Object.assign(' + str + '},' + name.substring(3) + ',{';
+		else if (name.substring(0,3)=='...') {
 			sub = '';
-			continue;
+			start = ',Object.assign({';
+			str += '},' + name.substring(3) + ',{';
 		}
-		str += `${sub}"${name.replace(/:(\w)/g, upper)}":${value ? field(value, '+') : true}`;
-		sub = ',';
+		else {
+			str += `${sub}"${name.replace(/:::(\w)/g, (s, i) => i.toUpperCase())}":${value ? field(value, '+') : true}`;
+			sub = ',';
+		}
 	}
-	str = 'h(' + nodeName + ',' + str + end;
+	str = 'h(' + nodeName + start + str + '})';
 	let child = n.firstChild;
 	while (child) {
 		str += ',' + walk(child);
 		child = child.nextSibling;
 	}
 	return str + ')';
-}
-
-function upper (s, i) {
-	return i.toUpperCase();
 }
 
 /** Serialize a field to a String or reference for use in generated code. */
@@ -79,7 +88,7 @@ function field(value, sep) {
 	if (matches != null) {
 		if (matches[0] === value) return value;
 		strValue = strValue.replace(reg, `"${sep}$1${sep}"`).replace(/"[+,]"/g, '');
-		if (sep === ',') strValue = `[${strValue}]`;
+		if (sep == ',') strValue = `[${strValue}]`;
 	}
 	return strValue;
 }

@@ -22,7 +22,7 @@
   "eslintConfig": {
     "extends": "developit",
     "rules": {
-      "prefer-const": 2
+      "prefer-const": 0
     }
   },
   "jest": {

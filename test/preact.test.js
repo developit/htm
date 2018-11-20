@@ -36,13 +36,14 @@ describe('preact-html', () => {
 			`;
 		}
 	}
-
 	const Bar = ({ hello, children }) => html`
 	<div>
 		Value of hello: ${hello + ''}
 		${children}
 	</div>
 	`;
+
+	const Baz = ({ myCaseSensitiveProp }) => html`<div>${myCaseSensitiveProp}</div>`;
 
 	const fullHtml = '<div class="foo">\n\t\t\t\t\t<h1>Name: jason</h1>\n\t\t\t\t\t<p>Hello world!</p>\n\t\t\t\t\t<button>Click Me</button>\n\t\t\t\t\t<pre>Count: 0</pre>\n\t\t\t\t\txml-style end tags:\n\t\t\t\t\t<div>\n\t\tValue of hello: true\n\t\t\n\t</div>\n\t\t\t\t\texplicit end tags:\n\t\t\t\t\t<div>\n\t\tValue of hello: true\n\t\tsome children (count=0)\n\t</div>\n\t\t\t\t\timplicit end tags: (&lt;//&gt;)\n\t\t\t\t\t<div>\n\t\tValue of hello: true\n\t\tsome children (count=0)\n\t</div>\n\t\t\t\t\tsome text at the end\n\t\t\t\t</div>';
 
@@ -65,10 +66,18 @@ describe('preact-html', () => {
 		});
 	});
 
-	test('spread props', () => {
+	test('preserves case', () => {
+		scratch.textContent = '';
+		render(html`<${Baz} myCaseSensitiveProp="Yay!" />`, scratch);
+		expect(scratch.innerHTML).toBe('<div>Yay!</div>');
+	});
+
+	test('object spreads', () => {
 		scratch.textContent = '';
 
 		const props = { a: 1, b: 2, c: 3 };
+		const other = { d: 4, e: 5, f: 6 };
+
 		render(html`<div ...${props} />`, scratch);
 		expect(scratch.innerHTML).toBe(`<div a="1" b="2" c="3"></div>`);
 		scratch.innerHTML = '';
@@ -79,10 +88,17 @@ describe('preact-html', () => {
 
 		render(html`<div ...${props} is-after />`, scratch);
 		expect(scratch.innerHTML).toBe(`<div a="1" b="2" c="3" is-after="true"></div>`);
+		expect(JSON.stringify(props)).toBe(`{"a":1,"b":2,"c":3}`);
 		scratch.innerHTML = '';
 
 		render(html`<div is-before ...${props} is-after="blah" />`, scratch);
 		expect(scratch.innerHTML).toBe(`<div is-before="true" a="1" b="2" c="3" is-after="blah"></div>`);
+		scratch.innerHTML = '';
+
+		render(html`<div ...${props} ...${other} />`, scratch);
+		expect(scratch.innerHTML).toBe(`<div a="1" b="2" c="3" d="4" e="5" f="6"></div>`);
+		scratch.innerHTML = '';
+
 	});
 });
 
