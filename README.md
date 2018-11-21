@@ -148,6 +148,10 @@ It's a single HTML file, and there's no build or tooling. You can edit it with n
         `;
       }
     }
+		  
+    const Header = ({ name }) => html`<header><h1>${name} List</h1></header>`
+
+    const Footer = props => html`<footer ...${props} />`
 
     render(html`<${App} page="All" />`, document.body);
   </script>
