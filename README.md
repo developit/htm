@@ -1,9 +1,10 @@
+
+<h1 align="center">
+  HTM (Hyperscript Tagged Markup)
+  <a href="https://www.npmjs.org/package/htm"><img src="https://img.shields.io/npm/v/htm.svg?style=flat" alt="npm"></a>
+</h1>
 <p align="center">
-  <img src="https://i.imgur.com/09ih11e.jpg" width="715" alt="hyperscript tagged markup demo">
-  <h1 align="center">
-  	HTM (Hyperscript Tagged Markup)
-	  <a href="https://www.npmjs.org/package/htm"><img src="https://img.shields.io/npm/v/htm.svg?style=flat" alt="npm"></a>
-  </h1>
+  <img src="https://i.imgur.com/09ih11e.jpg" width="572" alt="hyperscript tagged markup demo">
 </p>
 
 `htm` is **JSX-like syntax in plain JavaScript** - no transpiler necessary.
@@ -142,14 +143,14 @@ It's a single HTML file, and there's no build or tooling. You can edit it with n
                 <li>${todo}</li>
               `)}
             </ul>
-            <button onClick=${this.addTodo.bind(this)}>Add Todo</button>
+            <button onClick=${() => this.addTodo()}>Add Todo</button>
             <${Footer}>footer content here<//>
           </div>
         `;
       }
     }
 		  
-    const Header = ({ name }) => html`<header><h1>${name} List</h1></header>`
+    const Header = ({ name }) => html`<h1>${name} List</h1>`
 
     const Footer = props => html`<footer ...${props} />`
 
