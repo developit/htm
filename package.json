@@ -11,7 +11,7 @@
     "build:preact": "microbundle src/integrations/preact/index.mjs -o preact/index.js -f es,umd --external preact,htm --no-sourcemap --target web && cp src/integrations/preact/{index.d.ts,package.json} preact/ && npm run -s build:preact:standalone",
     "build:preact:standalone": "microbundle src/integrations/preact/standalone.mjs -o preact/standalone.js -f es,umd --no-sourcemap --target web",
     "build:babel": "cd packages/babel-plugin-htm && npm run build",
-    "test": "eslint src/**/*.mjs test && jest test",
+    "test": "eslint src/**/*.mjs test && npm run build && jest test",
     "release": "npm run build && git checkout --detach && git add -f babel dist preact && git commit -am \"$npm_package_version\" && git tag $npm_package_version && git push --tags && git checkout master"
   },
   "files": [
