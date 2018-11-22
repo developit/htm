@@ -81,7 +81,7 @@ Since `htm` is a generic library, we need to tell it what to "compile" our templ
 The target should be a function of the form `h(tag, props, ...children)` _([hyperscript])_, and can return anything.
 
 ```js
-// this is our hyperscript function. for now, it just returns an description object.
+// this is our hyperscript function. for now, it just returns a description object.
 function h(tag, props, ...children) {
   return { tag, props, children };
 }
