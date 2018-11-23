@@ -18,6 +18,26 @@ describe('htm/babel', () => {
 		).toBe(`h("div",{id:"hello"},["hello"]);`);
 	});
 
+	test('cache key should be unique', () => {
+		transform('html`<div>Hello, World!</div>`;', {
+			babelrc: false,
+			compact: true,
+			plugins: [
+				htmBabelPlugin
+			]
+		});
+
+		expect(
+			transform('html`<div>Hello${comma} World!</div>`;', {
+				babelrc: false,
+				compact: true,
+				plugins: [
+					htmBabelPlugin
+				]
+			}).code
+		).toBe(`h("div",{},["Hello",comma," World!"]);`);
+	});
+
 	test('basic transformation with variable', () => {
 		expect(
 			transform('var name="world";html`<div id=hello>hello, ${name}</div>`;', {
