@@ -79,12 +79,13 @@ function walk(n) {
 
 /** Serialize a field to a String or reference for use in generated code. */
 function field(value, sep) {
-	const matches = value.match(reg);
-	let strValue = JSON.stringify(value);
-	if (matches != null) {
-		if (matches[0] === value) return value;
-		strValue = strValue.replace(reg, `"${sep}$1${sep}"`).replace(/"[+,]"/g, '');
-		if (sep == ',') strValue = `[${strValue}]`;
+	const pieces = value.split(reg);
+	if (pieces[1] === value) {
+		return value;
 	}
-	return strValue;
+	for (let i = 0; i < pieces.length; i += 2) {
+		pieces[i] = JSON.stringify(pieces[i]);
+	}
+	const strValue = pieces.join(sep);
+	return sep == ',' ? `[${strValue}]` : strValue;
 }
