@@ -113,7 +113,7 @@ describe('performance', () => {
 		let count = 0;
 		function go(count) {
 			return html(
-				statics.concat(['count:', count]),
+				statics.concat(['count:', ''+count]),
 				`id${count}`,
 				html(['<li data-id="','">', '</li>'], 'i'+count, 'some text #'+count),
 				Foo, Foo, Foo
