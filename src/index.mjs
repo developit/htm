@@ -18,7 +18,11 @@ const TEMPLATE = document.createElement('template');
 const reg = /(\$_h\[\d+\])/g;
 
 export default function html(statics) {
-	const tpl = CACHE[statics] || (CACHE[statics] = build(statics));
+	let key = '', i = 0;
+	while (i < statics.length) {
+		key += statics[i].length + '$' + statics[i++];
+	}
+	const tpl = CACHE[key] || (CACHE[key] = build(statics));
 	// eslint-disable-next-line prefer-rest-params
 	return tpl(this, arguments);
 }
