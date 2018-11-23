@@ -15,7 +15,7 @@ const CACHE = {};
 
 const TEMPLATE = document.createElement('template');
 
-const reg = /(\$_h\[\d+\])/g;
+const reg = /(\$_\[\d+\])/g;
 
 export default function html(statics) {
 	const tpl = CACHE[statics] || (CACHE[statics] = build(statics));
@@ -23,23 +23,29 @@ export default function html(statics) {
 	return tpl(this, arguments);
 }
 
+function escape(str) {
+	return str.replace(/([_A-Z])/g, '$_$1');
+}
+
+function unescape(str) {
+	return str.replace(/\$_([_A-Z])/gi, (_, c) => c.toUpperCase());
+}
+
 /** Create a template function given strings from a tagged template. */
 function build(statics) {
-	let str = statics[0], i = 1;
+	let str = escape(statics[0]), i = 1;
 	while (i < statics.length) {
-		str += '$_h[' + i + ']' + statics[i++];
+		str += '$_[' + i + ']' + escape(statics[i++]);
 	}
 	// Template string preprocessing:
-	// - replace <${Foo}> with <c c@=${Foo}>
+	// - replace <${Foo}> with <c $_=${Foo}>
 	// - replace <x /> with <x></x>
-	// - replace <${Foo}>a<//>b with <c c@=${Foo}>a</c>b
+	// - replace <${Foo}>a<//>b with <c $_=${Foo}>a</c>b
 	TEMPLATE.innerHTML = str
-		.replace(/<(?:(\/)\/|(\/?)(\$_h\[\d+\]))/g, '<$1$2c c@=$3')
-		.replace(/<([\w:-]+)(?:\s[^<>]*?)?(\/?)>/g, (str, name, a) => (
-			str.replace(/(?:'.*?'|".*?"|([A-Z]))/g, (s, c) => c ? ':::'+c : s) + (a ? '</'+name+'>' : '')
-		))
+		.replace(/<(?:(\/)\/|(\/?)(\$_\[\d+\]))/g, '<$1$2c $_=$3')
+		.replace(/<([\w:-]+)(?:\s[^<>]*?)?\/>/g, '$&</$1>')
 		.trim();
-	return Function('h', '$_h', 'return ' + walk((TEMPLATE.content || TEMPLATE).firstChild));
+	return Function('h', '$_', 'return ' + unescape(walk((TEMPLATE.content || TEMPLATE).firstChild)));
 }
 
 /** Traverse a DOM tree and serialize it to hyperscript function calls */
@@ -55,7 +61,7 @@ function walk(n) {
 	for (let i=0; i<n.attributes.length; i++) {
 		const name = n.attributes[i].name;
 		const value = n.attributes[i].value;
-		if (name=='c@') {
+		if (name=='$_') {
 			nodeName = value;
 		}
 		else if (name.substring(0,3)=='...') {
@@ -64,7 +70,7 @@ function walk(n) {
 			str += '},' + name.substring(3) + ',{';
 		}
 		else {
-			str += `${sub}"${name.replace(/:::(\w)/g, (s, i) => i.toUpperCase())}":${value ? field(value, '+') : true}`;
+			str += `${sub}${JSON.stringify(name)}:${value ? field(value, '+') : true}`;
 			sub = ',';
 		}
 	}
