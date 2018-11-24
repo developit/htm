@@ -39,7 +39,11 @@ function build(statics) {
 			str.replace(/(?:'.*?'|".*?"|([A-Z]))/g, (s, c) => c ? ':::'+c : s) + (a ? '</'+name+'>' : '')
 		))
 		.trim();
-	return Function('h', '$_h', 'return ' + walk((TEMPLATE.content || TEMPLATE).firstChild));
+	const rootEls = Array.from((TEMPLATE.content || TEMPLATE).children);
+	if (rootEls.length > 1) {
+		return Function('h', '$_h', 'return [' + rootEls.map(walk).join(',') + ']');
+	}
+	return Function('h', '$_h', 'return ' + walk(rootEls[0]));
 }
 
 /** Traverse a DOM tree and serialize it to hyperscript function calls */

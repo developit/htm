@@ -30,6 +30,18 @@ describe('htm/babel', () => {
 		).toBe(`var name="world";h("div",{id:"hello"},["hello, ",name]);`);
 	});
 
+	test('multiple root level elements ', () => {
+		expect(
+			transform('html`<div id=hello>hello</div><span>hola</span>`;', {
+				babelrc: false,
+				compact: true,
+				plugins: [
+					htmBabelPlugin
+				]
+			}).code
+		).toBe(`[h("div",{id:"hello"},["hello"]),h("span",{},["hola"])];`);
+	});
+
 	test('inline vnode transformation: (pragma:false)', () => {
 		expect(
 			transform('var name="world",vnode=html`<div id=hello>hello, ${name}</div>`;', {
