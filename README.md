@@ -160,7 +160,8 @@ It's a single HTML file, and there's no build or tooling. You can edit it with n
 ```
 
 **Here's a [live version](https://htm-demo-preact.glitch.me/).**
-**Here is [Sandbox](https://codesandbox.io/s/x7pmq32j6q) you can play with**
+
+**Here is a [Sandbox](https://codesandbox.io/s/x7pmq32j6q) you can play with**
 
 How nifty is that?  Notice there's only one import - here we're using the prebuilt Preact integration since it's easier to import and a bit smaller.
 
