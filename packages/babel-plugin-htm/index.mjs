@@ -21,7 +21,7 @@ let currentExpressions;
  */
 export default function htmBabelPlugin({ types: t }, options = {}) {
 	const pragma = options.pragma===false ? false : dottedIdentifier(options.pragma || 'h');
-
+  
 	const inlineVNodes = options.monomorphic || pragma===false;
 
 	function dottedIdentifier(keypath) {
@@ -39,12 +39,12 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 		const end = parts.pop() || '';
 		return new RegExp(parts.join('/'), end);
 	}
-
+  
 	function propertyName(key) {
 		if (key.match(/(^\d|[^a-z0-9_$])/i)) return t.stringLiteral(key);
 		return t.identifier(key);
 	}
-
+  
 	function stringValue(str) {
 		if (options.monomorphic) {
 			return t.objectExpression([
@@ -57,7 +57,7 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 		}
 		return t.stringLiteral(str);
 	}
-
+  
 	function createVNode(tag, props, children) {
 		if (inlineVNodes) {
 			return t.objectExpression([
@@ -68,7 +68,7 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 				options.monomorphic && t.objectProperty(propertyName('text'), t.nullLiteral())
 			].filter(Boolean));
 		}
-
+    
 		return t.callExpression(pragma, [tag, props, children]);
 	}
 
@@ -153,7 +153,7 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 
 		return createVNode(tag, propsNode, children);
 	}
-
+  
 	const html = htm.bind(h);
 
 	// The tagged template tag function name we're looking for.
