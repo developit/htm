@@ -45,7 +45,7 @@ function build(statics) {
 /** Traverse a DOM tree and serialize it to hyperscript function calls */
 function walk(n) {
 	if (n.nodeType != 1) {
-		if (n.nodeType == 3 && n.data) return field(n.data, ',');
+		if (n.nodeType == 3 && n.data) return `[${field(n.data)}]`;
 		return 'null';
 	}
 	let str = '',
@@ -79,13 +79,9 @@ function walk(n) {
 
 /** Serialize a field to a String or reference for use in generated code. */
 function field(value, sep) {
-	const pieces = value.split(reg);
-	if (pieces[1] === value) {
-		return value;
-	}
-	for (let i = 0; i < pieces.length; i += 2) {
-		pieces[i] = JSON.stringify(pieces[i]);
-	}
-	const strValue = pieces.join(sep);
-	return sep == ',' ? `[${strValue}]` : strValue;
+	return value
+		.split(reg)
+		.map((piece, i) => i % 2 ? piece : (piece && JSON.stringify(piece)))
+		.filter(piece => piece)
+		.join(sep);
 }
