@@ -49,7 +49,7 @@ Like `pragma=false` but converts all inline text to objects, resulting in the sa
 html`<div id="foo">hello ${you}</div>`
 // output:
 { type: 1, tag:"div", props:{ id: "foo" }, text: null, children:[
-  { type: 3, tag: null, props: null, text "hello ", children: null },
+  { type: 3, tag: null, props: null, text: "hello ", children: null },
   you
 ] }
 ```
