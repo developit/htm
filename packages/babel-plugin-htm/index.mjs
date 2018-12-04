@@ -24,6 +24,14 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
   
 	const inlineVNodes = options.monomorphic || pragma===false;
 
+	function escape(str) {
+		return str.replace(/_/g, '$__');
+	}
+
+	function unescape(str) {
+		return str.replace(/\$__/g, '_');
+	}
+
 	function dottedIdentifier(keypath) {
 		const path = keypath.split('.');
 		let out;
@@ -89,18 +97,18 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 			child = child.trim();
 		}
 		if (typeof child==='string') {
-			const matches = child.match(/\$\$\$_h_\[(\d+)\]/);
+			const matches = child.match(/^\$_\[(\d+)\]$/);
 			if (matches) return currentExpressions[matches[1]];
-			return stringValue(child);
+			return stringValue(unescape(child));
 		}
 		return child;
 	}
 
 	function h(tag, props) {
 		if (typeof tag==='string') {
-			const matches = tag.match(/\$\$\$_h_\[(\d+)\]/);
+			const matches = tag.match(/^\$_\[(\d+)\]$/);
 			if (matches) tag = currentExpressions[matches[1]];
-			else tag = t.stringLiteral(tag);
+			else tag = t.stringLiteral(unescape(tag));
 		}
 
 		//const propsNode = props==null || Object.keys(props).length===0 ? t.nullLiteral() : t.objectExpression(
@@ -108,27 +116,27 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 			Object.keys(props).map(key => {
 				let value = props[key];
 				if (typeof value==='string') {
-					const tokenizer = /\$\$\$_h_\[(\d+)\]/g;
+					const tokenizer = /\$_\[(\d+)\]/g;
 					let token, lhs, root, index=0, lastIndex=0;
 					const append = expr => {
 						if (lhs) expr = t.binaryExpression('+', lhs, expr);
 						root = lhs = expr;
 					};
 					while ((token = tokenizer.exec(value))) {
-						append(t.stringLiteral(value.substring(index, token.index)));
+						append(t.stringLiteral(unescape(value.substring(index, token.index))));
 						append(currentExpressions[token[1]]);
 						index = token.index;
 						lastIndex = tokenizer.lastIndex;
 					}
 					if (lastIndex < value.length) {
-						append(t.stringLiteral(value.substring(lastIndex)));
+						append(t.stringLiteral(unescape(value.substring(lastIndex))));
 					}
 					value = root;
 				}
 				else if (typeof value==='boolean') {
 					value = t.booleanLiteral(value);
 				}
-				return t.objectProperty(propertyName(key), value);
+				return t.objectProperty(propertyName(unescape(key)), value);
 			})
 		);
 
@@ -166,10 +174,10 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 			TaggedTemplateExpression(path) {
 				const tag = path.node.tag.name;
 				if (htmlName[0]==='/' ? patternStringToRegExp(htmlName).test(tag) : tag === htmlName) {
-					const statics = path.node.quasi.quasis.map(e => e.value.raw);
+					const statics = path.node.quasi.quasis.map(e => escape(e.value.raw));
 					const expr = path.node.quasi.expressions;
 					currentExpressions = expr;
-					path.replaceWith(html(statics, ...expr.map((p, i) => `$$$_h_[${i}]`)));
+					path.replaceWith(html(statics, ...expr.map((p, i) => `$_[${i}]`)));
 				}
 			}
 		}

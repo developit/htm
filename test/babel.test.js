@@ -57,4 +57,16 @@ describe('htm/babel', () => {
 			}).code
 		).toBe(`var name="world",vnode={type:1,tag:"div",props:{id:"hello"},children:[{type:3,tag:null,props:null,children:null,text:"hello, "},name],text:null};`);
 	});
+
+	test('preserves placeholder-looking strings in attributes and text', () => {
+		expect(
+			transform('html`<div $_[1]=$_[2]>$_[3]`;', {
+				babelrc: false,
+				compact: true,
+				plugins: [
+					htmBabelPlugin
+				]
+			}).code
+		).toBe(`h("div",{"$_[1]":"$_[2]"},["$_[3]"]);`);
+	});
 });
