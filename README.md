@@ -11,7 +11,7 @@
 
 Develop with React/Preact directly in the browser, then compile `htm` away for production.
 
-It's built using [Tagged Templates] and the browser's HTML parser.
+It's built using [Tagged Templates] and the browser's HTML parser. Works in [all modern browsers].
 
 ## `htm` by the numbers:
 
@@ -221,3 +221,4 @@ console.log(html`
 [vhtml]: https://github.com/developit/vhtml
 [jsxobj]: https://github.com/developit/jsxobj
 [hyperscript]: https://github.com/hyperhype/hyperscript
+[all modern browsers]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Browser_compatibility
