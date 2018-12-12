@@ -11,9 +11,11 @@ function escapeValue(value) {
  * @param {Babel} babel
  * @param {object} [options]
  * @param {string} [options.tag='html']  The tagged template "tag" function name to produce.
+ * @param {string} [options.html=false]  If `true`, output HTML-like instead of XML-like (no self-closing tags, etc).
  */
 export default function jsxToTaggedTemplatesBabelPlugin({ types: t }, options = {}) {
 	const tag = dottedIdentifier(options.tag || 'html');
+	const htmlOutput = !!options.html;
 
 	function dottedIdentifier(keypath) {
 		const path = keypath.split('.');
@@ -82,7 +84,7 @@ export default function jsxToTaggedTemplatesBabelPlugin({ types: t }, options = 
 			}
 		}
 
-		if (node.children && node.children.length !== 0) {
+		if (htmlOutput || node.children && node.children.length !== 0) {
 			raw('>');
 			for (let i = 0; i < node.children.length; i++) {
 				let child = node.children[i];
