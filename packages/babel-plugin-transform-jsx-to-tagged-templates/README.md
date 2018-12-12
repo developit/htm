@@ -23,7 +23,6 @@ npm i -D babel-plugin-transform-jsx-to-tagged-templates
 ```js
 "plugins": [
   "babel-plugin-transform-jsx-to-tagged-templates"
-  ]
 ]
 ```
 
@@ -33,15 +32,45 @@ There's only one option: `tag`. It lets you specify the function to use for pref
 
 ```js
 "plugins": [
-    [
-      "babel-plugin-transform-jsx-to-tagged-templates",
-      {
-        "tag": "custom.html"
-      }
-    ]
-  ]
+  ["babel-plugin-transform-jsx-to-tagged-templates", {
+    "tag": "custom.html"
+  }]
 ]
 ```
 
+## Auto-importing the tag
+
+Want to automatically import `html` into any file that uses JSX?  It works the same as with JSX!
+Just use [babel-plugin-jsx-pragmatic]:
+
+```js
+"plugins": [
+  ["babel-plugin-jsx-pragmatic", {
+    // the module to import:
+    "module": "lit-html",
+    // a named export to use from that module:
+    "export": "html",
+    // what to call it locally: (should match your "tag" option)
+    "import": "$$html"
+  }],
+  ["babel-plugin-transform-jsx-to-tagged-templates", {
+    "tag": "$$html"
+  }]
+]
+```
+
+The above will produce files that look like:
+
+```js
+import { html as $$html } from 'lit-html';
+
+export default $$html`<h1>hello</h1>`
+```
+
+### License
+
+Apache 2
+
 [htm]: https://github.com/developit/htm
 [lit-html]: https://github.com/polymer/lit-html
+[babel-plugin-jsx-pragmatic]: https://github.com/jmm/babel-plugin-jsx-pragmatic

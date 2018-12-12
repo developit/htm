@@ -45,4 +45,25 @@ describe('babel-plugin-transform-jsx-to-tagged-templates', () => {
 			}).code
 		).toBe('const Foo = props => html`<ul>${props.items.map(item => html`<li>\n    ${item}\n  </li>`)}</ul>`;');
 	});
+
+	test('integration with babel-plugin-jsx-pragmatic', () => {
+		expect(
+			transform('const Foo = props => <div>hello</div>;', {
+				babelrc: false,
+				plugins: [
+					['babel-plugin-jsx-pragmatic', {
+						// module to import:
+						module: 'lit-html',
+						// the name of the export to use:
+						export: 'html',
+						// whatever you specified for the "tag" option:
+						import: '$$html'
+					}],
+					[transformJsxToTaggedTemplatesPlugin, {
+						tag: '$$html'
+					}]
+				]
+			}).code
+		).toBe('import { html as $$html } from "lit-html";\n\nconst Foo = props => $$html`<div>hello</div>`;');
+	});
 });
