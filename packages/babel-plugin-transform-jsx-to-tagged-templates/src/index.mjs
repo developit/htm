@@ -1,4 +1,4 @@
-import jsx from 'babel-plugin-syntax-jsx';
+import jsx from '@babel/plugin-syntax-jsx';
 
 function escapeValue(value) {
 	if (value.match(/^[a-z0-9_' &]+$/gi)) {

@@ -18,7 +18,7 @@
 	},
 	"babel": {
 		"presets": [
-			"env"
+			"@babel/preset-env"
 		]
 	},
 	"jest": {
@@ -48,15 +48,16 @@
 	"license": "Apache-2.0",
 	"homepage": "https://github.com/developit/htm/tree/master/packages/babel-plugin-transform-jsx-to-tagged-templates",
 	"devDependencies": {
-		"babel-core": "^6.26.3",
+		"@babel/core": "^7.2.0",
+		"@babel/preset-env": "^7.2.0",
+		"babel-core": "^7.0.0-bridge.0",
 		"babel-jest": "^23.6.0",
-		"babel-preset-env": "^1.7.0",
 		"eslint": "^5.10.0",
 		"eslint-config-developit": "^1.1.1",
 		"jest": "^23.6.0",
 		"microbundle": "^0.8.3"
 	},
 	"dependencies": {
-		"babel-plugin-syntax-jsx": "^6.18.0"
+		"@babel/plugin-syntax-jsx": "^7.2.0"
 	}
 }
