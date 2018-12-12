@@ -24,6 +24,30 @@ describe('babel-plugin-transform-jsx-to-tagged-templates', () => {
 		).toBe('const Foo = () => html`<div class="foo" draggable>\n  <h1>Hello</h1>\n  <p>world.</p>\n</div>`;');
 	});
 
+	describe('props', () => {
+		test('static values', () => {
+			expect(
+				transform('(<div a="a" b="bb" c d />);', {
+					babelrc: false,
+					plugins: [
+						transformJsxToTaggedTemplatesPlugin
+					]
+				}).code
+			).toBe('html`<div a="a" b="bb" c d/>`;');
+		});
+
+		test('expression values', () => {
+			expect(
+				transform('const Foo = (props, a) => <div a={a} b={"b"} c={{}} d={props.d} e />;', {
+					babelrc: false,
+					plugins: [
+						transformJsxToTaggedTemplatesPlugin
+					]
+				}).code
+			).toBe('const Foo = (props, a) => html`<div a=${a} b=${"b"} c=${{}} d=${props.d} e/>`;');
+		});
+	});
+
 	test('whitespace', () => {
 		expect(
 			transform('const Foo = props => <div a b> a <em> b </em> c <strong> d </strong> e </div>;', {
