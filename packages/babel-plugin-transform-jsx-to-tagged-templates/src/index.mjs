@@ -89,7 +89,8 @@ export default function jsxToTaggedTemplatesBabelPlugin({ types: t }, options = 
 			for (let i = 0; i < node.children.length; i++) {
 				let child = node.children[i];
 				if (t.isJSXText(child)) {
-					raw(child.value);
+					// @todo - expose `whitespace: true` option?
+					raw(child.value.trim());
 				}
 				else {
 					if (t.isJSXExpressionContainer(child)) {
