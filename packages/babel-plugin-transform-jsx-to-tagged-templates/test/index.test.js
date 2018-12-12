@@ -62,6 +62,20 @@ describe('babel-plugin-transform-jsx-to-tagged-templates', () => {
 				compile('const Foo = (props, a) => <div a={a} b={"b"} c={{}} d={props.d} e />;')
 			).toBe('const Foo = (props, a) => html`<div a=${a} b=${"b"} c=${{}} d=${props.d} e/>`;');
 		});
+
+		test('spread', () => {
+			expect(
+				compile('const Foo = props => <div {...props} />;')
+			).toBe('const Foo = props => html`<div ...${props}/>`;');
+
+			expect(
+				compile('(<div {...{}} />);')
+			).toBe('html`<div ...${{}}/>`;');
+
+			expect(
+				compile('(<div a {...b} c />);')
+			).toBe('html`<div a ...${b} c/>`;');
+		});
 	});
 
 	describe('nesting', () => {

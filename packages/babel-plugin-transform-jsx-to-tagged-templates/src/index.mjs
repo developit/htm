@@ -66,8 +66,14 @@ export default function jsxToTaggedTemplatesBabelPlugin({ types: t }, options = 
 
 		if (open.attributes) {
 			for (let i = 0; i < open.attributes.length; i++) {
-				const { name, value } = open.attributes[i];
+				const attr = open.attributes[i];
 				raw(' ');
+				if (t.isJSXSpreadAttribute(attr)) {
+					raw('...');
+					expr(attr.argument);
+					continue;
+				}
+				const { name, value } = attr;
 				raw(name.name);
 				if (value) {
 					raw('=');
