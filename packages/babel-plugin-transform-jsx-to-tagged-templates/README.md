@@ -28,12 +28,20 @@ npm i -D babel-plugin-transform-jsx-to-tagged-templates
 
 ## Options
 
-There's only one option: `tag`. It lets you specify the function to use for prefixing templates. The default is "html":
+The following options are available:
+
+| Option | Type    | Default  | Description
+|--------|---------|----------|------------
+| `tag`  | String  | `"html"` | The "tag" function to prefix [Tagged Templates] with.<br> _Useful when [Auto-importing a tag function](#auto-importing-the-tag)._
+| `html` | Boolean | `false`  | `true` outputs HTML-like templates for use with [lit-html].<br> _The is default XML-like, with self-closing tags._
+
+Options are passed to a Babel plugin using a nested Array:
 
 ```js
 "plugins": [
   ["babel-plugin-transform-jsx-to-tagged-templates", {
-    "tag": "custom.html"
+    "tag": "$$html",
+    "html": true
   }]
 ]
 ```
