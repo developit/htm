@@ -4,13 +4,31 @@ import transformJsxToTaggedTemplatesPlugin from '../src/index.mjs';
 describe('babel-plugin-transform-jsx-to-tagged-templates', () => {
 	test('basic transformation', () => {
 		expect(
-			transform('(<div id="hello">hello</div>);', {
+			transform('(<div />);', {
 				babelrc: false,
 				plugins: [
 					transformJsxToTaggedTemplatesPlugin
 				]
 			}).code
-		).toBe('html`<div id="hello">hello</div>`;');
+		).toBe('html`<div/>`;');
+
+		expect(
+			transform('(<span>a</span>);', {
+				babelrc: false,
+				plugins: [
+					transformJsxToTaggedTemplatesPlugin
+				]
+			}).code
+		).toBe('html`<span>a</span>`;');
+
+		expect(
+			transform('(<div>hello</div>);', {
+				babelrc: false,
+				plugins: [
+					transformJsxToTaggedTemplatesPlugin
+				]
+			}).code
+		).toBe('html`<div>hello</div>`;');
 	});
 
 	test('nested children transformation', () => {

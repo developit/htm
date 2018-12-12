@@ -81,9 +81,9 @@ export default function jsxToTaggedTemplatesBabelPlugin({ types: t }, options = 
 				}
 			}
 		}
-		raw('>');
 
-		if (node.children) {
+		if (node.children && node.children.length !== 0) {
+			raw('>');
 			for (let i = 0; i < node.children.length; i++) {
 				let child = node.children[i];
 				if (t.isJSXText(child)) {
@@ -102,17 +102,20 @@ export default function jsxToTaggedTemplatesBabelPlugin({ types: t }, options = 
 					}
 				}
 			}
-		}
 
-		if (name.match(/^[A-Z]/)) {
-			raw('</');
-			expr(t.identifier(name));
-			raw('>');
+			if (name.match(/^[A-Z]/)) {
+				raw('</');
+				expr(t.identifier(name));
+				raw('>');
+			}
+			else {
+				raw('</');
+				raw(name);
+				raw('>');
+			}
 		}
 		else {
-			raw('</');
-			raw(name);
-			raw('>');
+			raw('/>');
 		}
 
 		if (isRoot) {
