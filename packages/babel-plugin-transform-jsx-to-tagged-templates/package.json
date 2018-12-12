@@ -1,0 +1,63 @@
+{
+	"name": "babel-plugin-transform-jsx-to-tagged-templates",
+	"version": "0.1.0",
+	"description": "Babel plugin to compile JSX to Tagged Templates.",
+	"main": "dist/babel-plugin-transform-jsx-to-tagged-templates.js",
+	"module": "dist/babel-plugin-transform-jsx-to-tagged-templates.mjs",
+	"scripts": {
+		"build": "microbundle src/index.mjs -f es,cjs --target node --no-compress --no-sourcemap",
+		"test": "jest",
+		"prepare": "npm run build"
+	},
+	"files": [
+		"dist",
+		"src"
+	],
+	"eslintConfig": {
+		"extends": "developit"
+	},
+	"babel": {
+		"presets": [
+			"env"
+		]
+	},
+	"jest": {
+		"moduleFileExtensions": [
+			"mjs",
+			"js",
+			"json"
+		],
+		"transform": {
+			"^.+\\.m?js$": "babel-jest"
+		}
+	},
+	"repository": "developit/htm",
+	"keywords": [
+		"tagged template",
+		"template literals",
+		"html",
+		"htm",
+		"jsx",
+		"virtual dom",
+		"hyperscript",
+		"babel",
+		"babel plugin",
+		"babel-plugin"
+	],
+	"author": "Jason Miller <jason@developit.ca>",
+	"license": "Apache-2.0",
+	"homepage": "https://github.com/developit/htm/tree/master/packages/babel-plugin-transform-jsx-to-tagged-templates",
+	"devDependencies": {
+		"babel-core": "^6.26.3",
+		"babel-jest": "^23.6.0",
+		"babel-preset-env": "^1.7.0",
+		"eslint": "^5.10.0",
+		"eslint-config-developit": "^1.1.1",
+		"jest": "^23.6.0",
+		"microbundle": "^0.8.3"
+	},
+	"dependencies": {
+		"@babel/plugin-syntax-jsx": "^7.2.0",
+		"babel-plugin-syntax-jsx": "^6.18.0"
+	}
+}
