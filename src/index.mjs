@@ -53,7 +53,6 @@ function build(input) {
 	function commit() {
 		if (!inTag) {
 			if (field || (buffer = buffer.trim())) {
-			// if (field || buffer) {
 				if (hasChildren++) out += ',';
 				out += field || JSON.stringify(buffer);
 			}
@@ -64,23 +63,16 @@ function build(input) {
 			mode = MODE_WHITESPACE;
 		}
 		else if (mode === MODE_ATTRIBUTE || (mode === MODE_WHITESPACE && buffer === '...')) {
-			// if (!propCount++) {
-			// 	propsStart = out.length + 1;
-			// }
 			if (mode === MODE_WHITESPACE) {
 				spread = true;
 				if (!spreads++) {
 					if (propCount === 0) out += ',Object.assign({},';
 					else out = out.replace(/,\(\{(.*?)$/, ',Object.assign({},{$1') + '},';
-					// out = out.substring(0, propsStart) + out.substring;
 				}
-				// out += ',' + field;
 				out += field + ',{';
 				propCount++;
 			}
-			// out += ',';
 			else if (propName) {
-				// out += ',' + propName + ':';
 				if (!spread) out += ',';
 				if (propCount === 0) out += '({';
 				out += propName + ':';
@@ -92,32 +84,23 @@ function build(input) {
 			propHasValue = false;
 		}
 		else if (mode === MODE_WHITESPACE) {
-			// if (buffer === '...') {
-			// 	spread = true;
-			// }
-			// else {
-			// spread = false;
 			mode = MODE_ATTRIBUTE;
 			// we're in an attribute name
 			propName = buffer;
 			buffer = field = '';
 			commit();
 			mode = MODE_WHITESPACE;
-			// }
 		}
 		buffer = field = '';
-		// hasChildren++;
 	}
 
 	for (let i=0; i<input.length; i++) {
-		// prevCharCode = charCode;
 		charCode = input.charCodeAt(i);
 		field = '';
 
 		if (charCode === QUOTE_SINGLE || charCode === QUOTE_DOUBLE) {
 			if (quote === charCode) {
 				quote = 0;
-				// commit();
 				continue;
 			}
 			if (quote === 0) {
@@ -127,7 +110,6 @@ function build(input) {
 		}
 
 		if (charCode === 0) {
-			// if (mode !== MODE_TAGNAME && mode !== MODE_ATTRIBUTE) commit();
 			if (!inTag) commit();
 			field = `$_h[${fieldIndex++}]`;
 			commit();
@@ -144,10 +126,6 @@ function build(input) {
 						propCount = 0;
 						slash = spread = propHasValue = false;
 						mode = MODE_TAGNAME;
-						//if (buffer = buffer.trim()) out += JSON.stringify(buffer);
-						// if (hasChildren++) out += ',';
-						// out += 'h(';
-						// buffer = '';
 						continue;
 					}
 				
@@ -155,7 +133,6 @@ function build(input) {
 					if (inTag) {
 						commit();
 						if (mode !== MODE_SKIP) {
-							// if (prevCharCode === SLASH) {
 							if (propCount === 0) {
 								out += ',null';
 							}
@@ -164,7 +141,6 @@ function build(input) {
 							}
 						}
 						if (slash) {
-							// tags.pop();
 							out += ')';
 						}
 						inTag = false;
@@ -172,16 +148,6 @@ function build(input) {
 						mode = MODE_TEXT;
 						continue;
 					}
-
-					// case QUOTE_SINGLE:
-					// case QUOTE_DOUBLE:
-					// 	if (quote === charCode) {
-					// 		quote = 0;
-					// 	}
-					// 	if (quote === 0) {
-					// 		quote = charCode;
-					// 	}
-					// 	continue;
 				
 				case EQUALS:
 					if (inTag) {
@@ -197,7 +163,6 @@ function build(input) {
 						if (!slash) {
 							slash = true;
 							// </foo>
-							// console.log(mode === MODE_TAGNAME, field, buffer.trim());
 							if (mode === MODE_TAGNAME && !field && !buffer.trim().length) {
 								buffer = field = '';
 								mode = MODE_SKIP;
@@ -214,85 +179,12 @@ function build(input) {
 						commit();
 						continue;
 					}
-					// else if (!buffer.length) continue;
-					// commit = inTag === true;
-					// continue;
 			}
 		}
 
 		buffer += input.charAt(i);
 
-		// // while ((token = TOKENIZER.exec(statics[i])) || ((field=`$_h[${i}]`), (buffer=''), (lastIndex=0), statics[++i])) {
-		// // if (char==='\\' || !token) continue;
-		// if (token[3] != null) break;
-		// if (!token) {
-		// 	if (!inTag) {
-		// 		if (buffer) out += JSON.stringify(buffer);
-		// 		out += field;
-		// 		buffer = '';
-		// 		field = null;
-		// 	}
-		// 	continue;
-		// }
-		// buffer += token.input.substring(lastIndex, token.index);
-		// char = token[0];
-		// if (!inTag) continue;
-		// if (prev==='\\') out += prev + char;
-		// else if (token[1] && !inQuote) inQuote = true;
-		// else if (inQuote) {
-		// 	if (inQuote===token[1]) {
-		// 		inQuote = false;
-		// 		quotedValue = field || JSON.stringify(buffer);
-		// 	}
-		// }
-		// else if (char==='<') inTag = true;
-		// else if (char==='>') inTag = false;
-		// else if (char==='/' && prev==='<') out += ')';
-		// else if (char==='=') {
-		// 	propName = buffer;
-		// 	// out += ',' + JSON.stringify(buffer) + ':';
-		// }
-		// else if (token[2]) {
-		// 	if (prev==='<') {
-		// 		const tag = field || JSON.stringify(buffer);
-		// 		tags.push(tag);
-		// 		if (buffer) {
-		// 			out += JSON.stringify(buffer);
-		// 		}
-		// 		if (hasChildren) out += ',';
-		// 		out += `h(${tag}`;
-		// 		buffer = '';
-		// 		hasChildren = true;
-		// 		// childIndex = 0;
-		// 	}
-		// 	else {
-		// 		out += ',' + JSON.stringify(propName || buffer) + ':' + (quotedValue || 'true');
-		// 		buffer = propName = quotedValue = '';
-		// 	}
-		// }
-		// prev = char;
-		// field = null;
-		// lastIndex = TOKENIZER.lastIndex;
 	}
 	commit();
 	return Function('h', '$_h', out);
-	// try {
-	// 	return Function('h', '$_h', out);
-	// }
-	// catch (e) {
-	// 	throw `input: ${out}\n${e}`;
-	// }
 }
-
-
-/** Serialize a field to a String or reference for use in generated code. */
-// function field(value, sep) {
-// 	const matches = value.match(reg);
-// 	let strValue = JSON.stringify(value);
-// 	if (matches != null) {
-// 		if (matches[0] === value) return value;
-// 		strValue = strValue.replace(reg, `"${sep}$1${sep}"`).replace(/"[+,]"/g, '');
-// 		if (sep == ',') strValue = `[${strValue}]`;
-// 	}
-// 	return strValue;
-// }
