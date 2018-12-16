@@ -13,78 +13,286 @@
 
 const CACHE = {};
 
-const TEMPLATE = document.createElement('template');
-
-const reg = /(\$_h\[\d+\])/g;
-
 export default function html(statics) {
-	const tpl = CACHE[statics] || (CACHE[statics] = build(statics));
+	const str = statics.join('\0');
+	const tpl = CACHE[str] || (CACHE[str] = build(str));
 	// eslint-disable-next-line prefer-rest-params
 	return tpl(this, arguments);
 }
 
+const TAG_START = 60;
+const TAG_END = 62;
+const EQUALS = 61;
+const QUOTE_DOUBLE = 34;
+const QUOTE_SINGLE = 39;
+const TAB = 9;
+const NEWLINE = 10;
+const RETURN = 13;
+const SPACE = 32;
+const SLASH = 47;
+
+const MODE_WHITESPACE = 0;
+const MODE_TEXT = 1;
+const MODE_TAGNAME = 9;
+const MODE_ATTRIBUTE = 13;
+const MODE_SKIP = 47;
+
 /** Create a template function given strings from a tagged template. */
-function build(statics) {
-	let str = statics[0], i = 1;
-	while (i < statics.length) {
-		str += '$_h[' + i + ']' + statics[i++];
+function build(input) {
+	let out = 'return ';
+	let buffer = '';
+	let mode = MODE_WHITESPACE;
+	let fieldIndex = 1;
+	let field = '';
+	let hasChildren = 0;
+	let propCount = 0;
+	let spreads = 0;
+	let quote = 0;
+	let spread, slash, charCode, inTag, propName, propHasValue;
+
+	function commit() {
+		if (!inTag) {
+			if (field || (buffer = buffer.trim())) {
+			// if (field || buffer) {
+				if (hasChildren++) out += ',';
+				out += field || JSON.stringify(buffer);
+			}
+		}
+		else if (mode === MODE_TAGNAME) {
+			if (hasChildren++) out += ',';
+			out += 'h(' + (field || JSON.stringify(buffer));
+			mode = MODE_WHITESPACE;
+		}
+		else if (mode === MODE_ATTRIBUTE || (mode === MODE_WHITESPACE && buffer === '...')) {
+			// if (!propCount++) {
+			// 	propsStart = out.length + 1;
+			// }
+			if (mode === MODE_WHITESPACE) {
+				spread = true;
+				if (!spreads++) {
+					if (propCount === 0) out += ',Object.assign({},';
+					else out = out.replace(/,\(\{(.*?)$/, ',Object.assign({},{$1') + '},';
+					// out = out.substring(0, propsStart) + out.substring;
+				}
+				// out += ',' + field;
+				out += field + ',{';
+				propCount++;
+			}
+			// out += ',';
+			else if (propName) {
+				// out += ',' + propName + ':';
+				if (!spread) out += ',';
+				if (propCount === 0) out += '({';
+				out += propName + ':';
+				out += field || ((propHasValue || buffer) && JSON.stringify(buffer)) || 'true';
+				propName = '';
+				spread = false;
+				propCount++;
+			}
+			propHasValue = false;
+		}
+		else if (mode === MODE_WHITESPACE) {
+			// if (buffer === '...') {
+			// 	spread = true;
+			// }
+			// else {
+			// spread = false;
+			mode = MODE_ATTRIBUTE;
+			// we're in an attribute name
+			propName = buffer;
+			buffer = field = '';
+			commit();
+			mode = MODE_WHITESPACE;
+			// }
+		}
+		buffer = field = '';
+		// hasChildren++;
 	}
-	// Template string preprocessing:
-	// - replace <${Foo}> with <c c@=${Foo}>
-	// - replace <x /> with <x></x>
-	// - replace <${Foo}>a<//>b with <c c@=${Foo}>a</c>b
-	TEMPLATE.innerHTML = str
-		.replace(/<(?:(\/)\/|(\/?)(\$_h\[\d+\]))/g, '<$1$2c c@=$3')
-		.replace(/<([\w:-]+)(?:\s[^<>]*?)?(\/?)>/g, (str, name, a) => (
-			str.replace(/(?:'.*?'|".*?"|([A-Z]))/g, (s, c) => c ? ':::'+c : s) + (a ? '</'+name+'>' : '')
-		))
-		.trim();
-	return Function('h', '$_h', 'return ' + walk((TEMPLATE.content || TEMPLATE).firstChild));
+
+	for (let i=0; i<input.length; i++) {
+		// prevCharCode = charCode;
+		charCode = input.charCodeAt(i);
+		field = '';
+
+		if (charCode === QUOTE_SINGLE || charCode === QUOTE_DOUBLE) {
+			if (quote === charCode) {
+				quote = 0;
+				// commit();
+				continue;
+			}
+			if (quote === 0) {
+				quote = charCode;
+				continue;
+			}
+		}
+
+		if (charCode === 0) {
+			// if (mode !== MODE_TAGNAME && mode !== MODE_ATTRIBUTE) commit();
+			if (!inTag) commit();
+			field = `$_h[${fieldIndex++}]`;
+			commit();
+			continue;
+		}
+
+		if (quote === 0) {
+			switch (charCode) {
+				case TAG_START:
+					if (!inTag) {
+						// commit buffer
+						commit();
+						inTag = true;
+						propCount = 0;
+						slash = spread = propHasValue = false;
+						mode = MODE_TAGNAME;
+						//if (buffer = buffer.trim()) out += JSON.stringify(buffer);
+						// if (hasChildren++) out += ',';
+						// out += 'h(';
+						// buffer = '';
+						continue;
+					}
+				
+				case TAG_END:
+					if (inTag) {
+						commit();
+						if (mode !== MODE_SKIP) {
+							// if (prevCharCode === SLASH) {
+							if (propCount === 0) {
+								out += ',null';
+							}
+							else {
+								out += '})';
+							}
+						}
+						if (slash) {
+							// tags.pop();
+							out += ')';
+						}
+						inTag = false;
+						propCount = 0;
+						mode = MODE_TEXT;
+						continue;
+					}
+
+					// case QUOTE_SINGLE:
+					// case QUOTE_DOUBLE:
+					// 	if (quote === charCode) {
+					// 		quote = 0;
+					// 	}
+					// 	if (quote === 0) {
+					// 		quote = charCode;
+					// 	}
+					// 	continue;
+				
+				case EQUALS:
+					if (inTag) {
+						mode = MODE_ATTRIBUTE;
+						propHasValue = true;
+						propName = buffer;
+						buffer = '';
+						continue;
+					}
+
+				case SLASH:
+					if (inTag) {
+						if (!slash) {
+							slash = true;
+							// </foo>
+							// console.log(mode === MODE_TAGNAME, field, buffer.trim());
+							if (mode === MODE_TAGNAME && !field && !buffer.trim().length) {
+								buffer = field = '';
+								mode = MODE_SKIP;
+							}
+						}
+						continue;
+					}
+				case TAB:
+				case NEWLINE:
+				case RETURN:
+				case SPACE:
+					// <a disabled>
+					if (inTag) {
+						commit();
+						continue;
+					}
+					// else if (!buffer.length) continue;
+					// commit = inTag === true;
+					// continue;
+			}
+		}
+
+		buffer += input.charAt(i);
+
+		// // while ((token = TOKENIZER.exec(statics[i])) || ((field=`$_h[${i}]`), (buffer=''), (lastIndex=0), statics[++i])) {
+		// // if (char==='\\' || !token) continue;
+		// if (token[3] != null) break;
+		// if (!token) {
+		// 	if (!inTag) {
+		// 		if (buffer) out += JSON.stringify(buffer);
+		// 		out += field;
+		// 		buffer = '';
+		// 		field = null;
+		// 	}
+		// 	continue;
+		// }
+		// buffer += token.input.substring(lastIndex, token.index);
+		// char = token[0];
+		// if (!inTag) continue;
+		// if (prev==='\\') out += prev + char;
+		// else if (token[1] && !inQuote) inQuote = true;
+		// else if (inQuote) {
+		// 	if (inQuote===token[1]) {
+		// 		inQuote = false;
+		// 		quotedValue = field || JSON.stringify(buffer);
+		// 	}
+		// }
+		// else if (char==='<') inTag = true;
+		// else if (char==='>') inTag = false;
+		// else if (char==='/' && prev==='<') out += ')';
+		// else if (char==='=') {
+		// 	propName = buffer;
+		// 	// out += ',' + JSON.stringify(buffer) + ':';
+		// }
+		// else if (token[2]) {
+		// 	if (prev==='<') {
+		// 		const tag = field || JSON.stringify(buffer);
+		// 		tags.push(tag);
+		// 		if (buffer) {
+		// 			out += JSON.stringify(buffer);
+		// 		}
+		// 		if (hasChildren) out += ',';
+		// 		out += `h(${tag}`;
+		// 		buffer = '';
+		// 		hasChildren = true;
+		// 		// childIndex = 0;
+		// 	}
+		// 	else {
+		// 		out += ',' + JSON.stringify(propName || buffer) + ':' + (quotedValue || 'true');
+		// 		buffer = propName = quotedValue = '';
+		// 	}
+		// }
+		// prev = char;
+		// field = null;
+		// lastIndex = TOKENIZER.lastIndex;
+	}
+	commit();
+	return Function('h', '$_h', out);
+	// try {
+	// 	return Function('h', '$_h', out);
+	// }
+	// catch (e) {
+	// 	throw `input: ${out}\n${e}`;
+	// }
 }
 
-/** Traverse a DOM tree and serialize it to hyperscript function calls */
-function walk(n) {
-	if (n.nodeType != 1) {
-		if (n.nodeType == 3 && n.data) return field(n.data, ',');
-		return 'null';
-	}
-	let str = '',
-		nodeName = field(n.localName, str),
-		sub = '',
-		start = ',({';
-	for (let i=0; i<n.attributes.length; i++) {
-		const name = n.attributes[i].name;
-		const value = n.attributes[i].value;
-		if (name=='c@') {
-			nodeName = value;
-		}
-		else if (name.substring(0,3)=='...') {
-			sub = '';
-			start = ',Object.assign({';
-			str += '},' + name.substring(3) + ',{';
-		}
-		else {
-			str += `${sub}"${name.replace(/:::(\w)/g, (s, i) => i.toUpperCase())}":${value ? field(value, '+') : true}`;
-			sub = ',';
-		}
-	}
-	str = 'h(' + nodeName + start + str + '})';
-	let child = n.firstChild;
-	while (child) {
-		str += ',' + walk(child);
-		child = child.nextSibling;
-	}
-	return str + ')';
-}
 
 /** Serialize a field to a String or reference for use in generated code. */
-function field(value, sep) {
-	const matches = value.match(reg);
-	let strValue = JSON.stringify(value);
-	if (matches != null) {
-		if (matches[0] === value) return value;
-		strValue = strValue.replace(reg, `"${sep}$1${sep}"`).replace(/"[+,]"/g, '');
-		if (sep == ',') strValue = `[${strValue}]`;
-	}
-	return strValue;
-}
+// function field(value, sep) {
+// 	const matches = value.match(reg);
+// 	let strValue = JSON.stringify(value);
+// 	if (matches != null) {
+// 		if (matches[0] === value) return value;
+// 		strValue = strValue.replace(reg, `"${sep}$1${sep}"`).replace(/"[+,]"/g, '');
+// 		if (sep == ',') strValue = `[${strValue}]`;
+// 	}
+// 	return strValue;
+// }

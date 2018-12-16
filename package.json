@@ -23,7 +23,8 @@
   "eslintConfig": {
     "extends": "developit",
     "rules": {
-      "prefer-const": 0
+      "prefer-const": 0,
+      "no-fallthrough": 0
     }
   },
   "jest": {
