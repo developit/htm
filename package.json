@@ -28,12 +28,28 @@
   },
   "jest": {
     "testURL": "http://localhost",
+    "testMatch": [
+      "**/__tests__/**/*.?(m)js?(x)",
+      "**/?(*.)(spec|test).?(m)js?(x)"
+    ],
+    "transform": {
+      "\\.mjs$": "babel-jest"
+    },
+    "moduleFileExtensions": [
+      "mjs",
+      "js"
+    ],
     "moduleNameMapper": {
       "^htm-babel-plugin$": "<rootDir>/packages/babel-plugin-htm/dist/babel-plugin-htm.js",
       "^babel-plugin-htm$": "<rootDir>/packages/babel-plugin-htm/dist/babel-plugin-htm.js",
       "^htm$": "<rootDir>/dist/htm.js",
       "^htm/preact$": "<rootDir>/preact/index.js"
     }
+  },
+  "babel": {
+    "presets": [
+      "env"
+    ]
   },
   "repository": "developit/htm",
   "keywords": [
@@ -50,7 +66,9 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/developit/htm",
   "devDependencies": {
-    "@babel/core": "^7.1.2",
+    "@babel/preset-env": "^7.1.6",
+    "babel-jest": "^23.6.0",
+    "babel-preset-env": "^1.7.0",
     "eslint": "^5.2.0",
     "eslint-config-developit": "^1.1.1",
     "jest": "^23.4.2",
