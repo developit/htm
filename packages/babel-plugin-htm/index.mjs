@@ -1,8 +1,4 @@
-import { JSDOM } from 'jsdom';
-const before = global.document;
-global.document = new JSDOM().window.document;
-const htm = require('htm');
-global.document = before;
+import htm from 'htm';
 
 // htm() uses the HTML parser, which serializes attribute values.
 // this is a problem, because composite values here can be made up

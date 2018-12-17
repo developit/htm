@@ -2,8 +2,8 @@
  * @jest-environment node
  */
 
-const { transform } = require('@babel/core');
-const htmBabelPlugin = require('babel-plugin-htm');
+import { transform } from '@babel/core';
+import htmBabelPlugin from 'babel-plugin-htm';
 
 describe('htm/babel', () => {
 	test('basic transformation', () => {

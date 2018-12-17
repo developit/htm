@@ -6,11 +6,11 @@
   "umd:main": "dist/htm.umd.js",
   "module": "dist/htm.mjs",
   "scripts": {
-    "build": "npm run build:main && npm run build:preact && npm run build:babel",
+    "build": "npm run -s build:main && npm run -s build:preact && npm run -s build:babel",
     "build:main": "microbundle src/index.mjs -f es,umd --no-sourcemap --target web && microbundle src/cjs.mjs -f iife --no-sourcemap --target web",
     "build:preact": "cd src/integrations/preact && npm run build",
     "build:babel": "cd packages/babel-plugin-htm && npm run build",
-    "test": "eslint src/**/*.mjs test && npm run build && jest test",
+    "test": "eslint src/**/*.mjs test/**/*.mjs && npm run build && jest test",
     "release": "npm run build && git checkout --detach && git add -f babel dist preact && git commit -am \"$npm_package_version\" && git tag $npm_package_version && git push --tags && git checkout master"
   },
   "files": [
@@ -32,17 +32,16 @@
       "**/?(*.)(spec|test).?(m)js?(x)"
     ],
     "transform": {
-      "\\.mjs$": "babel-jest"
+      "\\.m?js$": "babel-jest"
     },
     "moduleFileExtensions": [
       "mjs",
       "js"
     ],
     "moduleNameMapper": {
-      "^htm-babel-plugin$": "<rootDir>/packages/babel-plugin-htm/dist/babel-plugin-htm.js",
-      "^babel-plugin-htm$": "<rootDir>/packages/babel-plugin-htm/dist/babel-plugin-htm.js",
-      "^htm$": "<rootDir>/dist/htm.js",
-      "^htm/preact$": "<rootDir>/preact/index.js"
+      "^babel-plugin-htm$": "<rootDir>/packages/babel-plugin-htm/index.mjs",
+      "^htm$": "<rootDir>/src/index.mjs",
+      "^htm/preact$": "<rootDir>/src/integrations/preact/index.mjs"
     }
   },
   "babel": {
