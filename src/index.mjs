@@ -177,6 +177,7 @@ function build(input) {
 					// <a disabled>
 					if (inTag) {
 						commit();
+						mode = MODE_WHITESPACE;
 						continue;
 					}
 			}
