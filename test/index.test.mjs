@@ -52,6 +52,10 @@ describe('htm', () => {
 	test('single prop with static value', () => {
 		expect(html`<a href="/hello" />`).toEqual({ tag: 'a', props: { href: '/hello' }, children: [] });
 	});
+	
+	test('single prop with static value followed by a single boolean prop', () => {
+		expect(html`<a href="/hello" b />`).toEqual({ tag: 'a', props: { href: '/hello', b: true }, children: [] });
+	});
 
 	test('two props with static values', () => {
 		expect(html`<a href="/hello" target="_blank" />`).toEqual({ tag: 'a', props: { href: '/hello', target: '_blank' }, children: [] });
@@ -75,6 +79,9 @@ describe('htm', () => {
 		expect(html`<a b ...${{ foo: 'bar' }} />`).toEqual({ tag: 'a', props: { b: true, foo: 'bar' }, children: [] });
 		expect(html`<a b c ...${{ foo: 'bar' }} />`).toEqual({ tag: 'a', props: { b: true, c: true, foo: 'bar' }, children: [] });
 		expect(html`<a ...${{ foo: 'bar' }} b />`).toEqual({ tag: 'a', props: { b: true, foo: 'bar' }, children: [] });
+		expect(html`<a b="1" ...${{ foo: 'bar' }} />`).toEqual({ tag: 'a', props: { b: '1', foo: 'bar' }, children: [] });
+		expect(html`<a x="1"><b y="2" ...${{ c: 'bar' }}/></a>`).toEqual(h('a', { x: '1' }, h('b', { y: '2', c: 'bar' }) ));
+		expect(html`<a ...${{ c: 'bar' }}><b ...${{ d: 'baz' }}/></a>`).toEqual(h('a', { c: 'bar' }, h('b', { d: 'baz' }) ));
 	});
 
 	test('mixed spread + static props', () => {
@@ -133,5 +140,24 @@ describe('htm', () => {
 				after
 			</a>
 		`).toEqual(h('a', null, 'before', 'foo', h('b', null), 'bar', 'after'));
+	});
+
+	test('hyphens (-) are allowed in attribute names', () => {
+		expect(html`<a b-c></a>`).toEqual(h('a', { 'b-c': true }));
+	});
+	
+	test('NUL characters are allowed in attribute values', () => {
+		expect(html`<a b="\0"></a>`).toEqual(h('a', { b: '\0' }));
+		expect(html`<a b="\0" c=${'foo'}></a>`).toEqual(h('a', { b: '\0', c: 'foo' }));
+	});
+	
+	test('NUL characters are allowed in text', () => {
+		expect(html`<a>\0</a>`).toEqual(h('a', null, '\0'));
+		expect(html`<a>\0${'foo'}</a>`).toEqual(h('a', null, '\0', 'foo'));
+	});
+	
+	test('cache key should be unique', () => {
+		html`<a b="${'foo'}" />`;
+		expect(html`<a b="\0" />`).toEqual(h('a', { b: '\0' }));
 	});
 });
