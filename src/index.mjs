@@ -67,6 +67,9 @@ function build(statics) {
 					if (!props) props = 'Object.assign({},';
 					else props = 'Object.assign({},' + props + '},';
 				}
+				else {
+					props += '},';
+				}
 				props += field + ',{';
 			}
 			else if (propName) {
