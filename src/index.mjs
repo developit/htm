@@ -14,8 +14,8 @@
 const CACHE = {};
 
 export default function html(statics) {
-	const str = statics.join('\0');
-	const tpl = CACHE[str] || (CACHE[str] = build(str));
+	const key = statics.reduce((key, s) => key + s.length + '$' + s, '');
+	const tpl = CACHE[key] || (CACHE[key] = build(statics));
 	// eslint-disable-next-line prefer-rest-params
 	return tpl(this, arguments);
 }
@@ -38,15 +38,13 @@ const MODE_ATTRIBUTE = 13;
 const MODE_SKIP = 47;
 
 /** Create a template function given strings from a tagged template. */
-function build(input) {
+function build(statics) {
 	let out = 'return ';
 	let buffer = '';
 	let mode = MODE_WHITESPACE;
-	let fieldIndex = 1;
 	let field = '';
 	let hasChildren = 0;
-	let propCount = 0;
-	let spreads = 0;
+	let props = '';
 	let quote = 0;
 	let spread, slash, charCode, inTag, propName, propHasValue;
 
@@ -64,22 +62,19 @@ function build(input) {
 		}
 		else if (mode === MODE_ATTRIBUTE || (mode === MODE_WHITESPACE && buffer === '...')) {
 			if (mode === MODE_WHITESPACE) {
-				spread = true;
-				if (!spreads++) {
-					if (propCount === 0) out += ',Object.assign({},';
-					else out = out.replace(/,\(\{(.*?)$/, ',Object.assign({},{$1') + '},';
+				if (!spread) {
+					spread = true;
+					if (!props) props = 'Object.assign({},';
+					else props = 'Object.assign({},' + props + '},';
 				}
-				out += field + ',{';
-				propCount++;
+				props += field + ',{';
 			}
 			else if (propName) {
-				if (!spread) out += ',';
-				if (propCount === 0) out += '({';
-				out += propName + ':';
-				out += field || ((propHasValue || buffer) && JSON.stringify(buffer)) || 'true';
+				if (!props) props += '{';
+				else if (!props.endsWith('{')) props += ',';
+				props += JSON.stringify(propName) + ':';
+				props += field || ((propHasValue || buffer) && JSON.stringify(buffer)) || 'true';
 				propName = '';
-				spread = false;
-				propCount++;
 			}
 			propHasValue = false;
 		}
@@ -94,96 +89,98 @@ function build(input) {
 		buffer = field = '';
 	}
 
-	for (let i=0; i<input.length; i++) {
-		charCode = input.charCodeAt(i);
-		field = '';
-
-		if (charCode === QUOTE_SINGLE || charCode === QUOTE_DOUBLE) {
-			if (quote === charCode) {
-				quote = 0;
-				continue;
-			}
-			if (quote === 0) {
-				quote = charCode;
-				continue;
-			}
-		}
-
-		if (charCode === 0) {
+	for (let i=0; i<statics.length; i++) {
+		if (i > 0) {
 			if (!inTag) commit();
-			field = `$_h[${fieldIndex++}]`;
+			field = `$_h[${i}]`;
 			commit();
-			continue;
 		}
+		
+		const input = statics[i];
+		for (let j=0; j<input.length; j++) {
+			charCode = input.charCodeAt(j);
+			field = '';
 
-		if (quote === 0) {
-			switch (charCode) {
-				case TAG_START:
-					if (!inTag) {
-						// commit buffer
-						commit();
-						inTag = true;
-						propCount = 0;
-						slash = spread = propHasValue = false;
-						mode = MODE_TAGNAME;
-						continue;
-					}
-				
-				case TAG_END:
-					if (inTag) {
-						commit();
-						if (mode !== MODE_SKIP) {
-							if (propCount === 0) {
-								out += ',null';
-							}
-							else {
-								out += '})';
-							}
-						}
-						if (slash) {
-							out += ')';
-						}
-						inTag = false;
-						propCount = 0;
-						mode = MODE_TEXT;
-						continue;
-					}
-				
-				case EQUALS:
-					if (inTag) {
-						mode = MODE_ATTRIBUTE;
-						propHasValue = true;
-						propName = buffer;
-						buffer = '';
-						continue;
-					}
-
-				case SLASH:
-					if (inTag) {
-						if (!slash) {
-							slash = true;
-							// </foo>
-							if (mode === MODE_TAGNAME && !field && !buffer.trim().length) {
-								buffer = field = '';
-								mode = MODE_SKIP;
-							}
-						}
-						continue;
-					}
-				case TAB:
-				case NEWLINE:
-				case RETURN:
-				case SPACE:
-					// <a disabled>
-					if (inTag) {
-						commit();
-						continue;
-					}
+			if (charCode === QUOTE_SINGLE || charCode === QUOTE_DOUBLE) {
+				if (quote === charCode) {
+					quote = 0;
+					continue;
+				}
+				if (quote === 0) {
+					quote = charCode;
+					continue;
+				}
 			}
+			
+			if (quote === 0) {
+				switch (charCode) {
+					case TAG_START:
+						if (!inTag) {
+							// commit buffer
+							commit();
+							inTag = true;
+							props = '';
+							slash = spread = propHasValue = false;
+							mode = MODE_TAGNAME;
+							continue;
+						}
+					
+					case TAG_END:
+						if (inTag) {
+							commit();
+							if (mode !== MODE_SKIP) {
+								if (!props) {
+									out += ',null';
+								}
+								else {
+									out += ',' + props + '}' + (spread ? ')' : '');
+								}
+							}
+							if (slash) {
+								out += ')';
+							}
+							spread = inTag = false;
+							props = '';
+							mode = MODE_TEXT;
+							continue;
+						}
+					
+					case EQUALS:
+						if (inTag) {
+							mode = MODE_ATTRIBUTE;
+							propHasValue = true;
+							propName = buffer;
+							buffer = '';
+							continue;
+						}
+
+					case SLASH:
+						if (inTag) {
+							if (!slash) {
+								slash = true;
+								// </foo>
+								if (mode === MODE_TAGNAME && !field && !buffer.trim().length) {
+									buffer = field = '';
+									mode = MODE_SKIP;
+								}
+							}
+							continue;
+						}
+					case TAB:
+					case NEWLINE:
+					case RETURN:
+					case SPACE:
+						// <a disabled>
+						if (inTag) {
+							commit();
+							mode = MODE_WHITESPACE;
+							continue;
+						}
+				}
+			}
+
+			buffer += input.charAt(j);
 		}
-
-		buffer += input.charAt(i);
-
 	}
 	commit();
 	return Function('h', '$_h', out);
