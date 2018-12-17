@@ -45,8 +45,7 @@ function build(input) {
 	let fieldIndex = 1;
 	let field = '';
 	let hasChildren = 0;
-	let propCount = 0;
-	let spreads = 0;
+	let props = '';
 	let quote = 0;
 	let spread, slash, charCode, inTag, propName, propHasValue;
 
@@ -64,22 +63,19 @@ function build(input) {
 		}
 		else if (mode === MODE_ATTRIBUTE || (mode === MODE_WHITESPACE && buffer === '...')) {
 			if (mode === MODE_WHITESPACE) {
-				spread = true;
-				if (!spreads++) {
-					if (propCount === 0) out += ',Object.assign({},';
-					else out = out.replace(/,\(\{(.*?)$/, ',Object.assign({},{$1') + '},';
+				if (!spread) {
+					spread = true;
+					if (!props) props = 'Object.assign({},';
+					else props = 'Object.assign({},' + props + '},';
 				}
-				out += field + ',{';
-				propCount++;
+				props += field + ',{';
 			}
 			else if (propName) {
-				if (!spread) out += ',';
-				if (propCount === 0) out += '({';
-				out += JSON.stringify(propName) + ':';
-				out += field || ((propHasValue || buffer) && JSON.stringify(buffer)) || 'true';
+				if (!props) props += '{';
+				else if (!props.endsWith('{')) props += ',';
+				props += JSON.stringify(propName) + ':';
+				props += field || ((propHasValue || buffer) && JSON.stringify(buffer)) || 'true';
 				propName = '';
-				spread = false;
-				propCount++;
 			}
 			propHasValue = false;
 		}
@@ -123,7 +119,7 @@ function build(input) {
 						// commit buffer
 						commit();
 						inTag = true;
-						propCount = 0;
+						props = '';
 						slash = spread = propHasValue = false;
 						mode = MODE_TAGNAME;
 						continue;
@@ -133,18 +129,18 @@ function build(input) {
 					if (inTag) {
 						commit();
 						if (mode !== MODE_SKIP) {
-							if (propCount === 0) {
+							if (!props) {
 								out += ',null';
 							}
 							else {
-								out += '})';
+								out += ',' + props + '}' + (spread ? ')' : '');
 							}
 						}
 						if (slash) {
 							out += ')';
 						}
-						inTag = false;
-						propCount = 0;
+						spread = inTag = false;
+						props = '';
 						mode = MODE_TEXT;
 						continue;
 					}
