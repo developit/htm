@@ -27,7 +27,7 @@
 	],
 	"author": "Jason Miller <jason@developit.ca>",
 	"license": "Apache-2.0",
-	"homepage": "https://github.com/developit/htm/packages/babel-plugin-htm",
+	"homepage": "https://github.com/developit/htm/tree/master/packages/babel-plugin-htm",
 	"dependencies": {
 		"htm": "^1.0.0",
 		"jsdom": "^11.12.0"
