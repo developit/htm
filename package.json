@@ -67,6 +67,7 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/developit/htm",
   "devDependencies": {
+    "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.1.6",
     "babel-jest": "^23.6.0",
     "babel-preset-env": "^1.7.0",
