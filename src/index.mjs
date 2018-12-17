@@ -45,8 +45,10 @@ function build(statics) {
 	let field = '';
 	let hasChildren = 0;
 	let props = '';
+	let propsClose = '';
+	let spreadClose = '';
 	let quote = 0;
-	let spread, slash, charCode, inTag, propName, propHasValue;
+	let slash, charCode, inTag, propName, propHasValue;
 
 	function commit() {
 		if (!inTag) {
@@ -62,19 +64,18 @@ function build(statics) {
 		}
 		else if (mode === MODE_ATTRIBUTE || (mode === MODE_WHITESPACE && buffer === '...')) {
 			if (mode === MODE_WHITESPACE) {
-				if (!spread) {
-					spread = true;
-					if (!props) props = 'Object.assign({},';
-					else props = 'Object.assign({},' + props + '},';
+				if (!spreadClose) {
+					spreadClose = ')';
+					if (!props) props = 'Object.assign({}';
+					else props = 'Object.assign({},' + props;
 				}
-				else {
-					props += '},';
-				}
-				props += field + ',{';
+				props += propsClose + ',' + field;
+				propsClose = '';
 			}
 			else if (propName) {
 				if (!props) props += '{';
-				else if (!props.endsWith('{')) props += ',';
+				else props += ',' + (propsClose ? '' : '{');
+				propsClose = '}';
 				props += JSON.stringify(propName) + ':';
 				props += field || ((propHasValue || buffer) && JSON.stringify(buffer)) || 'true';
 				propName = '';
@@ -122,8 +123,8 @@ function build(statics) {
 							// commit buffer
 							commit();
 							inTag = true;
-							props = '';
-							slash = spread = propHasValue = false;
+							spreadClose = propsClose = props = '';
+							slash = propHasValue = false;
 							mode = MODE_TAGNAME;
 							continue;
 						}
@@ -136,13 +137,13 @@ function build(statics) {
 									out += ',null';
 								}
 								else {
-									out += ',' + props + '}' + (spread ? ')' : '');
+									out += ',' + props + propsClose + spreadClose;
 								}
 							}
 							if (slash) {
 								out += ')';
 							}
-							spread = inTag = false;
+							inTag = false;
 							props = '';
 							mode = MODE_TEXT;
 							continue;
