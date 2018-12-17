@@ -75,7 +75,7 @@ function build(input) {
 			else if (propName) {
 				if (!spread) out += ',';
 				if (propCount === 0) out += '({';
-				out += propName + ':';
+				out += JSON.stringify(propName) + ':';
 				out += field || ((propHasValue || buffer) && JSON.stringify(buffer)) || 'true';
 				propName = '';
 				spread = false;
