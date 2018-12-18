@@ -1,13 +1,5 @@
 import htm from 'htm';
 
-// htm() uses the HTML parser, which serializes attribute values.
-// this is a problem, because composite values here can be made up
-// of strings and AST nodes, which serialize to [object Object].
-// Since the handoff from AST node handling to htm() is synchronous,
-// this global lookup will always reflect the corresponding
-// AST-derived values for the current htm() invocation.
-let currentExpressions;
-
 /**
  * @param {Babel} babel
  * @param {object} options
@@ -64,7 +56,7 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 				options.monomorphic && t.objectProperty(propertyName('text'), t.nullLiteral())
 			].filter(Boolean));
 		}
-    
+
 		return t.callExpression(pragma, [tag, props, children]);
 	}
 
@@ -85,8 +77,6 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 			child = child.trim();
 		}
 		if (typeof child==='string') {
-			const matches = child.match(/\$\$\$_h_\[(\d+)\]/);
-			if (matches) return currentExpressions[matches[1]];
 			return stringValue(child);
 		}
 		return child;
@@ -94,39 +84,42 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 
 	function h(tag, props) {
 		if (typeof tag==='string') {
-			const matches = tag.match(/\$\$\$_h_\[(\d+)\]/);
-			if (matches) tag = currentExpressions[matches[1]];
-			else tag = t.stringLiteral(tag);
+			tag = t.stringLiteral(tag);
 		}
 
-		//const propsNode = props==null || Object.keys(props).length===0 ? t.nullLiteral() : t.objectExpression(
-		const propsNode = t.objectExpression(
-			Object.keys(props).map(key => {
-				let value = props[key];
-				if (typeof value==='string') {
-					const tokenizer = /\$\$\$_h_\[(\d+)\]/g;
-					let token, lhs, root, index=0, lastIndex=0;
-					const append = expr => {
-						if (lhs) expr = t.binaryExpression('+', lhs, expr);
-						root = lhs = expr;
-					};
-					while ((token = tokenizer.exec(value))) {
-						append(t.stringLiteral(value.substring(index, token.index)));
-						append(currentExpressions[token[1]]);
-						index = token.index;
-						lastIndex = tokenizer.lastIndex;
+		let propsNode;
+
+		if (t.isObjectExpression(props)) {
+			propsNode = props;
+			for (let i in props) {
+				if (props.hasOwnProperty(i) && props[i] && props[i].type) {
+					for (let j=0; j<props.properties.length; j++) {
+						if (props.properties[j].start > props[i].start) {
+							props.properties.splice(j, 0, t.objectProperty(propertyName(i), props[i]));
+							break;
+						}
 					}
-					if (lastIndex < value.length) {
-						append(t.stringLiteral(value.substring(lastIndex)));
+					delete props[i];
+				}
+			}
+		}
+		else {
+			propsNode = t.objectExpression(
+				Object.keys(props).map(key => {
+					let value = props[key];
+					if (typeof value==='string') {
+						value = t.stringLiteral(value);
 					}
-					value = root;
-				}
-				else if (typeof value==='boolean') {
-					value = t.booleanLiteral(value);
-				}
-				return t.objectProperty(propertyName(key), value);
-			})
-		);
+					else if (typeof value==='boolean') {
+						value = t.booleanLiteral(value);
+					}
+					else if (typeof value==='number') {
+						value = t.stringLiteral(value + '');
+					}
+					return t.objectProperty(propertyName(key), value);
+				})
+			);
+		}
 
 		// recursive iteration of possibly nested arrays of children.
 		let children = [];
@@ -164,8 +157,7 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 				if (htmlName[0]==='/' ? patternStringToRegExp(htmlName).test(tag) : tag === htmlName) {
 					const statics = path.node.quasi.quasis.map(e => e.value.raw);
 					const expr = path.node.quasi.expressions;
-					currentExpressions = expr;
-					path.replaceWith(html(statics, ...expr.map((p, i) => `$$$_h_[${i}]`)));
+					path.replaceWith(html(statics, ...expr));
 				}
 			}
 		}
