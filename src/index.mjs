@@ -14,7 +14,7 @@
 const CACHE = {};
 
 export default function html(statics) {
-	const key = statics.join(statics);
+	const key = statics;
 
 	const tpl = CACHE[key] || (CACHE[key] = build(statics));
 	// eslint-disable-next-line prefer-rest-params
