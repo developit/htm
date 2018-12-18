@@ -52,7 +52,7 @@ function build(statics) {
 
 	function commit() {
 		if (!inTag) {
-			if (field || (buffer = buffer.replace(/^\s*\n+\s*|\s*\n+\s*$/g,''))) {
+			if (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g,''))) {
 				if (hasChildren++) out += ',';
 				out += field || JSON.stringify(buffer);
 			}
