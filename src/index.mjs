@@ -40,9 +40,9 @@ const MODE_SKIP = 47;
 
 /** Create a template function given strings from a tagged template. */
 const build = (statics) => {
+	let mode = MODE_WHITESPACE;
 	let out = 'return ';
 	let buffer = '';
-	let mode = MODE_WHITESPACE;
 	let field = '';
 	let hasChildren = 0;
 	let props = '';
