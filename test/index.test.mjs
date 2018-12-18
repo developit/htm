@@ -86,7 +86,7 @@ describe('htm', () => {
 
 	test('multiple spread props in one element', () => {
 		expect(html`<a ...${{ foo: 'bar' }} ...${{ quux: 'baz' }} />`).toEqual({ tag: 'a', props: { foo: 'bar', quux: 'baz' }, children: [] });
-	});  
+	});
   
 	test('mixed spread + static props', () => {
 		expect(html`<a b ...${{ foo: 'bar' }} />`).toEqual({ tag: 'a', props: { b: true, foo: 'bar' }, children: [] });
@@ -107,6 +107,7 @@ describe('htm', () => {
 	test('text child', () => {
 		expect(html`<a>foo</a>`).toEqual({ tag: 'a', props: null, children: ['foo'] });
 		expect(html`<a>foo bar</a>`).toEqual({ tag: 'a', props: null, children: ['foo bar'] });
+		expect(html`<a>foo "<b /></a>`).toEqual({ tag: 'a', props: null, children: ['foo "', { tag: 'b', props: null, children: [] }] });
 	});
 
 	test('dynamic child', () => {

@@ -45,12 +45,14 @@ function build(statics) {
 	let field = '';
 	let hasChildren = 0;
 	let props = '';
+	let propsClose = '';
+	let spreadClose = '';
 	let quote = 0;
-	let spread, slash, charCode, inTag, propName, propHasValue;
+	let slash, charCode, inTag, propName, propHasValue;
 
 	function commit() {
 		if (!inTag) {
-			if (field || (buffer = buffer.replace(/^\s*\n+\s*|\s*\n+\s*$/g,''))) {
+			if (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g,''))) {
 				if (hasChildren++) out += ',';
 				out += field || JSON.stringify(buffer);
 			}
@@ -62,19 +64,18 @@ function build(statics) {
 		}
 		else if (mode === MODE_ATTRIBUTE || (mode === MODE_WHITESPACE && buffer === '...')) {
 			if (mode === MODE_WHITESPACE) {
-				if (!spread) {
-					spread = true;
-					if (!props) props = 'Object.assign({},';
-					else props = 'Object.assign({},' + props + '},';
+				if (!spreadClose) {
+					spreadClose = ')';
+					if (!props) props = 'Object.assign({}';
+					else props = 'Object.assign({},' + props;
 				}
-				else {
-					props += '},';
-				}
-				props += field + ',{';
+				props += propsClose + ',' + field;
+				propsClose = '';
 			}
 			else if (propName) {
 				if (!props) props += '{';
-				else if (!props.endsWith('{')) props += ',';
+				else props += ',' + (propsClose ? '' : '{');
+				propsClose = '}';
 				props += JSON.stringify(propName) + ':';
 				props += field || ((propHasValue || buffer) && JSON.stringify(buffer)) || 'true';
 				propName = '';
@@ -99,90 +100,79 @@ function build(statics) {
 			commit();
 		}
 		
-		const input = statics[i];
-		for (let j=0; j<input.length; j++) {
-			charCode = input.charCodeAt(j);
-			field = '';
+		for (let j=0; j<statics[i].length; j++) {
+			charCode = statics[i].charCodeAt(j);
 
-			if (charCode === QUOTE_SINGLE || charCode === QUOTE_DOUBLE) {
-				if (quote === charCode) {
-					quote = 0;
-					continue;
-				}
-				if (quote === 0) {
-					quote = charCode;
+			if (!inTag) {
+				if (charCode === TAG_START) {
+					// commit buffer
+					commit();
+					inTag = true;
+					spreadClose = propsClose = props = '';
+					slash = propHasValue = false;
+					mode = MODE_TAGNAME;
 					continue;
 				}
 			}
-			
-			if (quote === 0) {
-				switch (charCode) {
-					case TAG_START:
-						if (!inTag) {
-							// commit buffer
-							commit();
-							inTag = true;
-							props = '';
-							slash = spread = propHasValue = false;
-							mode = MODE_TAGNAME;
-							continue;
-						}
-					
-					case TAG_END:
-						if (inTag) {
+			else {
+				if (charCode === QUOTE_SINGLE || charCode === QUOTE_DOUBLE) {
+					if (quote === charCode) {
+						quote = 0;
+						continue;
+					}
+					if (quote === 0) {
+						quote = charCode;
+						continue;
+					}
+				}
+				
+				if (quote === 0) {
+					switch (charCode) {
+						case TAG_END:
 							commit();
 							if (mode !== MODE_SKIP) {
 								if (!props) {
 									out += ',null';
 								}
 								else {
-									out += ',' + props + '}' + (spread ? ')' : '');
+									out += ',' + props + propsClose + spreadClose;
 								}
 							}
 							if (slash) {
 								out += ')';
 							}
-							spread = inTag = false;
+							inTag = false;
 							props = '';
 							mode = MODE_TEXT;
 							continue;
-						}
-					
-					case EQUALS:
-						if (inTag) {
+						case EQUALS:
 							mode = MODE_ATTRIBUTE;
 							propHasValue = true;
 							propName = buffer;
 							buffer = '';
 							continue;
-						}
-
-					case SLASH:
-						if (inTag) {
+						case SLASH:
 							if (!slash) {
 								slash = true;
 								// </foo>
-								if (mode === MODE_TAGNAME && !field && !buffer.trim().length) {
+								if (mode === MODE_TAGNAME && !buffer.trim()) {
 									buffer = field = '';
 									mode = MODE_SKIP;
 								}
 							}
 							continue;
-						}
-					case TAB:
-					case NEWLINE:
-					case RETURN:
-					case SPACE:
-						// <a disabled>
-						if (inTag) {
+						case TAB:
+						case NEWLINE:
+						case RETURN:
+						case SPACE:
+							// <a disabled>
 							commit();
 							mode = MODE_WHITESPACE;
 							continue;
-						}
+					}
 				}
 			}
-
-			buffer += input.charAt(j);
+			buffer += statics[i].charAt(j);
 		}
 	}
 	commit();
