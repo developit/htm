@@ -14,10 +14,7 @@
 const CACHE = {};
 
 export default function html(statics) {
-	let key = '';
-	for (let i=0; i<statics.length; i++) {
-		key += statics[i].length + '$' + statics[i];
-	}
+	const key = statics.join(statics);
 
 	const tpl = CACHE[key] || (CACHE[key] = build(statics));
 	// eslint-disable-next-line prefer-rest-params
