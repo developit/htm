@@ -39,7 +39,7 @@ const MODE_ATTRIBUTE = 13;
 const MODE_SKIP = 47;
 
 /** Create a template function given strings from a tagged template. */
-function build(statics) {
+const build = (statics) => {
 	let out = 'return ';
 	let buffer = '';
 	let mode = MODE_WHITESPACE;
@@ -51,7 +51,7 @@ function build(statics) {
 	let quote = 0;
 	let slash, charCode, inTag, propName, propHasValue;
 
-	function commit() {
+	const commit = () => {
 		if (!inTag) {
 			if (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g,''))) {
 				if (hasChildren++) out += ',';
@@ -92,7 +92,7 @@ function build(statics) {
 			mode = MODE_WHITESPACE;
 		}
 		buffer = field = '';
-	}
+	};
 
 	for (let i=0; i<statics.length; i++) {
 		if (i > 0) {
@@ -178,4 +178,4 @@ function build(statics) {
 	}
 	commit();
 	return Function('h', '$_h', out);
-}
+};
