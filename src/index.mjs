@@ -108,7 +108,7 @@ const build = (statics) => {
 				if (charCode === TAG_START) {
 					// commit buffer
 					commit();
-					inTag = true;
+					inTag = 1;
 					spreadClose = propsClose = props = '';
 					slash = propHasValue = false;
 					mode = MODE_TAGNAME;
@@ -142,7 +142,7 @@ const build = (statics) => {
 							if (slash) {
 								out += ')';
 							}
-							inTag = false;
+							inTag = 0;
 							props = '';
 							mode = MODE_TEXT;
 							continue;
