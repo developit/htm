@@ -164,5 +164,7 @@ describe('htm', () => {
 	test('cache key should be unique', () => {
 		html`<a b="${'foo'}" />`;
 		expect(html`<a b="\0" />`).toEqual(h('a', { b: '\0' }));
+		expect(html`<a>${''}9aaaaaaaaa${''}</a>`).not.toEqual(html`<a>${''}0${''}aaaaaaaaa${''}</a>`);
+		expect(html`<a>${''}0${''}aaaaaaaa${''}</a>`).not.toEqual(html`<a>${''}.8aaaaaaaa${''}</a>`);
 	});
 });

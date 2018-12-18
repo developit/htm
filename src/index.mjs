@@ -16,7 +16,8 @@ const CACHE = {};
 const stringify = JSON.stringify;
 
 export default function html(statics) {
-	const key = stringify(statics);
+	let key = '.';
+	for (let i=0; i<statics.length; i++) key += statics[i].length + ',' + statics[i];
 	const tpl = CACHE[key] || (CACHE[key] = build(statics));
 
 	// eslint-disable-next-line prefer-rest-params
