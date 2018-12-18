@@ -100,37 +100,35 @@ function build(statics) {
 			commit();
 		}
 		
-		const input = statics[i];
-		for (let j=0; j<input.length; j++) {
-			charCode = input.charCodeAt(j);
-			field = '';
+		for (let j=0; j<statics[i].length; j++) {
+			charCode = statics[i].charCodeAt(j);
 
-			if (charCode === QUOTE_SINGLE || charCode === QUOTE_DOUBLE) {
-				if (quote === charCode) {
-					quote = 0;
-					continue;
-				}
-				if (quote === 0) {
-					quote = charCode;
+			if (!inTag) {
+				if (charCode === TAG_START) {
+					// commit buffer
+					commit();
+					inTag = true;
+					spreadClose = propsClose = props = '';
+					slash = propHasValue = false;
+					mode = MODE_TAGNAME;
 					continue;
 				}
 			}
-			
-			if (quote === 0) {
-				switch (charCode) {
-					case TAG_START:
-						if (!inTag) {
-							// commit buffer
-							commit();
-							inTag = true;
-							spreadClose = propsClose = props = '';
-							slash = propHasValue = false;
-							mode = MODE_TAGNAME;
-							continue;
-						}
-					
-					case TAG_END:
-						if (inTag) {
+			else {
+				if (charCode === QUOTE_SINGLE || charCode === QUOTE_DOUBLE) {
+					if (quote === charCode) {
+						quote = 0;
+						continue;
+					}
+					if (quote === 0) {
+						quote = charCode;
+						continue;
+					}
+				}
+				
+				if (quote === 0) {
+					switch (charCode) {
+						case TAG_END:
 							commit();
 							if (mode !== MODE_SKIP) {
 								if (!props) {
@@ -147,43 +145,34 @@ function build(statics) {
 							props = '';
 							mode = MODE_TEXT;
 							continue;
-						}
-					
-					case EQUALS:
-						if (inTag) {
+						case EQUALS:
 							mode = MODE_ATTRIBUTE;
 							propHasValue = true;
 							propName = buffer;
 							buffer = '';
 							continue;
-						}
-
-					case SLASH:
-						if (inTag) {
+						case SLASH:
 							if (!slash) {
 								slash = true;
 								// </foo>
-								if (mode === MODE_TAGNAME && !field && !buffer.trim().length) {
+								if (mode === MODE_TAGNAME && !buffer.trim()) {
 									buffer = field = '';
 									mode = MODE_SKIP;
 								}
 							}
 							continue;
-						}
-					case TAB:
-					case NEWLINE:
-					case RETURN:
-					case SPACE:
-						// <a disabled>
-						if (inTag) {
+						case TAB:
+						case NEWLINE:
+						case RETURN:
+						case SPACE:
+							// <a disabled>
 							commit();
 							mode = MODE_WHITESPACE;
 							continue;
-						}
+					}
 				}
 			}
-
-			buffer += input.charAt(j);
+			buffer += statics[i].charAt(j);
 		}
 	}
 	commit();
