@@ -42,8 +42,38 @@ describe('performance', () => {
 		const elapsed = now - start;
 		const hz = count / elapsed * 1000;
 		// eslint-disable-next-line no-console
-		console.log(`Creation: ${hz|0}/s, average: ${elapsed/count.toFixed(4)}ms`);
+		console.log(`Creation: ${(hz|0).toLocaleString()}/s, average: ${elapsed/count*1000|0}µs`);
 		expect(elapsed).toBeGreaterThan(999);
 		expect(hz).toBeGreaterThan(1000);
+	});
+
+	test('usage', () => {
+		const results = [];
+		const Foo = ({ name }) => html`<div class="foo">${name}</div>`;
+		const statics = [
+			'\n<div id=app data-loading="true">\n\t<h1>Hello World</h1>\n\t<ul class="items" id=', '>\n\t',
+			'\n\t</ul>\n\t\n\t<', ' name="foo" />\n\t<', ' name="other">content</', '>\n\n</div>'
+		];
+		let count = 0;
+		function go(count) {
+			return html(
+				statics,
+				`id${count}`,
+				html(['<li data-id="','">', '</li>'], 'i'+count, 'some text #'+count),
+				Foo, Foo, Foo
+			);
+		}
+		let now = performance.now();
+		const start = now;
+		while ((now = performance.now()) < start+1000) {
+			count++;
+			if (results.push(String(go(count)))===10) results.length = 0;
+		}
+		const elapsed = now - start;
+		const hz = count / elapsed * 1000;
+		// eslint-disable-next-line no-console
+		console.log(`Usage: ${(hz|0).toLocaleString()}/s, average: ${elapsed/count*1000|0}µs`);
+		expect(elapsed).toBeGreaterThan(999);
+		expect(hz).toBeGreaterThan(100000);
 	});
 });
