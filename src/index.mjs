@@ -13,8 +13,11 @@
 
 const CACHE = {};
 
+const stringify = JSON.stringify;
+
 export default function html(statics) {
-	const key = statics.length + statics;
+	let key = '.';
+	for (let i=0; i<statics.length; i++) key += statics[i].length + ',' + statics[i];
 	const tpl = CACHE[key] || (CACHE[key] = build(statics));
 
 	// eslint-disable-next-line prefer-rest-params
@@ -55,12 +58,12 @@ const build = (statics) => {
 		if (!inTag) {
 			if (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g,''))) {
 				if (hasChildren++) out += ',';
-				out += field || JSON.stringify(buffer);
+				out += field || stringify(buffer);
 			}
 		}
 		else if (mode === MODE_TAGNAME) {
 			if (hasChildren++) out += ',';
-			out += 'h(' + (field || JSON.stringify(buffer));
+			out += 'h(' + (field || stringify(buffer));
 			mode = MODE_WHITESPACE;
 		}
 		else if (mode === MODE_ATTRIBUTE || (mode === MODE_WHITESPACE && buffer === '...')) {
@@ -77,8 +80,8 @@ const build = (statics) => {
 				if (!props) props += '{';
 				else props += ',' + (propsClose ? '' : '{');
 				propsClose = '}';
-				props += JSON.stringify(propName) + ':';
-				props += field || ((propHasValue || buffer) && JSON.stringify(buffer)) || 'true';
+				props += stringify(propName) + ':';
+				props += field || ((propHasValue || buffer) && stringify(buffer)) || 'true';
 				propName = '';
 			}
 			propHasValue = false;
