@@ -61,39 +61,8 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 		return t.callExpression(pragma, [tag, props, children]);
 	}
 	
-	function findNextNode(args, start) {
-		for (let i = start; i < args.length; i++) {
-			if (t.isNode(args[i])) {
-				return i;
-			}
-		}
-		return args.length;
-	}
-	
-	function flattenSpread(args) {
-		const flattened = [];
-		for (let i = 0; i < args.length; i++) {
-			if (t.isNode(args[i])) {
-				flattened.push(args[i]);
-			}
-			else {
-				const start = i;
-				const end = findNextNode(args, start + 1);
-				flattened.push(Object.assign(...args.slice(start, end)));
-				i = end - 1;
-			}
-		}
-		return flattened;
-	}
-	
 	function spreadNode(args, state) {
-		args = flattenSpread(args);
-
-		// Case 'Object.assign(x)' can be collapsed to 'x'.
-		if (args.length === 1) {
-			return propsNode(args[0]);
-		}
-		// Case 'Object.assign({}, x)', can be collapsed to 'x'.
+		// 'Object.assign({}, x)', can be collapsed to 'x'.
 		if (args.length === 2 && !t.isNode(args[0]) && Object.keys(args[0]).length === 0) {
 			return propsNode(args[1]);
 		}
