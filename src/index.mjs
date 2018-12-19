@@ -100,7 +100,7 @@ const build = (statics) => {
 	for (let i=0; i<statics.length; i++) {
 		if (i > 0) {
 			if (!inTag) commit();
-			field = `$_h[${i}]`;
+			field = `$[${i}]`;
 			commit();
 		}
 		
@@ -180,5 +180,5 @@ const build = (statics) => {
 		}
 	}
 	commit();
-	return Function('h', '$_h', out);
+	return Function('h', '$', out);
 };
