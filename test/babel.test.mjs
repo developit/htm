@@ -36,12 +36,82 @@ describe('htm/babel', () => {
 				babelrc: false,
 				compact: true,
 				plugins: [
+					[htmBabelPlugin, {
+						useBuiltIns: true
+					}]
+				]
+			}).code
+		).toBe(`h("a",Object.assign({b:2},{c:3}),["d: ",4]);`);
+	});
+	
+	test('spread a single variable', () => {
+		expect(
+			transform('html`<a ...${foo}></a>`;', {
+				babelrc: false,
+				compact: true,
+				plugins: [
 					htmBabelPlugin
 				]
 			}).code
-		).toBe(`h("a",{b:2,c:3},["d: ",4]);`);
+		).toBe(`h("a",foo,[]);`);
 	});
-
+	
+	test('spread two variables', () => {
+		expect(
+			transform('html`<a ...${foo} ...${bar}></a>`;', {
+				babelrc: false,
+				compact: true,
+				plugins: [
+					[htmBabelPlugin, {
+						useBuiltIns: true
+					}]
+				]
+			}).code
+		).toBe(`h("a",Object.assign({},foo,bar),[]);`);
+	});
+	
+	test('property followed by a spread', () => {
+		expect(
+			transform('html`<a b="1" ...${foo}></a>`;', {
+				babelrc: false,
+				compact: true,
+				plugins: [
+					[htmBabelPlugin, {
+						useBuiltIns: true
+					}]
+				]
+			}).code
+		).toBe(`h("a",Object.assign({b:"1"},foo),[]);`);
+	});
+	
+	test('spread followed by a property', () => {
+		expect(
+			transform('html`<a ...${foo} b="1"></a>`;', {
+				babelrc: false,
+				compact: true,
+				plugins: [
+					[htmBabelPlugin, {
+						useBuiltIns: true
+					}]
+				]
+			}).code
+		).toBe(`h("a",Object.assign({},foo,{b:"1"}),[]);`);
+	});
+	
+	test('mix-and-match spreads', () => {
+		expect(
+			transform('html`<a b="1" ...${foo} c=${2} ...${{d:3}}></a>`;', {
+				babelrc: false,
+				compact: true,
+				plugins: [
+					[htmBabelPlugin, {
+						useBuiltIns: true
+					}]
+				]
+			}).code
+		).toBe(`h("a",Object.assign({b:"1"},foo,{c:2},{d:3}),[]);`);
+	});
+	
 	test('inline vnode transformation: (pragma:false)', () => {
 		expect(
 			transform('var name="world",vnode=html`<div id=hello>hello, ${name}</div>`;', {
