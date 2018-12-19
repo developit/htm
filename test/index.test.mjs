@@ -168,4 +168,10 @@ describe('htm', () => {
 		expect(html`<a>${''}9aaaaaaaaa${''}</a>`).not.toEqual(html`<a>${''}0${''}aaaaaaaaa${''}</a>`);
 		expect(html`<a>${''}0${''}aaaaaaaa${''}</a>`).not.toEqual(html`<a>${''}.8aaaaaaaa${''}</a>`);
 	});
+	
+	test('do not mutate spread variables', () => {
+		const obj = {};
+		html`<a ...${obj} b="1" />`;
+		expect(obj).toEqual({});
+	});
 });
