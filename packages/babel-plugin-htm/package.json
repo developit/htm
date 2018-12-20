@@ -1,6 +1,6 @@
 {
 	"name": "babel-plugin-htm",
-	"version": "1.0.1",
+	"version": "2.0.0",
 	"description": "Babel plugin to compile htm's Tagged Template syntax to hyperscript or inline VNodes.",
 	"main": "dist/babel-plugin-htm.js",
 	"module": "dist/babel-plugin-htm.mjs",
@@ -29,9 +29,9 @@
 	"license": "Apache-2.0",
 	"homepage": "https://github.com/developit/htm/tree/master/packages/babel-plugin-htm",
 	"dependencies": {
-		"htm": "^1.0.0"
+		"htm": "^2.0.0"
 	},
 	"devDependencies": {
-		"microbundle": "^0.6.0"
+		"microbundle": "^0.8.3"
 	}
 }
