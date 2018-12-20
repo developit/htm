@@ -7,6 +7,7 @@ import htm from 'htm';
  * @param {string} [options.tag=html]  The tagged template "tag" function name to process.
  * @param {boolean} [options.monomorphic=false]  Output monomorphic inline objects instead of using String literals.
  * @param {boolean} [options.useBuiltIns=false]  Use the native Object.assign instead of trying to polyfill it.
+ * @param {boolean} [options.variableArity=true] If `false`, always passes exactly 3 arguments to the pragma function.
  */
 export default function htmBabelPlugin({ types: t }, options = {}) {
 	const pragma = options.pragma===false ? false : dottedIdentifier(options.pragma || 'h');
@@ -48,6 +49,11 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 	}
   
 	function createVNode(tag, props, children) {
+		// Never pass children=[[]].
+		if (children.elements.length === 1 && t.isArrayExpression(children.elements[0]) && children.elements[0].elements.length === 0) {
+			children = children.elements[0];
+		}
+
 		if (inlineVNodes) {
 			return t.objectExpression([
 				options.monomorphic && t.objectProperty(propertyName('type'), t.numericLiteral(1)),
@@ -58,7 +64,13 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 			].filter(Boolean));
 		}
 
-		return t.callExpression(pragma, [tag, props, children]);
+		// Passing `{variableArity:false}` always produces `h(tag, props, children)` - where `children` is always an Array.
+		// Otherwise, the default is `h(tag, props, ...children)`.
+		if (options.variableArity !== false) {
+			children = children.elements;
+		}
+
+		return t.callExpression(pragma, [tag, props].concat(children));
 	}
 	
 	function spreadNode(args, state) {

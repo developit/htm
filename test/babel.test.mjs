@@ -15,7 +15,7 @@ describe('htm/babel', () => {
 					htmBabelPlugin
 				]
 			}).code
-		).toBe(`h("div",{id:"hello"},["hello"]);`);
+		).toBe(`h("div",{id:"hello"},"hello");`);
 	});
 
 	test('basic transformation with variable', () => {
@@ -27,7 +27,7 @@ describe('htm/babel', () => {
 					htmBabelPlugin
 				]
 			}).code
-		).toBe(`var name="world";h("div",{id:"hello"},["hello, ",name]);`);
+		).toBe(`var name="world";h("div",{id:"hello"},"hello, ",name);`);
 	});
 
 	test('basic nested transformation', () => {
@@ -41,7 +41,7 @@ describe('htm/babel', () => {
 					}]
 				]
 			}).code
-		).toBe(`h("a",Object.assign({b:2},{c:3}),["d: ",4]);`);
+		).toBe(`h("a",Object.assign({b:2},{c:3}),"d: ",4);`);
 	});
 	
 	test('spread a single variable', () => {
@@ -53,7 +53,7 @@ describe('htm/babel', () => {
 					htmBabelPlugin
 				]
 			}).code
-		).toBe(`h("a",foo,[]);`);
+		).toBe(`h("a",foo);`);
 	});
 	
 	test('spread two variables', () => {
@@ -67,7 +67,7 @@ describe('htm/babel', () => {
 					}]
 				]
 			}).code
-		).toBe(`h("a",Object.assign({},foo,bar),[]);`);
+		).toBe(`h("a",Object.assign({},foo,bar));`);
 	});
 	
 	test('property followed by a spread', () => {
@@ -81,7 +81,7 @@ describe('htm/babel', () => {
 					}]
 				]
 			}).code
-		).toBe(`h("a",Object.assign({b:"1"},foo),[]);`);
+		).toBe(`h("a",Object.assign({b:"1"},foo));`);
 	});
 	
 	test('spread followed by a property', () => {
@@ -95,7 +95,7 @@ describe('htm/babel', () => {
 					}]
 				]
 			}).code
-		).toBe(`h("a",Object.assign({},foo,{b:"1"}),[]);`);
+		).toBe(`h("a",Object.assign({},foo,{b:"1"}));`);
 	});
 	
 	test('mix-and-match spreads', () => {
@@ -109,47 +109,69 @@ describe('htm/babel', () => {
 					}]
 				]
 			}).code
-		).toBe(`h("a",Object.assign({b:"1"},foo,{c:2},{d:3}),[]);`);
+		).toBe(`h("a",Object.assign({b:"1"},foo,{c:2},{d:3}));`);
 	});
 	
-	test('inline vnode transformation: (pragma:false)', () => {
-		expect(
-			transform('var name="world",vnode=html`<div id=hello>hello, ${name}</div>`;', {
-				babelrc: false,
-				compact: true,
-				plugins: [
-					[htmBabelPlugin, {
-						pragma: false
-					}]
-				]
-			}).code
-		).toBe(`var name="world",vnode={tag:"div",props:{id:"hello"},children:["hello, ",name]};`);
+	describe('{variableArity:false}', () => {
+		test('should pass no children as an empty Array', () => {
+			expect(
+				transform('html`<div />`;', {
+					babelrc: false,
+					compact: true,
+					plugins: [
+						[htmBabelPlugin, {
+							variableArity: false
+						}]
+					]
+				}).code
+			).toBe(`h("div",null,[]);`);
+		});
+
+		test('should pass children as an Array', () => {
+			expect(
+				transform('html`<div id=hello>hello</div>`;', {
+					babelrc: false,
+					compact: true,
+					plugins: [
+						[htmBabelPlugin, {
+							variableArity: false
+						}]
+					]
+				}).code
+			).toBe(`h("div",{id:"hello"},["hello"]);`);
+		});
 	});
 
-	test('monomorphic transformation', () => {
-		expect(
-			transform('var name="world",vnode=html`<div id=hello>hello, ${name}</div>`;', {
-				babelrc: false,
-				compact: true,
-				plugins: [
-					[htmBabelPlugin, {
-						monomorphic: true
-					}]
-				]
-			}).code
-		).toBe(`var name="world",vnode={type:1,tag:"div",props:{id:"hello"},children:[{type:3,tag:null,props:null,children:null,text:"hello, "},name],text:null};`);
+	describe('{pragma:false}', () => {
+		test('should transform to inline vnodes', () => {
+			expect(
+				transform('var name="world",vnode=html`<div id=hello>hello, ${name}</div>`;', {
+					babelrc: false,
+					compact: true,
+					plugins: [
+						[htmBabelPlugin, {
+							pragma: false
+						}]
+					]
+				}).code
+			).toBe(`var name="world",vnode={tag:"div",props:{id:"hello"},children:["hello, ",name]};`);
+		});
 	});
 
-	test('preserves placeholder-looking strings in attributes and text', () => {
-		expect(
-			transform('html`<div $$$_h_[1]=$$$_h_[2]>$$$_h_[3]</div>`;', {
-				babelrc: false,
-				compact: true,
-				plugins: [
-					htmBabelPlugin
-				]
-			}).code
-		).toBe(`h("div",{"$$$_h_[1]":"$$$_h_[2]"},["$$$_h_[3]"]);`);
+	describe('{monomorphic:true}', () => {
+		test('should transform to monomorphic inline vnodes', () => {
+			expect(
+				transform('var name="world",vnode=html`<div id=hello>hello, ${name}</div>`;', {
+					babelrc: false,
+					compact: true,
+					plugins: [
+						[htmBabelPlugin, {
+							monomorphic: true
+						}]
+					]
+				}).code
+			).toBe(`var name="world",vnode={type:1,tag:"div",props:{id:"hello"},children:[{type:3,tag:null,props:null,children:null,text:"hello, "},name],text:null};`);
+		});
 	});
 
 	describe('main test suite', () => {
