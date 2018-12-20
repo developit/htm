@@ -81,6 +81,7 @@ describe('htm', () => {
 		expect(html`<a ...${{ foo: 'bar' }} b />`).toEqual({ tag: 'a', props: { b: true, foo: 'bar' }, children: [] });
 		expect(html`<a b="1" ...${{ foo: 'bar' }} />`).toEqual({ tag: 'a', props: { b: '1', foo: 'bar' }, children: [] });
 		expect(html`<a x="1"><b y="2" ...${{ c: 'bar' }}/></a>`).toEqual(h('a', { x: '1' }, h('b', { y: '2', c: 'bar' }) ));
+		expect(html`<a b=${2} ...${{ c: 3 }}>d: ${4}</a>`).toEqual(h('a',{ b: 2, c: 3 }, 'd: ', 4));
 		expect(html`<a ...${{ c: 'bar' }}><b ...${{ d: 'baz' }}/></a>`).toEqual(h('a', { c: 'bar' }, h('b', { d: 'baz' }) ));
 	});
 
@@ -166,5 +167,11 @@ describe('htm', () => {
 		expect(html`<a b="\0" />`).toEqual(h('a', { b: '\0' }));
 		expect(html`<a>${''}9aaaaaaaaa${''}</a>`).not.toEqual(html`<a>${''}0${''}aaaaaaaaa${''}</a>`);
 		expect(html`<a>${''}0${''}aaaaaaaa${''}</a>`).not.toEqual(html`<a>${''}.8aaaaaaaa${''}</a>`);
+	});
+	
+	test('do not mutate spread variables', () => {
+		const obj = {};
+		html`<a ...${obj} b="1" />`;
+		expect(obj).toEqual({});
 	});
 });

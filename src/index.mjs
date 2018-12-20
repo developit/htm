@@ -71,7 +71,7 @@ const build = (statics) => {
 				if (!spreadClose) {
 					spreadClose = ')';
 					if (!props) props = 'Object.assign({}';
-					else props = 'Object.assign({},' + props;
+					else props = 'Object.assign(' + props;
 				}
 				props += propsClose + ',' + field;
 				propsClose = '';
