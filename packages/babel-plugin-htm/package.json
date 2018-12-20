@@ -29,8 +29,7 @@
 	"license": "Apache-2.0",
 	"homepage": "https://github.com/developit/htm/tree/master/packages/babel-plugin-htm",
 	"dependencies": {
-		"htm": "^1.0.0",
-		"jsdom": "^11.12.0"
+		"htm": "^1.0.0"
 	},
 	"devDependencies": {
 		"microbundle": "^0.6.0"

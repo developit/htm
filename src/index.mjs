@@ -13,78 +13,172 @@
 
 const CACHE = {};
 
-const TEMPLATE = document.createElement('template');
-
-const reg = /(\$_h\[\d+\])/g;
+const stringify = JSON.stringify;
 
 export default function html(statics) {
-	const tpl = CACHE[statics] || (CACHE[statics] = build(statics));
+	let key = '.';
+	for (let i=0; i<statics.length; i++) key += statics[i].length + ',' + statics[i];
+	const tpl = CACHE[key] || (CACHE[key] = build(statics));
+
 	// eslint-disable-next-line prefer-rest-params
 	return tpl(this, arguments);
 }
 
+const TAG_START = 60;
+const TAG_END = 62;
+const EQUALS = 61;
+const QUOTE_DOUBLE = 34;
+const QUOTE_SINGLE = 39;
+const TAB = 9;
+const NEWLINE = 10;
+const RETURN = 13;
+const SPACE = 32;
+const SLASH = 47;
+
+const MODE_WHITESPACE = 0;
+const MODE_TEXT = 1;
+const MODE_TAGNAME = 9;
+const MODE_ATTRIBUTE = 13;
+const MODE_SKIP = 47;
+
 /** Create a template function given strings from a tagged template. */
-function build(statics) {
-	let str = statics[0], i = 1;
-	while (i < statics.length) {
-		str += '$_h[' + i + ']' + statics[i++];
-	}
-	// Template string preprocessing:
-	// - replace <${Foo}> with <c c@=${Foo}>
-	// - replace <x /> with <x></x>
-	// - replace <${Foo}>a<//>b with <c c@=${Foo}>a</c>b
-	TEMPLATE.innerHTML = str
-		.replace(/<(?:(\/)\/|(\/?)(\$_h\[\d+\]))/g, '<$1$2c c@=$3')
-		.replace(/<([\w:-]+)(?:\s[^<>]*?)?(\/?)>/g, (str, name, a) => (
-			str.replace(/(?:'.*?'|".*?"|([A-Z]))/g, (s, c) => c ? ':::'+c : s) + (a ? '</'+name+'>' : '')
-		))
-		.trim();
-	return Function('h', '$_h', 'return ' + walk((TEMPLATE.content || TEMPLATE).firstChild));
-}
+const build = (statics) => {
+	let mode = MODE_WHITESPACE;
+	let out = 'return ';
+	let buffer = '';
+	let field = '';
+	let hasChildren = 0;
+	let props = '';
+	let propsClose = '';
+	let spreadClose = '';
+	let quote = 0;
+	let slash, charCode, inTag, propName, propHasValue;
 
-/** Traverse a DOM tree and serialize it to hyperscript function calls */
-function walk(n) {
-	if (n.nodeType != 1) {
-		if (n.nodeType == 3 && n.data) return field(n.data, ',');
-		return 'null';
-	}
-	let str = '',
-		nodeName = field(n.localName, str),
-		sub = '',
-		start = ',({';
-	for (let i=0; i<n.attributes.length; i++) {
-		const name = n.attributes[i].name;
-		const value = n.attributes[i].value;
-		if (name=='c@') {
-			nodeName = value;
+	const commit = () => {
+		if (!inTag) {
+			if (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g,''))) {
+				if (hasChildren++) out += ',';
+				out += field || stringify(buffer);
+			}
 		}
-		else if (name.substring(0,3)=='...') {
-			sub = '';
-			start = ',Object.assign({';
-			str += '},' + name.substring(3) + ',{';
+		else if (mode === MODE_TAGNAME) {
+			if (hasChildren++) out += ',';
+			out += 'h(' + (field || stringify(buffer));
+			mode = MODE_WHITESPACE;
 		}
-		else {
-			str += `${sub}"${name.replace(/:::(\w)/g, (s, i) => i.toUpperCase())}":${value ? field(value, '+') : true}`;
-			sub = ',';
+		else if (mode === MODE_ATTRIBUTE || (mode === MODE_WHITESPACE && buffer === '...')) {
+			if (mode === MODE_WHITESPACE) {
+				if (!spreadClose) {
+					spreadClose = ')';
+					if (!props) props = 'Object.assign({}';
+					else props = 'Object.assign(' + props;
+				}
+				props += propsClose + ',' + field;
+				propsClose = '';
+			}
+			else if (propName) {
+				if (!props) props += '{';
+				else props += ',' + (propsClose ? '' : '{');
+				propsClose = '}';
+				props += stringify(propName) + ':';
+				props += field || ((propHasValue || buffer) && stringify(buffer)) || 'true';
+				propName = '';
+			}
+			propHasValue = false;
 		}
-	}
-	str = 'h(' + nodeName + start + str + '})';
-	let child = n.firstChild;
-	while (child) {
-		str += ',' + walk(child);
-		child = child.nextSibling;
-	}
-	return str + ')';
-}
+		else if (mode === MODE_WHITESPACE) {
+			mode = MODE_ATTRIBUTE;
+			// we're in an attribute name
+			propName = buffer;
+			buffer = field = '';
+			commit();
+			mode = MODE_WHITESPACE;
+		}
+		buffer = field = '';
+	};
 
-/** Serialize a field to a String or reference for use in generated code. */
-function field(value, sep) {
-	const matches = value.match(reg);
-	let strValue = JSON.stringify(value);
-	if (matches != null) {
-		if (matches[0] === value) return value;
-		strValue = strValue.replace(reg, `"${sep}$1${sep}"`).replace(/"[+,]"/g, '');
-		if (sep == ',') strValue = `[${strValue}]`;
+	for (let i=0; i<statics.length; i++) {
+		if (i > 0) {
+			if (!inTag) commit();
+			field = `$[${i}]`;
+			commit();
+		}
+		
+		for (let j=0; j<statics[i].length; j++) {
+			charCode = statics[i].charCodeAt(j);
+
+			if (!inTag) {
+				if (charCode === TAG_START) {
+					// commit buffer
+					commit();
+					inTag = 1;
+					spreadClose = propsClose = props = '';
+					slash = propHasValue = false;
+					mode = MODE_TAGNAME;
+					continue;
+				}
+			}
+			else {
+				if (charCode === QUOTE_SINGLE || charCode === QUOTE_DOUBLE) {
+					if (quote === charCode) {
+						quote = 0;
+						continue;
+					}
+					if (quote === 0) {
+						quote = charCode;
+						continue;
+					}
+				}
+				
+				if (quote === 0) {
+					switch (charCode) {
+						case TAG_END:
+							commit();
+							if (mode !== MODE_SKIP) {
+								if (!props) {
+									out += ',null';
+								}
+								else {
+									out += ',' + props + propsClose + spreadClose;
+								}
+							}
+							if (slash) {
+								out += ')';
+							}
+							inTag = 0;
+							props = '';
+							mode = MODE_TEXT;
+							continue;
+						case EQUALS:
+							mode = MODE_ATTRIBUTE;
+							propHasValue = true;
+							propName = buffer;
+							buffer = '';
+							continue;
+						case SLASH:
+							if (!slash) {
+								slash = true;
+								// </foo>
+								if (mode === MODE_TAGNAME && !buffer.trim()) {
+									buffer = field = '';
+									mode = MODE_SKIP;
+								}
+							}
+							continue;
+						case TAB:
+						case NEWLINE:
+						case RETURN:
+						case SPACE:
+							// <a disabled>
+							commit();
+							mode = MODE_WHITESPACE;
+							continue;
+					}
+				}
+			}
+			buffer += statics[i].charAt(j);
+		}
 	}
-	return strValue;
-}
+	commit();
+	return Function('h', '$', out);
+};
