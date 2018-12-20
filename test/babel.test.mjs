@@ -151,4 +151,14 @@ describe('htm/babel', () => {
 			}).code
 		).toBe(`h("div",{"$$$_h_[1]":"$$$_h_[2]"},["$$$_h_[3]"]);`);
 	});
+
+	describe('main test suite', () => {
+		// Run all of the main tests against the Babel plugin:
+		const mod = require('fs').readFileSync(require('path').resolve(__dirname, 'index.test.mjs'), 'utf8').replace(/\\0/g, '\0');
+		const { code } = transform(mod.replace(/^\s*import\s*.+?\s*from\s+(['"]).*?\1[\s;]*$/im, 'const htm = function(){};'), {
+			babelrc: false,
+			plugins: [htmBabelPlugin]
+		});
+		eval(code);
+	});
 });
