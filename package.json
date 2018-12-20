@@ -11,7 +11,7 @@
     "build:preact": "cd src/integrations/preact && npm run build",
     "build:babel": "cd packages/babel-plugin-htm && npm run build",
     "test": "eslint src/**/*.mjs test/**/*.mjs && npm run build && jest test",
-    "release": "npm t && git commit -am \"$npm_package_version\" && git tag $npm_package_version && git push && git push --tags"
+    "release": "npm t && git commit -am \"$npm_package_version\" && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
   "files": [
     "dist",
