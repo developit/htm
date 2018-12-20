@@ -41,7 +41,7 @@ Here's some ergonomic features you get for free that aren't present in JSX:
 - **No transpiler necessary**
 - HTML's optional quotes: `<div class=foo>`
 - Component end-tags: `<${Footer}>footer content<//>`
-- Syntax highlighting and language support via the [literaly VSCode extension].
+- Syntax highlighting and language support via the [lit-html VSCode extension].
 
 ## Installation
 
