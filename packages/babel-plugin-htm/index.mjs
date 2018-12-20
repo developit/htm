@@ -71,6 +71,8 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 	}
 	
 	function propsNode(props) {
+		if (props == null) return t.nullLiteral();
+
 		return t.isNode(props) ? props : t.objectExpression(
 			Object.keys(props).map(key => {
 				let value = props[key];
@@ -85,7 +87,11 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 		);
 	}
 
-	function transform({ tag, props, children }, state) {
+	function transform(node, state) {
+		if (node === undefined) return t.identifier('undefined');
+		if (node == null) return t.nullLiteral();
+
+		const { tag, props, children } = node;
 		function childMapper(child) {
 			if (typeof child==='string') {
 				return stringValue(child);
