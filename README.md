@@ -11,22 +11,22 @@
 
 Develop with React/Preact directly in the browser, then compile `htm` away for production.
 
-It's built using [Tagged Templates] and the browser's HTML parser. Works in [all modern browsers].
+It uses standard JavaScript [Tagged Templates] and works in [all modern browsers].
 
 ## `htm` by the numbers:
 
-🐣 **700 bytes** when used directly in the browser
+🐣 **< 700 bytes** when used directly in the browser
 
-⚛️ **500 bytes** when used with Preact _(thanks gzip 🌈)_
+⚛️ **< 500 bytes** when used with Preact _(thanks gzip 🌈)_
 
 🏅 **0 bytes** when compiled using [babel-plugin-htm]
 
 
 ## Syntax: like JSX but also lit
 
-The syntax is inspired by [lit-html], but includes features familiar to anyone who works with JSX:
+The syntax you write when using HTM is as close as possible to JSX:
 
-- Rest spread: `<div ...${props}>`
+- Spread props: `<div ...${props}>`
 - Self-closing tags: `<div />`
 - Components: `<${Foo}>` _(where `Foo` is a component reference)_
 - Boolean attributes: `<div draggable />`
@@ -40,17 +40,8 @@ Here's some ergonomic features you get for free that aren't present in JSX:
 
 - **No transpiler necessary**
 - HTML's optional quotes: `<div class=foo>`
-- HTML's self-closing tags: `<img src=${url}>`
-- Optional end-tags: `<section><h1>this is the whole template!`
 - Component end-tags: `<${Footer}>footer content<//>`
-- Support for HTML comments: `<div><!-- don't delete this! --></div>`
-- Syntax highlighting and language support via the [lit-html VSCode extension].
-
-## Project Status
-
-The original goal for `htm` was to create a wrapper around Preact that felt natural for use untranspiled in the browser. I wanted to use Virtual DOM, but I wanted to eschew build tooling and use ES Modules directly.
-
-This meant giving up JSX, and the closest alternative was [Tagged Templates]. So, I wrote this library to patch up the differences between the two as much as possible. As it turns out, the technique is framework-agnostic, so it should work great with most Virtual DOM libraries.
+- Syntax highlighting and language support via the [literaly VSCode extension].
 
 ## Installation
 
@@ -78,12 +69,12 @@ import { html, render } from 'https://unpkg.com/htm/preact/standalone.mjs'
 
 Since `htm` is a generic library, we need to tell it what to "compile" our templates to.
 
-The target should be a function of the form `h(tag, props, ...children)` _([hyperscript])_, and can return anything.
+The target should be a function of the form `h(type, props, ...children)` _([hyperscript])_, and can return anything.
 
 ```js
 // this is our hyperscript function. for now, it just returns a description object.
-function h(tag, props, ...children) {
-  return { tag, props, children };
+function h(type, props, ...children) {
+  return { type, props, children };
 }
 ```
 
@@ -102,15 +93,15 @@ Here's the whole thing for clarity:
 ```js
 import htm from 'htm';
 
-function h(tag, props, ...children) {
-  return { tag, props, children };
+function h(type, props, ...children) {
+  return { type, props, children };
 }
 
 const html = htm.bind(h);
 
 console.log( html`<h1 id=hello>Hello world!</h1>` );
 // {
-//   tag: 'h1',
+//   type: 'h1',
 //   props: { id: 'hello' },
 //   children: ['Hello world!']
 // }
@@ -159,11 +150,13 @@ It's a single HTML file, and there's no build or tooling. You can edit it with n
 </html>
 ```
 
-**Here's a [live version](https://htm-demo-preact.glitch.me/).**
+[⚡️ **See live version** ▶](https://htm-demo-preact.glitch.me/)
 
-**Here is a [Sandbox](https://codesandbox.io/s/x7pmq32j6q) you can play with**
+[⚡️ **Try this on CodeSandbox** ▶](https://codesandbox.io/s/x7pmq32j6q)
 
-How nifty is that?  Notice there's only one import - here we're using the prebuilt Preact integration since it's easier to import and a bit smaller.
+How nifty is that?
+
+Notice there's only one import - here we're using the prebuilt Preact integration since it's easier to import and a bit smaller.
 
 The same example works fine without the prebuilt version, just using two imports:
 
@@ -192,7 +185,7 @@ console.log( html`<h1 id=hello>Hello world!</h1>` );
 // '<h1 id="hello">Hello world!</h1>'
 ```
 
-**Webpack configuration via [jsxobj]:** ([details here](https://webpack.js.org/configuration/configuration-languages/#babel-and-jsx))
+**Webpack configuration via [jsxobj]:** ([details here](https://webpack.js.org/configuration/configuration-languages/#babel-and-jsx)) _(never do this)_
 
 ```js
 import htm from 'htm';
@@ -214,9 +207,17 @@ console.log(html`
 // }
 ```
 
+## Project Status
+
+The original goal for `htm` was to create a wrapper around Preact that felt natural for use untranspiled in the browser. I wanted to use Virtual DOM, but I wanted to eschew build tooling and use ES Modules directly.
+
+This meant giving up JSX, and the closest alternative was [Tagged Templates]. So, I wrote this library to patch up the differences between the two as much as possible. As it turns out, the technique is framework-agnostic, so it should work great with most Virtual DOM libraries.
+
+As of 2.0.0, `htm` is stable, well-tested and ready for production use.
+
 [Tagged Templates]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates
 [lit-html]: https://github.com/Polymer/lit-html
-[babel-plugin-htm]: https://www.npmjs.com/package/babel-plugin-htm
+[babel-plugin-htm]: https://github.com/developit/htm/tree/master/packages/babel-plugin-htm
 [lit-html VSCode extension]: https://marketplace.visualstudio.com/items?itemName=bierner.lit-html
 [vhtml]: https://github.com/developit/vhtml
 [jsxobj]: https://github.com/developit/jsxobj

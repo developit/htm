@@ -29,6 +29,33 @@ React.createElement("div", { id: "foo" }, "hello ", you)
 The target "hyperscript" function to compile elements to (see [Babel docs]).
 Defaults to: `"h"`.
 
+### `tag=html`
+
+By default, `babel-plugin-htm` will process all Tagged Templates with a tag function named `html`. To use a different name, use the `tag` option in your Babel configuration:
+
+```js
+{"plugins":[
+  ["babel-plugin-htm", {
+    "tag": "myCustomHtmlFunction"
+  }]
+]}
+```
+
+### `useBuiltIns=false`
+
+`babel-plugin-htm` transforms prop spreads (`<a ...${b}>`) into `Object.assign()` calls. For browser support reasons, Babel's standard `_extends` helper is used by default. To use native `Object.assign` directly, pass `{useBuiltIns:true}`.
+
+### `variableArity=true`
+
+By default, `babel-plugin-htm` transpiles to the same output as JSX would, which assumes a target function of the form `h(type, props, ...children)`. If, for the purposes of optimization or simplification, you would like all calls to `h()` to be passed exactly 3 arguments, specify `{variableArity:false}` in your Babel config:
+
+```js
+html`<div />`  // h('div', null, [])
+html`<div a />`  // h('div', { a: true }, [])
+html`<div>b</div>`  // h('div', null, ['b'])
+html`<div a>b</div>`  // h('div', { a: true }, ['b'])
+```
+
 ### `pragma=false` _(experimental)_
 
 Setting `pragma` to `false` changes the output to be plain objects instead of `h()` function calls:
