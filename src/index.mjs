@@ -46,7 +46,6 @@ const build = (statics) => {
 	let mode = MODE_TEXT;
 	let out = 'return ';
 	let buffer = '';
-	let field = '';
 	let childClose = '';
 	let props = '';
 	let propsClose = '';
@@ -54,7 +53,7 @@ const build = (statics) => {
 	let quote = 0;
 	let slash, charCode, propName, propHasValue;
 
-	const commit = () => {
+	const commit = field => {
 		if (mode === MODE_TEXT) {
 			if (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g,''))) {
 				out += childClose + (field || stringify(buffer));
@@ -71,7 +70,7 @@ const build = (statics) => {
 				if (!spreadClose) {
 					props = 'Object.assign(' + (props || '{}');
 				}
-				props += propsClose + ',' + field;
+				props += propsClose + ',' + (field || '');
 				propsClose = '';
 				spreadClose = ')';
 			}
@@ -89,18 +88,17 @@ const build = (statics) => {
 			mode = MODE_ATTRIBUTE;
 			// we're in an attribute name
 			propName = buffer;
-			buffer = field = '';
+			buffer = '';
 			commit();
 			mode = MODE_WHITESPACE;
 		}
-		buffer = field = '';
+		buffer = '';
 	};
 
 	for (let i=0; i<statics.length; i++) {
 		if (i > 0) {
 			if (mode === MODE_TEXT) commit();
-			field = `$[${i}]`;
-			commit();
+			commit(`$[${i}]`);
 		}
 		
 		for (let j=0; j<statics[i].length; j++) {
@@ -157,7 +155,7 @@ const build = (statics) => {
 								slash = true;
 								// </foo>
 								if (mode === MODE_TAGNAME && !buffer.trim()) {
-									buffer = field = '';
+									buffer = '';
 									mode = MODE_SKIP;
 								}
 							}
