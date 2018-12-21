@@ -69,12 +69,11 @@ const build = (statics) => {
 		else if (mode === MODE_ATTRIBUTE || (mode === MODE_WHITESPACE && buffer === '...')) {
 			if (mode === MODE_WHITESPACE) {
 				if (!spreadClose) {
-					spreadClose = ')';
-					if (!props) props = 'Object.assign({}';
-					else props = 'Object.assign(' + props;
+					props = 'Object.assign(' + (props || '{}');
 				}
 				props += propsClose + ',' + field;
 				propsClose = '';
+				spreadClose = ')';
 			}
 			else if (propName) {
 				if (!props) props += '{';
