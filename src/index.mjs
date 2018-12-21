@@ -47,7 +47,7 @@ const build = (statics) => {
 	let out = 'return ';
 	let buffer = '';
 	let field = '';
-	let hasChildren = 0;
+	let childClose = '';
 	let props = '';
 	let propsClose = '';
 	let spreadClose = '';
@@ -57,13 +57,13 @@ const build = (statics) => {
 	const commit = () => {
 		if (mode === MODE_TEXT) {
 			if (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g,''))) {
-				if (hasChildren++) out += ',';
-				out += field || stringify(buffer);
+				out += childClose + (field || stringify(buffer));
+				childClose = ',';
 			}
 		}
 		else if (mode === MODE_TAGNAME) {
-			if (hasChildren++) out += ',';
-			out += 'h(' + (field || stringify(buffer));
+			out += childClose + 'h(' + (field || stringify(buffer));
+			childClose = ',';
 			mode = MODE_WHITESPACE;
 		}
 		else if (mode === MODE_ATTRIBUTE || (mode === MODE_WHITESPACE && buffer === '...')) {
