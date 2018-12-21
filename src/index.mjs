@@ -52,7 +52,8 @@ const build = (statics) => {
 	let propsClose = '';
 	let spreadClose = '';
 	let quote = 0;
-	let charCode, propName, propHasValue;
+	let fallbackPropValue = true;
+	let charCode, propName;
 
 	const commit = field => {
 		if (mode === MODE_TEXT) {
@@ -66,32 +67,32 @@ const build = (statics) => {
 			childClose = ',';
 			mode = MODE_WHITESPACE;
 		}
-		else if (mode === MODE_ATTRIBUTE || (mode === MODE_WHITESPACE && buffer === '...')) {
-			if (mode === MODE_WHITESPACE) {
-				if (!spreadClose) {
-					props = 'Object.assign(' + (props || '{}');
-				}
-				props += propsClose + ',' + (field || '');
-				propsClose = '';
-				spreadClose = ')';
+		else if (mode === MODE_WHITESPACE && buffer === '...') {
+			if (!spreadClose) {
+				props = 'Object.assign(' + (props || '{}');
 			}
-			else if (propName) {
-				if (!props) props += '{';
-				else props += ',' + (propsClose ? '' : '{');
+			props += propsClose + ',' + (field || '');
+			propsClose = '';
+			spreadClose = ')';
+		}
+		else if (mode === MODE_ATTRIBUTE || mode === MODE_WHITESPACE) {
+			if (mode === MODE_WHITESPACE) {
+				propName = buffer;
+				buffer = '';
+			}
+			
+			if (propName) {
+				if (!props) {
+					props += '{';
+				}
+				else {
+					props += ',' + (propsClose ? '' : '{');
+				}
 				propsClose = '}';
-				props += stringify(propName) + ':';
-				props += field || ((propHasValue || buffer) && stringify(buffer)) || 'true';
+				props += stringify(propName) + ':' + (field || stringify(buffer || fallbackPropValue));
 				propName = '';
 			}
-			propHasValue = false;
-		}
-		else if (mode === MODE_WHITESPACE) {
-			mode = MODE_ATTRIBUTE;
-			// we're in an attribute name
-			propName = buffer;
-			buffer = '';
-			commit();
-			mode = MODE_WHITESPACE;
+			fallbackPropValue = true;
 		}
 		buffer = '';
 	};
@@ -110,7 +111,6 @@ const build = (statics) => {
 					// commit buffer
 					commit();
 					tagClose = spreadClose = propsClose = props = '';
-					propHasValue = false;
 					mode = MODE_TAGNAME;
 					continue;
 				}
@@ -144,9 +144,8 @@ const build = (statics) => {
 							continue;
 						case EQUALS:
 							mode = MODE_ATTRIBUTE;
-							propHasValue = true;
 							propName = buffer;
-							buffer = '';
+							buffer = fallbackPropValue = '';
 							continue;
 						case SLASH:
 							if (!tagClose) {
