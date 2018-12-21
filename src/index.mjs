@@ -46,12 +46,13 @@ const build = (statics) => {
 	let mode = MODE_TEXT;
 	let out = 'return ';
 	let buffer = '';
+	let tagClose = '';
 	let childClose = '';
 	let props = '';
 	let propsClose = '';
 	let spreadClose = '';
 	let quote = 0;
-	let slash, charCode, propName, propHasValue;
+	let charCode, propName, propHasValue;
 
 	const commit = field => {
 		if (mode === MODE_TEXT) {
@@ -108,8 +109,8 @@ const build = (statics) => {
 				if (charCode === TAG_START) {
 					// commit buffer
 					commit();
-					spreadClose = propsClose = props = '';
-					slash = propHasValue = false;
+					tagClose = spreadClose = propsClose = props = '';
+					propHasValue = false;
 					mode = MODE_TAGNAME;
 					continue;
 				}
@@ -138,10 +139,7 @@ const build = (statics) => {
 									out += ',' + props + propsClose + spreadClose;
 								}
 							}
-							if (slash) {
-								out += ')';
-							}
-							props = '';
+							out += tagClose;
 							mode = MODE_TEXT;
 							continue;
 						case EQUALS:
@@ -151,8 +149,8 @@ const build = (statics) => {
 							buffer = '';
 							continue;
 						case SLASH:
-							if (!slash) {
-								slash = true;
+							if (!tagClose) {
+								tagClose = ')';
 								// </foo>
 								if (mode === MODE_TAGNAME && !buffer.trim()) {
 									buffer = '';
