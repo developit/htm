@@ -35,15 +35,15 @@ const RETURN = 13;
 const SPACE = 32;
 const SLASH = 47;
 
-const MODE_WHITESPACE = 0;
-const MODE_TEXT = 1;
+const MODE_TEXT = 0;
+const MODE_WHITESPACE = 1;
 const MODE_TAGNAME = 9;
 const MODE_ATTRIBUTE = 13;
 const MODE_SKIP = 47;
 
 /** Create a template function given strings from a tagged template. */
 const build = (statics) => {
-	let mode = MODE_WHITESPACE;
+	let mode = MODE_TEXT;
 	let out = 'return ';
 	let buffer = '';
 	let field = '';
@@ -52,10 +52,10 @@ const build = (statics) => {
 	let propsClose = '';
 	let spreadClose = '';
 	let quote = 0;
-	let slash, charCode, inTag, propName, propHasValue;
+	let slash, charCode, propName, propHasValue;
 
 	const commit = () => {
-		if (!inTag) {
+		if (mode === MODE_TEXT) {
 			if (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g,''))) {
 				if (hasChildren++) out += ',';
 				out += field || stringify(buffer);
@@ -99,7 +99,7 @@ const build = (statics) => {
 
 	for (let i=0; i<statics.length; i++) {
 		if (i > 0) {
-			if (!inTag) commit();
+			if (mode === MODE_TEXT) commit();
 			field = `$[${i}]`;
 			commit();
 		}
@@ -107,11 +107,10 @@ const build = (statics) => {
 		for (let j=0; j<statics[i].length; j++) {
 			charCode = statics[i].charCodeAt(j);
 
-			if (!inTag) {
+			if (mode === MODE_TEXT) {
 				if (charCode === TAG_START) {
 					// commit buffer
 					commit();
-					inTag = 1;
 					spreadClose = propsClose = props = '';
 					slash = propHasValue = false;
 					mode = MODE_TAGNAME;
@@ -145,7 +144,6 @@ const build = (statics) => {
 							if (slash) {
 								out += ')';
 							}
-							inTag = 0;
 							props = '';
 							mode = MODE_TEXT;
 							continue;
