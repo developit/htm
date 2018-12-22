@@ -80,16 +80,9 @@ const build = (statics) => {
 				propName = buffer;
 				buffer = '';
 			}
-			
 			if (propName) {
-				if (!props) {
-					props += '{';
-				}
-				else {
-					props += ',' + (propsClose ? '' : '{');
-				}
+				props += (props ? ',' + (propsClose ? '' : '{') : '{') + stringify(propName) + ':' + (field || stringify(buffer || fallbackPropValue));
 				propsClose = '}';
-				props += stringify(propName) + ':' + (field || stringify(buffer || fallbackPropValue));
 				propName = '';
 			}
 			fallbackPropValue = true;
@@ -132,12 +125,7 @@ const build = (statics) => {
 						case TAG_END:
 							commit();
 							if (mode !== MODE_SKIP) {
-								if (!props) {
-									out += ',null';
-								}
-								else {
-									out += ',' + props + propsClose + spreadClose;
-								}
+								out += ',' + (props + propsClose + spreadClose || null);
 							}
 							out += tagClose;
 							mode = MODE_TEXT;
