@@ -98,7 +98,7 @@ const build = (statics) => {
 	};
 
 	for (let i=0; i<statics.length; i++) {
-		if (i > 0) {
+		if (i) {
 			if (mode === MODE_TEXT) commit();
 			commit(`$[${i}]`);
 		}
