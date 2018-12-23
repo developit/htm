@@ -29,7 +29,7 @@ describe('performance', () => {
 			return html(
 				statics.concat(['count:', count]),
 				`id${count}`,
-				html(['<li data-id="','">', '</li>'], 'i'+count, 'some text #'+count),
+				html`<li data-id="${'i'+count}">${'some text #'+count}</li>`,
 				Foo, Foo, Foo
 			);
 		}
@@ -50,18 +50,18 @@ describe('performance', () => {
 	test('usage', () => {
 		const results = [];
 		const Foo = ({ name }) => html`<div class="foo">${name}</div>`;
-		const statics = [
-			'\n<div id=app data-loading="true">\n\t<h1>Hello World</h1>\n\t<ul class="items" id=', '>\n\t',
-			'\n\t</ul>\n\t\n\t<', ' name="foo" />\n\t<', ' name="other">content</', '>\n\n</div>'
-		];
 		let count = 0;
 		function go(count) {
-			return html(
-				statics,
-				`id${count}`,
-				html(['<li data-id="','">', '</li>'], 'i'+count, 'some text #'+count),
-				Foo, Foo, Foo
-			);
+			return html`
+				<div id=app data-loading="true">
+					<h1>Hello World</h1>
+					<ul class="items" id=${'id' + count}>
+						${html`<li data-id="${'i' + count}">${'some text #' + count}</li>`}
+					</ul>
+					<${Foo} name="foo" />
+					<${Foo} name="other">content<//>
+				</div>
+			`;
 		}
 		let now = performance.now();
 		const start = now;
