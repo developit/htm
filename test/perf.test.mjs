@@ -20,14 +20,14 @@ describe('performance', () => {
 	test('creation', () => {
 		const results = [];
 		const Foo = ({ name }) => html`<div class="foo">${name}</div>`;
-		const statics = [
-			'\n<div id=app data-loading="true">\n\t<h1>Hello World</h1>\n\t<ul class="items" id=', '>\n\t',
-			'\n\t</ul>\n\t\n\t<', ' name="foo" />\n\t<', ' name="other">content</', '>\n\n</div>'
-		];
 		let count = 0;
 		function go(count) {
+			const statics = [
+				'\n<div id=app'+(++count)+' data-loading="true">\n\t<h1>Hello World</h1>\n\t<ul class="items" id=', '>\n\t',
+				'\n\t</ul>\n\t\n\t<', ' name="foo" />\n\t<', ' name="other">content</', '>\n\n</div>'
+			];
 			return html(
-				statics.concat(['count:', count]),
+				statics,
 				`id${count}`,
 				html(['<li data-id="','">', '</li>'], 'i'+count, 'some text #'+count),
 				Foo, Foo, Foo
