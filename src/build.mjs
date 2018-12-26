@@ -41,7 +41,7 @@ export const evaluate = (h, current, fields) => {
 		else if (code === CHILD_RECURSE) {
 			args.push(evaluate(h, value, fields));
 		}
-		else if (code === CHILD_APPEND) {
+		else {
 			args.push(value);
 		}
 	}
@@ -56,7 +56,8 @@ export const build = (statics) => {
 	let buffer = '';
 	let quote = -1;
 	let fallbackPropValue = true;
-	let charCode, propName, current;
+	let charCode, propName;
+	let current = [];
 
 	const commit = field => {
 		if (mode === MODE_TEXT) {
@@ -120,12 +121,10 @@ export const build = (statics) => {
 
 							if (!mode) {
 								if (current.length === 1) {
-									current = current[0] || current;
+									current = current[0];
 								}
-								if (current[0]) {
-									current[0].push(0, current, CHILD_RECURSE);
-								}
-								current = current[0] || current;
+								current[0].push(0, current, CHILD_RECURSE);
+								current = current[0];
 							}
 							mode = MODE_TEXT;
 							continue;
@@ -157,5 +156,5 @@ export const build = (statics) => {
 		}
 	}
 	commit();
-	return current;
+	return current[1];
 };
