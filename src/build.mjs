@@ -92,9 +92,9 @@ export const build = (statics) => {
 				current = [current];
 				mode = MODE_TAGNAME;
 			}
-			else if (mode !== MODE_TEXT && (idx = '\'">=/\t\n\r '.indexOf(char)) >= 0 && char.indexOf(quote) >= 0) {
+			else if (mode !== MODE_TEXT && (char === quote || !quote) && (idx = '\'">=/\t\n\r '.indexOf(char)) >= 0) {
 				if (idx < 2) {
-					// char is a quote && (quote === char || quote is empty)
+					// char === '"' || char === "'"
 					quote = quote ? '' : char;
 				}
 				else if (idx === 2) {
