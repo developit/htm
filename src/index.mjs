@@ -24,22 +24,11 @@ export default function html(statics) {
 	return tpl(this, arguments);
 }
 
-const TAG_START = 60;
-const TAG_END = 62;
-const EQUALS = 61;
-const QUOTE_DOUBLE = 34;
-const QUOTE_SINGLE = 39;
-const TAB = 9;
-const NEWLINE = 10;
-const RETURN = 13;
-const SPACE = 32;
-const SLASH = 47;
-
-const MODE_TEXT = 0;
-const MODE_WHITESPACE = 1;
-const MODE_TAGNAME = 9;
-const MODE_ATTRIBUTE = 13;
-const MODE_SKIP = 47;
+const MODE_SKIP = 0;
+const MODE_TEXT = 1;
+const MODE_WHITESPACE = 3;
+const MODE_TAGNAME = 4;
+const MODE_ATTRIBUTE = 5;
 
 /** Create a template function given strings from a tagged template. */
 const build = (statics) => {
@@ -51,9 +40,9 @@ const build = (statics) => {
 	let props = '';
 	let propsClose = '';
 	let spreadClose = '';
-	let quote = 0;
+	let quote = '';
 	let fallbackPropValue = true;
-	let charCode, propName;
+	let char, propName, idx;
 
 	const commit = field => {
 		if (mode === MODE_TEXT) {
@@ -92,71 +81,63 @@ const build = (statics) => {
 
 	for (let i=0; i<statics.length; i++) {
 		if (i) {
-			if (mode === MODE_TEXT) commit();
+			if (mode === MODE_TEXT) {
+				commit();
+			}
 			commit(`$[${i}]`);
 		}
 		
 		for (let j=0; j<statics[i].length; j++) {
-			charCode = statics[i].charCodeAt(j);
+			char = statics[i][j];
 
-			if (mode === MODE_TEXT) {
-				if (charCode === TAG_START) {
-					// commit buffer
+			if (mode === MODE_TEXT && char === '<') {
+				// commit buffer
+				commit();
+				tagClose = spreadClose = propsClose = props = '';
+				mode = MODE_TAGNAME;
+			}
+			else if (mode !== MODE_TEXT && (char === quote || !quote) && (idx = '\'">=/\t\n\r '.indexOf(char)) >= 0) {
+				if (idx < 2) {
+					// char === '"' || char === "'"
+					quote = quote ? '' : char;
+				}
+				else if (idx === 2) {
+					// char === '>'
 					commit();
-					tagClose = spreadClose = propsClose = props = '';
-					mode = MODE_TAGNAME;
-					continue;
+					if (mode !== MODE_SKIP) {
+						out += ',' + (props + propsClose + spreadClose || null);
+					}
+					out += tagClose;
+					mode = MODE_TEXT;
+					commit();
+				}
+				else if (idx === 3) {
+					// char === '='
+					mode = MODE_ATTRIBUTE;
+					propName = buffer;
+					buffer = fallbackPropValue = '';
+				}
+				else if (idx === 4) {
+					// char === '/'
+					if (!tagClose) {
+						tagClose = ')';
+						// </foo>
+						if (mode === MODE_TAGNAME && !buffer.trim()) {
+							buffer = '';
+							mode = MODE_SKIP;
+						}
+					}
+				}
+				else {
+					// char is a whitespace
+					// <a disabled>
+					commit();
+					mode = MODE_WHITESPACE;
 				}
 			}
 			else {
-				if (charCode === QUOTE_SINGLE || charCode === QUOTE_DOUBLE) {
-					if (quote === charCode) {
-						quote = 0;
-						continue;
-					}
-					if (quote === 0) {
-						quote = charCode;
-						continue;
-					}
-				}
-				
-				if (quote === 0) {
-					switch (charCode) {
-						case TAG_END:
-							commit();
-							if (mode !== MODE_SKIP) {
-								out += ',' + (props + propsClose + spreadClose || null);
-							}
-							out += tagClose;
-							mode = MODE_TEXT;
-							continue;
-						case EQUALS:
-							mode = MODE_ATTRIBUTE;
-							propName = buffer;
-							buffer = fallbackPropValue = '';
-							continue;
-						case SLASH:
-							if (!tagClose) {
-								tagClose = ')';
-								// </foo>
-								if (mode === MODE_TAGNAME && !buffer.trim()) {
-									buffer = '';
-									mode = MODE_SKIP;
-								}
-							}
-							continue;
-						case TAB:
-						case NEWLINE:
-						case RETURN:
-						case SPACE:
-							// <a disabled>
-							commit();
-							mode = MODE_WHITESPACE;
-							continue;
-					}
-				}
+				buffer += char;
 			}
-			buffer += statics[i].charAt(j);
 		}
 	}
 	commit();
