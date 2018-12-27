@@ -166,7 +166,10 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 					const expr = path.node.quasi.expressions;
 
 					const tree = treeify(statics, expr);
-					path.replaceWith(transform(tree, state));
+					const node = !Array.isArray(tree)
+						? transform(tree, state)
+						: t.arrayExpression(tree.map(root => transform(root, state)));
+					path.replaceWith(node);
 				}
 			}
 		}

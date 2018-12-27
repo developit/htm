@@ -4,17 +4,6 @@ const PROPS_ASSIGN = 2;
 const CHILD_RECURSE = 3;
 const CHILD_APPEND = 4;
 
-const TAG_START = 60;
-const TAG_END = 62;
-const EQUALS = 61;
-const QUOTE_DOUBLE = 34;
-const QUOTE_SINGLE = 39;
-const TAB = 9;
-const NEWLINE = 10;
-const RETURN = 13;
-const SPACE = 32;
-const SLASH = 47;
-
 const MODE_SLASH = 0;
 const MODE_TEXT = 1;
 const MODE_WHITESPACE = 3;
@@ -41,7 +30,7 @@ export const evaluate = (h, current, fields) => {
 		else if (code === CHILD_RECURSE) {
 			args.push(evaluate(h, value, fields));
 		}
-		else {
+		else { 	// code === CHILD_APPEND
 			args.push(value);
 		}
 	}
@@ -54,10 +43,10 @@ export const evaluate = (h, current, fields) => {
 export const build = (statics) => {
 	let mode = MODE_TEXT;
 	let buffer = '';
-	let quote = -1;
+	let quote = '';
 	let fallbackPropValue = true;
-	let charCode, propName;
 	let current = [];
+	let char, propName;
 
 	const commit = field => {
 		if (mode === MODE_TEXT) {
@@ -72,7 +61,7 @@ export const build = (statics) => {
 		else if (mode === MODE_WHITESPACE && buffer === '...') {
 			current.push(field, 0, PROPS_ASSIGN);
 		}
-		else if (mode === MODE_ATTRIBUTE || mode === MODE_WHITESPACE) {
+		else if (mode) {	// mode === MODE_ATTRIBUTE || mode === MODE_WHITESPACE
 			if (mode === MODE_WHITESPACE) {
 				propName = buffer;
 				buffer = '';
@@ -88,15 +77,17 @@ export const build = (statics) => {
 
 	for (let i=0; i<statics.length; i++) {
 		if (i) {
-			if (mode === MODE_TEXT) commit();
+			if (mode === MODE_TEXT) {
+				commit();
+			}
 			commit(i);
 		}
 		
 		for (let j=0; j<statics[i].length; j++) {
-			charCode = statics[i].charCodeAt(j);
+			char = statics[i].charAt(j);
 
 			if (mode === MODE_TEXT) {
-				if (charCode === TAG_START) {
+				if (char === '<') {
 					// commit buffer
 					commit();
 					current = [current];
@@ -104,57 +95,54 @@ export const build = (statics) => {
 					continue;
 				}
 			}
-			else {
-				if (quote === charCode) {
-					quote = -1;
-					continue;
-				}
-				
-				if (quote < 0) {
-					switch (charCode) {
-						case QUOTE_SINGLE:
-						case QUOTE_DOUBLE:
-							quote = charCode;
-							continue;
-						case TAG_END:
-							commit();
+			else if (quote === char) {
+				quote = '';
+				continue;
+			}
+			else if (!quote) {
+				switch (char) {
+					case '"':
+					case "'":
+						quote = char;
+						continue;
+					case '>':
+						commit();
 
-							if (!mode) {
-								if (current.length === 1) {
-									current = current[0];
-								}
-								current[0].push(0, current, CHILD_RECURSE);
+						if (!mode) {
+							if (current.length === 1) {
 								current = current[0];
 							}
-							mode = MODE_TEXT;
-							continue;
-						case EQUALS:
-							if (mode) {
-								mode = MODE_ATTRIBUTE;
-								propName = buffer;
-								buffer = fallbackPropValue = '';
-							}
-							continue;
-						case SLASH:
+							current[0].push(0, current, CHILD_RECURSE);
+							current = current[0];
+						}
+						mode = MODE_TEXT;
+						continue;
+					case '=':
+						if (mode) {
+							mode = MODE_ATTRIBUTE;
+							propName = buffer;
+							buffer = fallbackPropValue = '';
+						}
+						continue;
+					case '/':
+						commit();
+						mode = MODE_SLASH;
+						continue;
+					case '\t':
+					case '\r':
+					case '\n':
+					case ' ':
+						if (mode) {
+							// <a disabled>
 							commit();
-							mode = MODE_SLASH;
-							continue;
-						case TAB:
-						case NEWLINE:
-						case RETURN:
-						case SPACE:
-							if (mode) {
-								// <a disabled>
-								commit();
-								mode = MODE_WHITESPACE;
-							}
-							continue;
-					}
+							mode = MODE_WHITESPACE;
+						}
+						continue;
 				}
 			}
-			buffer += statics[i].charAt(j);
+			buffer += char;
 		}
 	}
 	commit();
-	return current[1];
+	return current;
 };

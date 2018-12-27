@@ -17,9 +17,15 @@ const CACHE = {};
 
 export default function html(statics) {
 	let key = '.';
-	for (let i=0; i<statics.length; i++) key += statics[i].length + ',' + statics[i];
+	for (let i=0; i<statics.length; i++) {
+		key += statics[i].length + ',' + statics[i];
+	}
 	const tpl = CACHE[key] || (CACHE[key] = build(statics));
 
-	// eslint-disable-next-line prefer-rest-params
-	return tpl && evaluate(this, tpl, arguments);
+	const res = [];
+	for (let i=1; i<tpl.length; i+=3) {
+		// eslint-disable-next-line prefer-rest-params
+		res.push(evaluate(this, tpl[i], arguments));
+	}
+	return res.length > 1 ? res : res[0];
 }
