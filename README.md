@@ -41,7 +41,7 @@ Here's some ergonomic features you get for free that aren't present in JSX:
 - **No transpiler necessary**
 - HTML's optional quotes: `<div class=foo>`
 - Component end-tags: `<${Footer}>footer content<//>`
-- Syntax highlighting and language support via the [lit-html VSCode extension].
+- Syntax highlighting and language support via the [lit-html VSCode extension] and [vim-jsx-pretty plugin].
 
 ## Installation
 
@@ -219,6 +219,7 @@ As of 2.0.0, `htm` is stable, well-tested and ready for production use.
 [lit-html]: https://github.com/Polymer/lit-html
 [babel-plugin-htm]: https://github.com/developit/htm/tree/master/packages/babel-plugin-htm
 [lit-html VSCode extension]: https://marketplace.visualstudio.com/items?itemName=bierner.lit-html
+[vim-jsx-pretty plugin]: https://github.com/MaxMEllon/vim-jsx-pretty
 [vhtml]: https://github.com/developit/vhtml
 [jsxobj]: https://github.com/developit/jsxobj
 [hyperscript]: https://github.com/hyperhype/hyperscript
