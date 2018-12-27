@@ -46,7 +46,7 @@ export const build = (statics) => {
 	let quote = '';
 	let fallbackPropValue = true;
 	let current = [];
-	let char, propName;
+	let char, propName, idx;
 
 	const commit = field => {
 		if (mode === MODE_TEXT) {
@@ -86,61 +86,56 @@ export const build = (statics) => {
 		for (let j=0; j<statics[i].length; j++) {
 			char = statics[i].charAt(j);
 
-			if (mode === MODE_TEXT) {
-				if (char === '<') {
-					// commit buffer
-					commit();
-					current = [current];
-					mode = MODE_TAGNAME;
-					continue;
+			if (mode === MODE_TEXT && char === '<') {
+				// commit buffer
+				commit();
+				current = [current];
+				mode = MODE_TAGNAME;
+			}
+			else if (mode !== MODE_TEXT && (idx = '\'">=/\t\n\r '.indexOf(char)) >= 0 && char.indexOf(quote) >= 0) {
+				if (idx < 2) {
+					// char is a quote && (quote === char || quote is empty)
+					quote = quote ? '' : char;
 				}
-			}
-			else if (quote === char) {
-				quote = '';
-				continue;
-			}
-			else if (!quote) {
-				switch (char) {
-					case '"':
-					case "'":
-						quote = char;
-						continue;
-					case '>':
-						commit();
+				else if (idx === 2) {
+					// char === '>'
+					commit();
 
-						if (!mode) {
-							if (current.length === 1) {
-								current = current[0];
-							}
-							current[0].push(0, current, CHILD_RECURSE);
+					if (!mode) {
+						// encountered a slash in current tag
+												
+						if (current.length === 1) {
+							// no tag name or attributes before the slash
 							current = current[0];
 						}
-						mode = MODE_TEXT;
-						continue;
-					case '=':
-						if (mode) {
-							mode = MODE_ATTRIBUTE;
-							propName = buffer;
-							buffer = fallbackPropValue = '';
-						}
-						continue;
-					case '/':
-						commit();
-						mode = MODE_SLASH;
-						continue;
-					case '\t':
-					case '\r':
-					case '\n':
-					case ' ':
-						if (mode) {
-							// <a disabled>
-							commit();
-							mode = MODE_WHITESPACE;
-						}
-						continue;
+						current[0].push(0, current, CHILD_RECURSE);
+						current = current[0];
+					}
+					mode = MODE_TEXT;
+				}
+				else if (idx === 3) {
+					// char === '='
+					if (mode) {
+						mode = MODE_ATTRIBUTE;
+						propName = buffer;
+						buffer = fallbackPropValue = '';
+					}
+				}
+				else if (idx === 4) {
+					// char === '/'
+					commit();
+					mode = MODE_SLASH;
+				}
+				else if (mode) {
+					// char is a whitespace
+					// <a disabled>
+					commit();
+					mode = MODE_WHITESPACE;
 				}
 			}
-			buffer += char;
+			else {
+				buffer += char;
+			}
 		}
 	}
 	commit();
