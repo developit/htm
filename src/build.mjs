@@ -84,7 +84,7 @@ export const build = (statics) => {
 		}
 		
 		for (let j=0; j<statics[i].length; j++) {
-			char = statics[i].charAt(j);
+			char = statics[i][j];
 
 			if (mode === MODE_TEXT && char === '<') {
 				// commit buffer
