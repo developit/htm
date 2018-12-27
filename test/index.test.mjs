@@ -27,6 +27,14 @@ describe('htm', () => {
 		expect(html`<span />`).toEqual({ tag: 'span', props: null, children: [] });
 	});
 
+	test('multiple root elements', () => {
+		expect(html`<a /><b></b><c><//>`).toEqual([
+			{ tag: 'a', props: null, children: [] },
+			{ tag: 'b', props: null, children: [] },
+			{ tag: 'c', props: null, children: [] }
+		]);
+	});
+	
 	test('single dynamic tag name', () => {
 		expect(html`<${'foo'} />`).toEqual({ tag: 'foo', props: null, children: [] });
 		function Foo () {}
