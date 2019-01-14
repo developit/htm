@@ -56,7 +56,25 @@ describe('babel-plugin-transform-jsx-to-tagged-templates', () => {
 				compile('(<div a="a" b="bb" c d />);')
 			).toBe('html`<div a="a" b="bb" c d/>`;');
 		});
-
+		
+		test('double quote values with single quotes', () => {
+			expect(
+				compile(`(<div a="'b'" />);`)
+			).toBe(`html\`<div a="'b'"/>\`;`);
+		});
+		
+		test('single quote values with double quotes', () => {
+			expect(
+				compile(`(<div a='"b"' />);`)
+			).toBe(`html\`<div a='"b"'/>\`;`);
+		});
+		
+		test('escape non-trivial values as expressions', () => {
+			expect(
+				compile(`(<div a="\x00" b="&abcd;" />);`)
+			).toBe('html`<div a=${"\x00"} b=${"&abcd;"}/>`;');
+		});
+		
 		test('expression values', () => {
 			expect(
 				compile('const Foo = (props, a) => <div a={a} b={"b"} c={{}} d={props.d} e />;')

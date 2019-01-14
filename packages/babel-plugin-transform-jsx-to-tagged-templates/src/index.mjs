@@ -1,12 +1,5 @@
 import jsx from '@babel/plugin-syntax-jsx';
 
-function escapeValue(value) {
-	if (value.match(/^[a-z0-9_' &]+$/gi)) {
-		return `"${value}"`;
-	}
-	return JSON.stringify(value);
-}
-
 /**
  * @param {Babel} babel
  * @param {object} [options]
@@ -40,6 +33,21 @@ export default function jsxToTaggedTemplatesBabelPlugin({ types: t }, options = 
 		buffer += str;
 	}
 
+	function escapeStringLiteral(node) {
+		const value = node.value;
+		
+		if (value.match(/^[a-z0-9_'" ]*$/gi)) {
+			if (value.indexOf('"') < 0) {
+				return raw(`"${value}"`);
+			}
+			else if (value.indexOf("'") < 0) {
+				return raw(`'${value}'`);
+			}
+		}
+
+		return expr(node);
+	}
+	
 	function commit(force) {
 		if (!buffer && !force) return;
 		quasis.push(t.templateElement({
@@ -79,7 +87,7 @@ export default function jsxToTaggedTemplatesBabelPlugin({ types: t }, options = 
 						expr(value.expression);
 					}
 					else if (t.isStringLiteral(value)) {
-						raw(escapeValue(value.value));
+						escapeStringLiteral(value);
 					}
 					else {
 						expr(value);
