@@ -85,16 +85,22 @@ describe('babel-plugin-transform-jsx-to-tagged-templates', () => {
 			).toBe('const Foo = () => html`<div class="foo" draggable><h1>Hello</h1><p>world.</p></div>`;');
 		});
 
-		test('inter-element whitespace is collapsed', () => {
+		test('inter-element whitespace is collapsed similarly to the JSX plugin', () => {
 			expect(
-				compile('const Foo = props => <div a b> a <em> b </em> c <strong> d </strong> e </div>;')
-			).toBe('const Foo = props => html`<div a b>a<em>b</em>c<strong>d</strong>e</div>`;');
+				compile('const Foo = props => <div a b> a \n <em> b \n B </em> c <strong> d </strong> e </div>;')
+			).toBe('const Foo = props => html`<div a b> a<em> b B </em> c <strong> d </strong> e </div>`;');
 		});
-
+		
 		test('nested JSX Expressions produce nested templates', () => {
 			expect(
 				compile('const Foo = props => <ul>{props.items.map(item =>\n  <li>\n    {item}\n  </li>\n)}</ul>;')
 			).toBe('const Foo = props => html`<ul>${props.items.map(item => html`<li>${item}</li>`)}</ul>`;');
+		});
+		
+		test('empty expressions are ignored', () => {
+			expect(
+				compile(`(<div>{/* a comment */}</div>);`)
+			).toBe('html`<div/>`;');
 		});
 	});
 
