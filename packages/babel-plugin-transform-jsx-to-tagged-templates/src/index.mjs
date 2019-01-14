@@ -53,8 +53,6 @@ export default function jsxToTaggedTemplatesBabelPlugin({ types: t }, options = 
 		const open = node.openingElement;
 		const { name } = open.name;
 
-		const toProcess = [];
-		
 		if (name.match(/^[A-Z]/)) {
 			raw('<');
 			expr(t.identifier(name));
@@ -90,21 +88,24 @@ export default function jsxToTaggedTemplatesBabelPlugin({ types: t }, options = 
 			}
 		}
 
-		const children = t.react.buildChildren(node);
-		if (htmlOutput || children && children.length !== 0) {
+		if (htmlOutput || node.children && node.children.length !== 0) {
 			raw('>');
-			for (let i = 0; i < children.length; i++) {
-				let child = children[i];
-				if (t.isStringLiteral(child)) {
+			for (let i = 0; i < node.children.length; i++) {
+				let child = node.children[i];
+				if (t.isJSXText(child)) {
 					// @todo - expose `whitespace: true` option?
-					raw(child.value);
-				}
-				else if (t.isJSXElement(child)) {
-					processNode(child);
+					raw(child.value.trim());
 				}
 				else {
-					expr(child);
-					toProcess.push(child);
+					if (t.isJSXExpressionContainer(child)) {
+						child = child.expression;
+					}
+					if (t.isJSXElement(child)) {
+						processNode(child);
+					}
+					else {
+						expr(child);
+					}
 				}
 			}
 
