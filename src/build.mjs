@@ -13,9 +13,9 @@ const MODE_ATTRIBUTE = 4;
 export const evaluate = (h, current, fields, args) => {
 	for (let i = 1; i < current.length; i++) {
 		const field = current[i++];
-		const value = field ? fields[field] : current[i];
+		const value = typeof field === 'number' ? fields[field] : field;
 
-		if (current[++i] === TAG_SET) {
+		if (current[i] === TAG_SET) {
 			args[0] = value;
 		}
 		else if (current[i] === PROPS_SET) {
@@ -48,20 +48,20 @@ export const build = (statics) => {
 
 	const commit = field => {
 		if (mode === MODE_TEXT && (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g,'')))) {
-			current.push(field, buffer, CHILD_APPEND);
+			current.push(field || buffer, CHILD_APPEND);
 		}
 		else if (mode === MODE_TAGNAME && (field || buffer)) {
-			current.push(field, buffer, TAG_SET);
+			current.push(field || buffer, TAG_SET);
 			mode = MODE_WHITESPACE;
 		}
 		else if (mode === MODE_WHITESPACE && buffer === '...' && field) {
-			current.push(field, 0, PROPS_ASSIGN);
+			current.push(field, PROPS_ASSIGN);
 		}
 		else if (mode === MODE_WHITESPACE && buffer && !field) {
-			current.push(0, true, PROPS_SET, buffer);
+			current.push(true, PROPS_SET, buffer);
 		}
 		else if (mode === MODE_ATTRIBUTE && propName) {
-			current.push(field, buffer, PROPS_SET, propName);
+			current.push(field || buffer, PROPS_SET, propName);
 			propName = '';
 		}
 		buffer = '';
@@ -118,7 +118,7 @@ export const build = (statics) => {
 					current = current[0];
 				}
 				mode = current;
-				(current = current[0]).push(0, mode, CHILD_RECURSE);
+				(current = current[0]).push(mode, CHILD_RECURSE);
 				mode = MODE_SLASH;
 			}
 			else if (char === ' ' || char === '\t' || char === '\n' || char === '\r') {
