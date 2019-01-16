@@ -44,7 +44,7 @@ export const build = (statics) => {
 	let buffer = '';
 	let quote = '';
 	let current = [0];
-	let char, propName, idx;
+	let char, propName;
 
 	const commit = field => {
 		if (mode === MODE_TEXT && (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g,'')))) {
@@ -78,48 +78,53 @@ export const build = (statics) => {
 		for (let j=0; j<statics[i].length; j++) {
 			char = statics[i][j];
 
-			if (mode === MODE_TEXT && char === '<') {
-				// commit buffer
-				commit();
-				current = [current];
-				mode = MODE_TAGNAME;
+			if (mode === MODE_TEXT) {
+				if (char === '<') {
+					// commit buffer
+					commit();
+					current = [current];
+					mode = MODE_TAGNAME;
+				}
+				else {
+					buffer += char;
+				}
 			}
-			else if (mode !== MODE_TEXT && (char === quote || !quote) && (idx = '\'">=/\t\n\r '.indexOf(char)) >= 0) {
-				if (idx < 2) {
-					// char === '"' || char === "'"
-					quote = quote ? '' : char;
+			else if (quote) {
+				if (char === quote) {
+					quote = '';
 				}
-				else if (idx === 2) {
-					// char === '>'
-					commit();
-					mode = MODE_TEXT;
+				else {
+					buffer += char;
 				}
-				else if (idx === 3) {
-					// char === '='
-					if (mode) {
-						mode = MODE_ATTRIBUTE;
-						propName = buffer;
-						buffer = '';
-					}
+			}
+			else if (char === '"' || char === "'") {
+				quote = char;
+			}
+			else if (char === '>') {
+				commit();
+				mode = MODE_TEXT;
+			}
+			else if (!mode) {
+				// Ignore everything until the tag ends
+			}
+			else if (char === '=') {
+				mode = MODE_ATTRIBUTE;
+				propName = buffer;
+				buffer = '';
+			}
+			else if (char === '/') {
+				commit();
+				if (mode === MODE_TAGNAME) {
+					current = current[0];
 				}
-				else if (idx === 4) {
-					// char === '/'
-					if (mode) {
-						commit();
-						if (mode === MODE_TAGNAME) {
-							current = current[0];
-						}
-						mode = current;
-						(current = current[0]).push(0, mode, CHILD_RECURSE);
-						mode = MODE_SLASH;
-					}
-				}
-				else if (mode) {
-					// char is a whitespace
-					// <a disabled>
-					commit();
-					mode = MODE_WHITESPACE;
-				}
+				mode = current;
+				(current = current[0]).push(0, mode, CHILD_RECURSE);
+				mode = MODE_SLASH;
+			}
+			else if (char === ' ' || char === '\t' || char === '\n' || char === '\r') {
+				// <a disabled>
+				commit();
+				mode = MODE_WHITESPACE;
 			}
 			else {
 				buffer += char;
