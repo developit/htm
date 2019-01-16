@@ -11,7 +11,7 @@ export const build = (h, fields) => {
 	let buffer = '';
 	let quote = '';
 	let args = root;
-	let char, propName, idx;
+	let char, propName;
 
 	const commit = () => {
 		if (mode === MODE_TEXT && (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g, ''))) {
@@ -54,52 +54,57 @@ export const build = (h, fields) => {
 		for (let j=0; j<fields[0][i].length; j++) {
 			char = fields[0][i][j];
 
-			if (mode === MODE_TEXT && char === '<') {
-				// commit buffer
-				commit();
-				stack.push(args);
-				args = ['', null];
-				buffer = '';
-				mode = MODE_TAGNAME;
+			if (mode === MODE_TEXT) {
+				if (char === '<') {
+					// commit buffer
+					commit();
+					stack.push(args);
+					args = ['', null];
+					buffer = '';
+					mode = MODE_TAGNAME;
+				}
+				else {
+					buffer += char;
+				}
 			}
-			else if (mode !== MODE_TEXT && (char === quote || !quote) && (idx = '\'">=/\t\n\r '.indexOf(char)) >= 0) {
-				if (idx < 2) {
-					// char === '"' || char === "'"
-					quote = quote ? '' : char;
+			else if (quote) {
+				if (char === quote) {
+					quote = '';
 				}
-				else if (idx === 2) {
-					// char === '>'
-					commit();
-					mode = MODE_TEXT;
+				else {
+					buffer += char;
 				}
-				else if (idx === 3) {
-					// char === '='
-					if (mode) {
-						mode = MODE_ATTRIBUTE;
-						propName = buffer;
-						buffer = '';
-					}
+			}
+			else if (char === '"' || char === "'") {
+				quote = char;
+			}
+			else if (char === '>') {
+				commit();
+				mode = MODE_TEXT;
+			}
+			else if (!mode) {
+				// Ignore everything until the tag ends
+			}
+			else if (char === '=') {
+				mode = MODE_ATTRIBUTE;
+				propName = buffer;
+				buffer = '';
+			}
+			else if (char === '/') {
+				commit();
+				if (mode === MODE_TAGNAME) {
+					// no tag name before the slash
+					args = stack.pop();
 				}
-				else if (idx === 4) {
-					// char === '/'
-					if (mode) {
-						commit();
-						if (mode === MODE_TAGNAME) {
-							// no tag name before the slash
-							args = stack.pop();
-						}
-						// eslint-disable-next-line prefer-spread
-						mode = h.apply(null, args); // Use 'mode' as a temporary variable
-						(args = stack.pop()).push(mode);
-						mode = MODE_SLASH;
-					}
-				}
-				else if (mode) {
-					// char is a whitespace
-					// <a disabled>
-					commit();
-					mode = MODE_WHITESPACE;
-				}
+				// eslint-disable-next-line prefer-spread
+				mode = h.apply(null, args); // Use 'mode' as a temporary variable
+				(args = stack.pop()).push(mode);
+				mode = MODE_SLASH;
+			}
+			else if (char === ' ' || char === '\t' || char === '\n' || char === '\r') {
+				// <a disabled>
+				commit();
+				mode = MODE_WHITESPACE;
 			}
 			else {
 				buffer += char;
