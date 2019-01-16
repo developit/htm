@@ -1,35 +1,35 @@
-const TAG_SET = 0;
-const PROPS_SET = 1;
-const PROPS_ASSIGN = 2;
-const CHILD_RECURSE = 3;
-const CHILD_APPEND = 4;
+const TAG_SET = 1;
+const PROPS_SET = 2;
+const PROPS_ASSIGN = 3;
+const CHILD_RECURSE = 4;
+const CHILD_APPEND = 0;
 
 const MODE_SLASH = 0;
 const MODE_TEXT = 1;
-const MODE_WHITESPACE = 3;
-const MODE_TAGNAME = 4;
-const MODE_ATTRIBUTE = 5;
+const MODE_WHITESPACE = 2;
+const MODE_TAGNAME = 3;
+const MODE_ATTRIBUTE = 4;
 
 export const evaluate = (h, current, fields, args) => {
 	for (let i = 1; i < current.length; i++) {
 		const field = current[i++];
 		const value = field ? fields[field] : current[i];
 
-		const code = current[++i];
-		if (code === TAG_SET) {
+		if (current[++i] === TAG_SET) {
 			args[0] = value;
 		}
-		else if (code === PROPS_SET) {
+		else if (current[i] === PROPS_SET) {
 			(args[1] = args[1] || {})[current[++i]] = value;
 		}
-		else if (code === PROPS_ASSIGN) {
+		else if (current[i] === PROPS_ASSIGN) {
 			args[1] = Object.assign(args[1] || {}, value);
 		}
-		else if (code === CHILD_RECURSE) {
-			// eslint-disable-next-line prefer-spread
+		else if (current[i]) {
+			// code === CHILD_RECURSE
 			args.push(h.apply(null, evaluate(h, value, fields, ['', null])));
 		}
-		else { 	// code === CHILD_APPEND
+		else {
+			// code === CHILD_APPEND
 			args.push(value);
 		}
 	}
