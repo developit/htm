@@ -72,7 +72,10 @@
     "eslint-config-developit": "^1.1.1",
     "jest": "^23.4.2",
     "microbundle": "^0.8.3",
-    "preact": "^8.2.9"
+    "preact": "^8.4.2"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "peerDependencies": {
+    "preact": "*"
+  }
 }
