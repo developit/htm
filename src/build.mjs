@@ -10,13 +10,11 @@ const MODE_WHITESPACE = 3;
 const MODE_TAGNAME = 4;
 const MODE_ATTRIBUTE = 5;
 
-export const evaluate = (h, current, fields) => {
-	const args = ['', null];
-
+export const evaluate = (h, current, fields, args) => {
 	for (let i = 1; i < current.length; i++) {
 		const field = current[i++];
 		const value = field ? fields[field] : current[i];
-		
+
 		const code = current[++i];
 		if (code === TAG_SET) {
 			args[0] = value;
@@ -28,49 +26,42 @@ export const evaluate = (h, current, fields) => {
 			args[1] = Object.assign(args[1] || {}, value);
 		}
 		else if (code === CHILD_RECURSE) {
-			args.push(evaluate(h, value, fields));
+			// eslint-disable-next-line prefer-spread
+			args.push(h.apply(null, evaluate(h, value, fields, ['', null])));
 		}
 		else { 	// code === CHILD_APPEND
 			args.push(value);
 		}
 	}
 
-	// eslint-disable-next-line prefer-spread
-	return h.apply(null, args);
+	return args;
 };
 
-/** Create a template function given strings from a tagged template. */
+
 export const build = (statics) => {
 	let mode = MODE_TEXT;
 	let buffer = '';
 	let quote = '';
-	let fallbackPropValue = true;
-	let current = [];
+	let current = [0];
 	let char, propName, idx;
 
 	const commit = field => {
-		if (mode === MODE_TEXT) {
-			if (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g,''))) {
-				current.push(field, buffer, CHILD_APPEND);
-			}
+		if (mode === MODE_TEXT && (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g,'')))) {
+			current.push(field, buffer, CHILD_APPEND);
 		}
 		else if (mode === MODE_TAGNAME && (field || buffer)) {
 			current.push(field, buffer, TAG_SET);
 			mode = MODE_WHITESPACE;
 		}
-		else if (mode === MODE_WHITESPACE && buffer === '...') {
+		else if (mode === MODE_WHITESPACE && buffer === '...' && field) {
 			current.push(field, 0, PROPS_ASSIGN);
 		}
-		else if (mode) {	// mode === MODE_ATTRIBUTE || mode === MODE_WHITESPACE
-			if (mode === MODE_WHITESPACE) {
-				propName = buffer;
-				buffer = '';
-			}
-			if (propName) {
-				current.push(field, buffer || fallbackPropValue, PROPS_SET, propName);
-				propName = '';
-			}
-			fallbackPropValue = true;
+		else if (mode === MODE_WHITESPACE && buffer && !field) {
+			current.push(0, true, PROPS_SET, buffer);
+		}
+		else if (mode === MODE_ATTRIBUTE && propName) {
+			current.push(field, buffer, PROPS_SET, propName);
+			propName = '';
 		}
 		buffer = '';
 	};
@@ -82,7 +73,7 @@ export const build = (statics) => {
 			}
 			commit(i);
 		}
-		
+
 		for (let j=0; j<statics[i].length; j++) {
 			char = statics[i][j];
 
@@ -100,17 +91,6 @@ export const build = (statics) => {
 				else if (idx === 2) {
 					// char === '>'
 					commit();
-
-					if (!mode) {
-						// encountered a slash in current tag
-												
-						if (current.length === 1) {
-							// no tag name or attributes before the slash
-							current = current[0];
-						}
-						current[0].push(0, current, CHILD_RECURSE);
-						current = current[0];
-					}
 					mode = MODE_TEXT;
 				}
 				else if (idx === 3) {
@@ -118,13 +98,20 @@ export const build = (statics) => {
 					if (mode) {
 						mode = MODE_ATTRIBUTE;
 						propName = buffer;
-						buffer = fallbackPropValue = '';
+						buffer = '';
 					}
 				}
 				else if (idx === 4) {
 					// char === '/'
-					commit();
-					mode = MODE_SLASH;
+					if (mode) {
+						commit();
+						if (mode === MODE_TAGNAME) {
+							current = current[0];
+						}
+						mode = current;
+						(current = current[0]).push(0, mode, CHILD_RECURSE);
+						mode = MODE_SLASH;
+					}
 				}
 				else if (mode) {
 					// char is a whitespace

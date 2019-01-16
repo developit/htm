@@ -15,17 +15,17 @@ import { build, evaluate } from './build.mjs';
  
 const CACHE = {};
 
-export default function html(statics) {
+export default function html() {
+	// eslint-disable-next-line prefer-rest-params
+	const statics = arguments[0];
+	
 	let key = '.';
 	for (let i=0; i<statics.length; i++) {
 		key += statics[i].length + ',' + statics[i];
 	}
 	const tpl = CACHE[key] || (CACHE[key] = build(statics));
 
-	const res = [];
-	for (let i=1; i<tpl.length; i+=3) {
-		// eslint-disable-next-line prefer-rest-params
-		res.push(evaluate(this, tpl[i], arguments));
-	}
+	// eslint-disable-next-line prefer-rest-params
+	const res = evaluate(this, tpl, arguments, []);
 	return res.length > 1 ? res : res[0];
 }
