@@ -15,10 +15,7 @@ import { build, evaluate } from './build.mjs';
  
 const CACHE = {};
 
-export default function html() {
-	// eslint-disable-next-line prefer-rest-params
-	const statics = arguments[0];
-	
+export default function html(statics) {
 	let key = '.';
 	for (let i=0; i<statics.length; i++) {
 		key += statics[i].length + ',' + statics[i];

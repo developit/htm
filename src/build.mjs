@@ -26,6 +26,7 @@ export const evaluate = (h, current, fields, args) => {
 		}
 		else if (current[i]) {
 			// code === CHILD_RECURSE
+			// eslint-disable-next-line prefer-spread
 			args.push(h.apply(null, evaluate(h, value, fields, ['', null])));
 		}
 		else {
