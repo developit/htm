@@ -17,7 +17,7 @@ export const build = (h, fields) => {
 		if (mode === MODE_TEXT && (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g, ''))) {
 			args.push(buffer);
 		}
-		if (mode === MODE_TAGNAME && buffer) {
+		else if (mode === MODE_TAGNAME && buffer) {
 			args[0] = buffer;
 			mode = MODE_WHITESPACE;
 		}
