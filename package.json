@@ -22,7 +22,9 @@
     "extends": "developit",
     "rules": {
       "prefer-const": 0,
-      "no-fallthrough": 0
+      "no-fallthrough": 0,
+      "prefer-rest-params": 0,
+      "func-style": 0
     }
   },
   "jest": {
