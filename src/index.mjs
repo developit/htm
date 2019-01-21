@@ -12,17 +12,29 @@
  */
 
 import { build, evaluate } from './build.mjs';
- 
-const CACHE = {};
 
-export default function html(statics) {
-	let key = '.';
-	for (let i=0; i<statics.length; i++) {
-		key += statics[i].length + ',' + statics[i];
+const getCacheMap = (statics) => {
+	let tpl = CACHE.get(statics);
+	if (!tpl) {
+		CACHE.set(statics, tpl = build(statics));
 	}
-	const tpl = CACHE[key] || (CACHE[key] = build(statics));
+	return tpl;
+};
 
+const getCache = (statics) => {
+	let key = '';
+	for (let i = 0; i < statics.length; i++) {
+		key += statics[i].length + '-' + statics[i];
+	}
+	return CACHE[key] || (CACHE[key] = build(statics));
+};
+
+const USE_MAP = typeof Map === 'function';
+const CACHE = USE_MAP ? new Map() : {};
+const cached = USE_MAP ? getCacheMap : getCache;
+
+export default function htm(statics) {
 	// eslint-disable-next-line prefer-rest-params
-	const res = evaluate(this, tpl, arguments, []);
+	const res = evaluate(this, cached(statics), arguments, []);
 	return res.length > 1 ? res : res[0];
 }
