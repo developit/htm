@@ -36,7 +36,7 @@ export default function jsxToTaggedTemplatesBabelPlugin({ types: t }, options = 
 	function escapeStringLiteral(node) {
 		const value = node.value;
 		
-		if (value.match(/^[a-z0-9_'" ]*$/gi)) {
+		if (value.match(/^.*$/u)) {
 			if (value.indexOf('"') < 0) {
 				return raw(`"${value}"`);
 			}
@@ -45,7 +45,7 @@ export default function jsxToTaggedTemplatesBabelPlugin({ types: t }, options = 
 			}
 		}
 
-		return expr(node);
+		return expr(t.stringLiteral(node.value));
 	}
 	
 	function commit(force) {

@@ -32,6 +32,21 @@ describe('babel-plugin-transform-jsx-to-tagged-templates', () => {
 				compile('(<Foo>a</Foo>);')
 			).toBe('html`<${Foo}>a</${Foo}>`;');
 		});
+		
+		test('static text', () => {
+			expect(
+				compile(`(<div>Hello</div>);`)
+			).toBe('html`<div>Hello</div>`;');
+			expect(
+				compile(`(<div>こんにちわ</div>);`)
+			).toBe('html`<div>こんにちわ</div>`;');
+		});
+		
+		test('HTML entities get unescaped', () => {
+			expect(
+				compile(`(<div>&amp;</div>);`)
+			).toBe('html`<div>&</div>`;');
+		});
 	});
 
 	describe('options.html = true', () => {
@@ -55,6 +70,15 @@ describe('babel-plugin-transform-jsx-to-tagged-templates', () => {
 			expect(
 				compile('(<div a="a" b="bb" c d />);')
 			).toBe('html`<div a="a" b="bb" c d/>`;');
+			expect(
+				compile('(<div a="こんにちわ" />);')
+			).toBe('html`<div a="こんにちわ"/>`;');
+		});
+		
+		test('HTML entities get unescaped', () => {
+			expect(
+				compile(`(<div a="&amp;" />);`)
+			).toBe('html`<div a="&"/>`;');
 		});
 		
 		test('double quote values with single quotes', () => {
@@ -69,12 +93,18 @@ describe('babel-plugin-transform-jsx-to-tagged-templates', () => {
 			).toBe(`html\`<div a='"b"'/>\`;`);
 		});
 		
-		test('escape non-trivial values as expressions', () => {
+		test('escape values with newlines as expressions', () => {
 			expect(
-				compile(`(<div a="\x00" b="&abcd;" />);`)
-			).toBe('html`<div a=${"\x00"} b=${"&abcd;"}/>`;');
+				compile(`(<div a="\n" />);`)
+			).toBe('html`<div a=${"\\n"}/>`;');
 		});
 		
+		test('escape values with both single and double quotes as expressions', () => {
+			expect(
+				compile(`(<div a="&#34;'" />);`)
+			).toBe('html`<div a=${"\\"\'"}/>`;');
+		});
+
 		test('expression values', () => {
 			expect(
 				compile('const Foo = (props, a) => <div a={a} b={"b"} c={{}} d={props.d} e />;')
