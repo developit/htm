@@ -47,6 +47,12 @@ describe('babel-plugin-transform-jsx-to-tagged-templates', () => {
 				compile(`(<div>&amp;</div>);`)
 			).toBe('html`<div>&</div>`;');
 		});
+		
+		test('&lt; gets wrapped into an expression container', () => {
+			expect(
+				compile(`(<div>a&lt;b&lt;&lt;&lt;c</div>);`)
+			).toBe('html`<div>${"a<b<<<c"}</div>`;');
+		});
 	});
 
 	describe('options.html = true', () => {

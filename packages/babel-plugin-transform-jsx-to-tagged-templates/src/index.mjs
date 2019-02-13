@@ -33,9 +33,16 @@ export default function jsxToTaggedTemplatesBabelPlugin({ types: t }, options = 
 		buffer += str;
 	}
 
-	function escapeStringLiteral(node) {
+	function escapeText(text) {
+		if (text.indexOf('<') < 0) {
+			return raw(text);
+		}
+		return expr(t.stringLiteral(text));
+	}
+
+	function escapePropValue(node) {
 		const value = node.value;
-		
+
 		if (value.match(/^.*$/u)) {
 			if (value.indexOf('"') < 0) {
 				return raw(`"${value}"`);
@@ -47,7 +54,7 @@ export default function jsxToTaggedTemplatesBabelPlugin({ types: t }, options = 
 
 		return expr(t.stringLiteral(node.value));
 	}
-	
+
 	function commit(force) {
 		if (!buffer && !force) return;
 		quasis.push(t.templateElement({
@@ -87,7 +94,7 @@ export default function jsxToTaggedTemplatesBabelPlugin({ types: t }, options = 
 						expr(value.expression);
 					}
 					else if (t.isStringLiteral(value)) {
-						escapeStringLiteral(value);
+						escapePropValue(value);
 					}
 					else {
 						expr(value);
@@ -96,24 +103,20 @@ export default function jsxToTaggedTemplatesBabelPlugin({ types: t }, options = 
 			}
 		}
 
-		if (htmlOutput || node.children && node.children.length !== 0) {
+		const children = t.react.buildChildren(node);
+		if (htmlOutput || children && children.length !== 0) {
 			raw('>');
-			for (let i = 0; i < node.children.length; i++) {
-				let child = node.children[i];
-				if (t.isJSXText(child)) {
+			for (let i = 0; i < children.length; i++) {
+				let child = children[i];
+				if (t.isStringLiteral(child)) {
 					// @todo - expose `whitespace: true` option?
-					raw(child.value.trim());
+					escapeText(child.value);
+				}
+				else if (t.isJSXElement(child)) {
+					processNode(child);
 				}
 				else {
-					if (t.isJSXExpressionContainer(child)) {
-						child = child.expression;
-					}
-					if (t.isJSXElement(child)) {
-						processNode(child);
-					}
-					else {
-						expr(child);
-					}
+					expr(child);
 				}
 			}
 
