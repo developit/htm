@@ -6,31 +6,12 @@
 	"module": "dist/babel-plugin-transform-jsx-to-tagged-templates.mjs",
 	"scripts": {
 		"build": "microbundle src/index.mjs -f es,cjs --target node --no-compress --no-sourcemap",
-		"test": "jest",
 		"prepare": "npm run build"
 	},
 	"files": [
 		"dist",
 		"src"
 	],
-	"eslintConfig": {
-		"extends": "developit"
-	},
-	"babel": {
-		"presets": [
-			"@babel/preset-env"
-		]
-	},
-	"jest": {
-		"moduleFileExtensions": [
-			"mjs",
-			"js",
-			"json"
-		],
-		"transform": {
-			"^.+\\.m?js$": "babel-jest"
-		}
-	},
 	"repository": "developit/htm",
 	"keywords": [
 		"tagged template",
@@ -48,17 +29,6 @@
 	"license": "Apache-2.0",
 	"homepage": "https://github.com/developit/htm/tree/master/packages/babel-plugin-transform-jsx-to-tagged-templates",
 	"devDependencies": {
-		"@babel/core": "^7.2.0",
-		"@babel/preset-env": "^7.2.0",
-		"babel-core": "^7.0.0-bridge.0",
-		"babel-jest": "^23.6.0",
-		"babel-plugin-jsx-pragmatic": "^1.0.2",
-		"eslint": "^5.10.0",
-		"eslint-config-developit": "^1.1.1",
-		"jest": "^23.6.0",
 		"microbundle": "^0.8.3"
-	},
-	"dependencies": {
-		"@babel/plugin-syntax-jsx": "^7.2.0"
 	}
 }

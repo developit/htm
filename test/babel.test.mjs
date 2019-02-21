@@ -5,12 +5,18 @@
 import { transform } from '@babel/core';
 import htmBabelPlugin from 'babel-plugin-htm';
 
+const options = {
+	babelrc: false,
+	configFile: false,
+	sourceType: 'script',
+	compact: true
+};
+
 describe('htm/babel', () => {
 	test('basic transformation', () => {
 		expect(
 			transform('html`<div id=hello>hello</div>`;', {
-				babelrc: false,
-				compact: true,
+				...options,
 				plugins: [
 					htmBabelPlugin
 				]
@@ -21,8 +27,7 @@ describe('htm/babel', () => {
 	test('basic transformation with variable', () => {
 		expect(
 			transform('var name="world";html`<div id=hello>hello, ${name}</div>`;', {
-				babelrc: false,
-				compact: true,
+				...options,
 				plugins: [
 					htmBabelPlugin
 				]
@@ -33,8 +38,7 @@ describe('htm/babel', () => {
 	test('basic nested transformation', () => {
 		expect(
 			transform('html`<a b=${2} ...${{ c: 3 }}>d: ${4}</a>`;', {
-				babelrc: false,
-				compact: true,
+				...options,
 				plugins: [
 					[htmBabelPlugin, {
 						useBuiltIns: true
@@ -43,24 +47,22 @@ describe('htm/babel', () => {
 			}).code
 		).toBe(`h("a",Object.assign({b:2},{c:3}),"d: ",4);`);
 	});
-	
+
 	test('spread a single variable', () => {
 		expect(
 			transform('html`<a ...${foo}></a>`;', {
-				babelrc: false,
-				compact: true,
+				...options,
 				plugins: [
 					htmBabelPlugin
 				]
 			}).code
 		).toBe(`h("a",foo);`);
 	});
-	
+
 	test('spread two variables', () => {
 		expect(
 			transform('html`<a ...${foo} ...${bar}></a>`;', {
-				babelrc: false,
-				compact: true,
+				...options,
 				plugins: [
 					[htmBabelPlugin, {
 						useBuiltIns: true
@@ -69,12 +71,11 @@ describe('htm/babel', () => {
 			}).code
 		).toBe(`h("a",Object.assign({},foo,bar));`);
 	});
-	
+
 	test('property followed by a spread', () => {
 		expect(
 			transform('html`<a b="1" ...${foo}></a>`;', {
-				babelrc: false,
-				compact: true,
+				...options,
 				plugins: [
 					[htmBabelPlugin, {
 						useBuiltIns: true
@@ -83,12 +84,11 @@ describe('htm/babel', () => {
 			}).code
 		).toBe(`h("a",Object.assign({b:"1"},foo));`);
 	});
-	
+
 	test('spread followed by a property', () => {
 		expect(
 			transform('html`<a ...${foo} b="1"></a>`;', {
-				babelrc: false,
-				compact: true,
+				...options,
 				plugins: [
 					[htmBabelPlugin, {
 						useBuiltIns: true
@@ -97,12 +97,11 @@ describe('htm/babel', () => {
 			}).code
 		).toBe(`h("a",Object.assign({},foo,{b:"1"}));`);
 	});
-	
+
 	test('mix-and-match spreads', () => {
 		expect(
 			transform('html`<a b="1" ...${foo} c=${2} ...${{d:3}}></a>`;', {
-				babelrc: false,
-				compact: true,
+				...options,
 				plugins: [
 					[htmBabelPlugin, {
 						useBuiltIns: true
@@ -111,13 +110,12 @@ describe('htm/babel', () => {
 			}).code
 		).toBe(`h("a",Object.assign({b:"1"},foo,{c:2},{d:3}));`);
 	});
-	
+
 	describe('{variableArity:false}', () => {
 		test('should pass no children as an empty Array', () => {
 			expect(
 				transform('html`<div />`;', {
-					babelrc: false,
-					compact: true,
+					...options,
 					plugins: [
 						[htmBabelPlugin, {
 							variableArity: false
@@ -130,8 +128,7 @@ describe('htm/babel', () => {
 		test('should pass children as an Array', () => {
 			expect(
 				transform('html`<div id=hello>hello</div>`;', {
-					babelrc: false,
-					compact: true,
+					...options,
 					plugins: [
 						[htmBabelPlugin, {
 							variableArity: false
@@ -146,8 +143,7 @@ describe('htm/babel', () => {
 		test('should transform to inline vnodes', () => {
 			expect(
 				transform('var name="world",vnode=html`<div id=hello>hello, ${name}</div>`;', {
-					babelrc: false,
-					compact: true,
+					...options,
 					plugins: [
 						[htmBabelPlugin, {
 							pragma: false
@@ -162,8 +158,7 @@ describe('htm/babel', () => {
 		test('should transform to monomorphic inline vnodes', () => {
 			expect(
 				transform('var name="world",vnode=html`<div id=hello>hello, ${name}</div>`;', {
-					babelrc: false,
-					compact: true,
+					...options,
 					plugins: [
 						[htmBabelPlugin, {
 							monomorphic: true
@@ -178,7 +173,7 @@ describe('htm/babel', () => {
 		// Run all of the main tests against the Babel plugin:
 		const mod = require('fs').readFileSync(require('path').resolve(__dirname, 'index.test.mjs'), 'utf8').replace(/\\0/g, '\0');
 		const { code } = transform(mod.replace(/^\s*import\s*.+?\s*from\s+(['"]).*?\1[\s;]*$/im, 'const htm = function(){};'), {
-			babelrc: false,
+			...options,
 			plugins: [htmBabelPlugin]
 		});
 		eval(code);

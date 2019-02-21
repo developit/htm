@@ -1,9 +1,11 @@
 import { transform } from '@babel/core';
-import transformJsxToTaggedTemplatesPlugin from '../src/index.mjs';
+import transformJsxToTaggedTemplatesPlugin from 'babel-plugin-transform-jsx-to-tagged-templates';
 
 function compile(code, { plugins = [], ...options } = {}) {
 	return transform(code, {
 		babelrc: false,
+		configFile: false,
+		sourceType: 'script',
 		plugins: [
 			...plugins,
 			[transformJsxToTaggedTemplatesPlugin, options]
@@ -32,7 +34,7 @@ describe('babel-plugin-transform-jsx-to-tagged-templates', () => {
 				compile('(<Foo>a</Foo>);')
 			).toBe('html`<${Foo}>a</${Foo}>`;');
 		});
-		
+
 		test('static text', () => {
 			expect(
 				compile(`(<div>Hello</div>);`)
@@ -41,13 +43,13 @@ describe('babel-plugin-transform-jsx-to-tagged-templates', () => {
 				compile(`(<div>こんにちわ</div>);`)
 			).toBe('html`<div>こんにちわ</div>`;');
 		});
-		
+
 		test('HTML entities get unescaped', () => {
 			expect(
 				compile(`(<div>&amp;</div>);`)
 			).toBe('html`<div>&</div>`;');
 		});
-		
+
 		test('&lt; gets wrapped into an expression container', () => {
 			expect(
 				compile(`(<div>a&lt;b&lt;&lt;&lt;c</div>);`)
@@ -80,31 +82,31 @@ describe('babel-plugin-transform-jsx-to-tagged-templates', () => {
 				compile('(<div a="こんにちわ" />);')
 			).toBe('html`<div a="こんにちわ"/>`;');
 		});
-		
+
 		test('HTML entities get unescaped', () => {
 			expect(
 				compile(`(<div a="&amp;" />);`)
 			).toBe('html`<div a="&"/>`;');
 		});
-		
+
 		test('double quote values with single quotes', () => {
 			expect(
 				compile(`(<div a="'b'" />);`)
 			).toBe(`html\`<div a="'b'"/>\`;`);
 		});
-		
+
 		test('single quote values with double quotes', () => {
 			expect(
 				compile(`(<div a='"b"' />);`)
 			).toBe(`html\`<div a='"b"'/>\`;`);
 		});
-		
+
 		test('escape values with newlines as expressions', () => {
 			expect(
 				compile(`(<div a="\n" />);`)
 			).toBe('html`<div a=${"\\n"}/>`;');
 		});
-		
+
 		test('escape values with both single and double quotes as expressions', () => {
 			expect(
 				compile(`(<div a="&#34;'" />);`)
@@ -144,13 +146,13 @@ describe('babel-plugin-transform-jsx-to-tagged-templates', () => {
 				compile('const Foo = props => <div a b> a \n <em> b \n B </em> c <strong> d </strong> e </div>;')
 			).toBe('const Foo = props => html`<div a b> a<em> b B </em> c <strong> d </strong> e </div>`;');
 		});
-		
+
 		test('nested JSX Expressions produce nested templates', () => {
 			expect(
 				compile('const Foo = props => <ul>{props.items.map(item =>\n  <li>\n    {item}\n  </li>\n)}</ul>;')
 			).toBe('const Foo = props => html`<ul>${props.items.map(item => html`<li>${item}</li>`)}</ul>`;');
 		});
-		
+
 		test('empty expressions are ignored', () => {
 			expect(
 				compile(`(<div>{/* a comment */}</div>);`)
