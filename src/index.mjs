@@ -11,7 +11,8 @@
  * limitations under the License.
  */
 
-const MINI = false;
+/* globals HTM_MODE */
+const MINI = typeof HTM_MODE === 'string' && HTM_MODE === 'mini';
 
 const TAG_SET = 1;
 const PROPS_SET = 2;
@@ -61,7 +62,7 @@ const build = function(statics) {
 	let quote = '';
 	let current = [0];
 	let char, propName;
-	
+
 	const commit = field => {
 		if (mode === MODE_TEXT && (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g,'')))) {
 			if (MINI) {
@@ -183,13 +184,13 @@ const build = function(statics) {
 		}
 	}
 	commit();
-	
+
 	if (MINI) {
 		return current.length > 2 ? current.slice(1) : current[1];
 	}
 	return current;
 };
- 
+
 const getCacheMap = (statics) => {
 	let tpl = CACHE.get(statics);
 	if (!tpl) {
@@ -206,13 +207,13 @@ const getCacheKeyed = (statics) => {
 	return CACHE[key] || (CACHE[key] = build(statics));
 };
 
-const USE_MAP = typeof Map === 'function';
+const USE_MAP = !MINI && typeof Map === 'function';
 const CACHE = USE_MAP ? new Map() : {};
 const getCache = USE_MAP ? getCacheMap : getCacheKeyed;
 
-function cached(statics) {
+const cached = function(statics) {
 	const res = evaluate(this, getCache(statics), arguments, []);
 	return res.length > 1 ? res : res[0];
-}
+};
 
 export default MINI ? build : cached;
