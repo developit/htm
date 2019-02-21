@@ -6,7 +6,7 @@ import jsx from '@babel/plugin-syntax-jsx';
  * @param {string} [options.tag='html']  The tagged template "tag" function name to produce.
  * @param {string} [options.html=false]  If `true`, output HTML-like instead of XML-like (no self-closing tags, etc).
  */
-export default function jsxToTaggedTemplatesBabelPlugin({ types: t }, options = {}) {
+export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 	const tag = dottedIdentifier(options.tag || 'html');
 	const htmlOutput = !!options.html;
 
@@ -144,7 +144,7 @@ export default function jsxToTaggedTemplatesBabelPlugin({ types: t }, options = 
 	}
 
 	return {
-		name: 'transform-jsx-to-tagged-templates',
+		name: 'transform-jsx-to-htm',
 		inherits: jsx,
 		visitor: {
 			JSXElement(path) {

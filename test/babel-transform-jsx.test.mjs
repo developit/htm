@@ -1,5 +1,5 @@
 import { transform } from '@babel/core';
-import transformJsxToTaggedTemplatesPlugin from 'babel-plugin-transform-jsx-to-tagged-templates';
+import transformJsxToHtmPlugin from 'babel-plugin-transform-jsx-to-htm';
 
 function compile(code, { plugins = [], ...options } = {}) {
 	return transform(code, {
@@ -8,12 +8,12 @@ function compile(code, { plugins = [], ...options } = {}) {
 		sourceType: 'script',
 		plugins: [
 			...plugins,
-			[transformJsxToTaggedTemplatesPlugin, options]
+			[transformJsxToHtmPlugin, options]
 		]
 	}).code;
 }
 
-describe('babel-plugin-transform-jsx-to-tagged-templates', () => {
+describe('babel-plugin-transform-jsx-to-htm', () => {
 	describe('elements and text', () => {
 		test('single named element', () => {
 			expect(

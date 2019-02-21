@@ -1,4 +1,4 @@
-# babel-plugin-transform-jsx-to-tagged-templates
+# babel-plugin-transform-jsx-to-htm
 
 This plugin converts JSX into Tagged Templates that work with things like [htm] and [lit-html].
 
@@ -15,14 +15,14 @@ const Foo = () => html`<h1>Hello</h1>`
 Grab it from npm:
 
 ```sh
-npm i -D babel-plugin-transform-jsx-to-tagged-templates
+npm i -D babel-plugin-transform-jsx-to-htm
 ```
 
 ... then add it to your Babel config (eg: `.babelrc`):
 
 ```js
 "plugins": [
-  "babel-plugin-transform-jsx-to-tagged-templates"
+  "babel-plugin-transform-jsx-to-htm"
 ]
 ```
 
@@ -39,7 +39,7 @@ Options are passed to a Babel plugin using a nested Array:
 
 ```js
 "plugins": [
-  ["babel-plugin-transform-jsx-to-tagged-templates", {
+  ["babel-plugin-transform-jsx-to-htm", {
     "tag": "$$html",
     "html": true
   }]
@@ -61,7 +61,7 @@ Just use [babel-plugin-jsx-pragmatic]:
     // what to call it locally: (should match your "tag" option)
     "import": "$$html"
   }],
-  ["babel-plugin-transform-jsx-to-tagged-templates", {
+  ["babel-plugin-transform-jsx-to-htm", {
     "tag": "$$html"
   }]
 ]

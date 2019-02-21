@@ -10,7 +10,7 @@
     "build:main": "microbundle src/index.mjs -f es,umd --no-sourcemap --target web && microbundle src/cjs.mjs -f iife --no-sourcemap --target web",
     "build:preact": "cd src/integrations/preact && npm run build",
     "build:babel": "cd packages/babel-plugin-htm && npm run build",
-    "build:babel-transform-jsx": "cd packages/babel-plugin-transform-jsx-to-tagged-templates && npm run build",
+    "build:babel-transform-jsx": "cd packages/babel-plugin-transform-jsx-to-htm && npm run build",
     "test": "eslint src/**/*.mjs test/**/*.mjs && npm run build && jest test",
     "release": "npm t && git commit -am \"$npm_package_version\" && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
@@ -40,7 +40,7 @@
       "js"
     ],
     "moduleNameMapper": {
-      "^babel-plugin-transform-jsx-to-tagged-templates$": "<rootDir>/packages/babel-plugin-transform-jsx-to-tagged-templates/src/index.mjs",
+      "^babel-plugin-transform-jsx-to-htm$": "<rootDir>/packages/babel-plugin-transform-jsx-to-htm/index.mjs",
       "^babel-plugin-htm$": "<rootDir>/packages/babel-plugin-htm/index.mjs",
       "^htm$": "<rootDir>/src/index.mjs",
       "^htm/preact$": "<rootDir>/src/integrations/preact/index.mjs"

@@ -1,16 +1,15 @@
 {
-	"name": "babel-plugin-transform-jsx-to-tagged-templates",
+	"name": "babel-plugin-transform-jsx-to-htm",
 	"version": "0.1.0",
 	"description": "Babel plugin to compile JSX to Tagged Templates.",
-	"main": "dist/babel-plugin-transform-jsx-to-tagged-templates.js",
-	"module": "dist/babel-plugin-transform-jsx-to-tagged-templates.mjs",
+	"main": "dist/babel-plugin-transform-jsx-to-htm.js",
+	"module": "dist/babel-plugin-transform-jsx-to-htm.mjs",
 	"scripts": {
-		"build": "microbundle src/index.mjs -f es,cjs --target node --no-compress --no-sourcemap",
+		"build": "microbundle index.mjs -f es,cjs --target node --no-compress --no-sourcemap",
 		"prepare": "npm run build"
 	},
 	"files": [
-		"dist",
-		"src"
+		"dist"
 	],
 	"repository": "developit/htm",
 	"keywords": [
@@ -27,7 +26,7 @@
 	],
 	"author": "Jason Miller <jason@developit.ca>",
 	"license": "Apache-2.0",
-	"homepage": "https://github.com/developit/htm/tree/master/packages/babel-plugin-transform-jsx-to-tagged-templates",
+	"homepage": "https://github.com/developit/htm/tree/master/packages/babel-plugin-transform-jsx-to-htm",
 	"devDependencies": {
 		"microbundle": "^0.8.3"
 	}
