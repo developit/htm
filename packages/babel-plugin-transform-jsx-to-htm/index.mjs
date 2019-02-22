@@ -5,12 +5,10 @@ import jsx from '@babel/plugin-syntax-jsx';
  * @param {object} [options]
  * @param {string} [options.tag='html']  The tagged template "tag" function name to produce.
  * @param {string | boolean | object} [options.import=false]  Import the tag automatically
- * @param {string} [options.html=false]  If `true`, output HTML-like instead of XML-like (no self-closing tags, etc).
  */
 export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 	const tagString = options.tag || 'html';
 	const tag = dottedIdentifier(tagString);
-	const htmlOutput = !!options.html;
 	const importDeclaration = tagImport(options.import || false);
 
 	function tagImport(imp) {
@@ -130,7 +128,7 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 		}
 
 		const children = t.react.buildChildren(node);
-		if (htmlOutput || children && children.length !== 0) {
+		if (children && children.length !== 0) {
 			raw('>');
 			for (let i = 0; i < children.length; i++) {
 				let child = children[i];
