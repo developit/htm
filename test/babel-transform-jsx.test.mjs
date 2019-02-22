@@ -101,22 +101,6 @@ describe('babel-plugin-transform-jsx-to-htm', () => {
 		});
 	});
 
-	describe('options.html = true', () => {
-		test('use explicit end tags instead of self-closing', () => {
-			expect(
-				compile('(<div />);', { html: true })
-			).toBe('html`<div></div>`;');
-
-			expect(
-				compile('(<div a />);', { html: true })
-			).toBe('html`<div a></div>`;');
-
-			expect(
-				compile('(<a>b</a>);', { html: true })
-			).toBe('html`<a>b</a>`;');
-		});
-	});
-
 	describe('props', () => {
 		test('static values', () => {
 			expect(
@@ -201,26 +185,6 @@ describe('babel-plugin-transform-jsx-to-htm', () => {
 			expect(
 				compile(`(<div>{/* a comment */}</div>);`)
 			).toBe('html`<div/>`;');
-		});
-	});
-
-	describe('integration with babel-plugin-jsx-pragmatic', () => {
-		test('JSX is still identified and import added', () => {
-			expect(
-				compile('const Foo = props => <div>hello</div>;', {
-					tag: '$$html',
-					plugins: [
-						['babel-plugin-jsx-pragmatic', {
-							// module to import:
-							module: 'lit-html',
-							// the name of the export to use:
-							export: 'html',
-							// whatever you specified for the "tag" option:
-							import: '$$html'
-						}]
-					]
-				})
-			).toBe('import { html as $$html } from "lit-html";\n\nconst Foo = props => $$html`<div>hello</div>`;');
 		});
 	});
 });
