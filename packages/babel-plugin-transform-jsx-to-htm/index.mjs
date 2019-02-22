@@ -4,11 +4,37 @@ import jsx from '@babel/plugin-syntax-jsx';
  * @param {Babel} babel
  * @param {object} [options]
  * @param {string} [options.tag='html']  The tagged template "tag" function name to produce.
+ * @param {string | boolean | object} [options.import=false]  Import the tag automatically
  * @param {string} [options.html=false]  If `true`, output HTML-like instead of XML-like (no self-closing tags, etc).
  */
 export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
-	const tag = dottedIdentifier(options.tag || 'html');
+	const tagString = options.tag || 'html';
+	const tag = dottedIdentifier(tagString);
 	const htmlOutput = !!options.html;
+	const importDeclaration = tagImport(options.import || false);
+
+	function tagImport(imp) {
+		if (imp === false) {
+			return null;
+		}
+		const tagRoot = t.identifier(tagString.split('.')[0]);
+		const { module, export: export_ } = typeof imp !== 'string' ? imp : {
+			module: imp,
+			export: null
+		};
+
+		let specifier;
+		if (export_ === '*') {
+			specifier = t.importNamespaceSpecifier(tagRoot);
+		}
+		else if (export_ === 'default') {
+			specifier = t.importDefaultSpecifier(tagRoot);
+		}
+		else {
+			specifier = t.importSpecifier(tagRoot, export_ ? t.identifier(export_) : tagRoot);
+		}
+		return t.importDeclaration([specifier], t.stringLiteral(module));
+	}
 
 	function dottedIdentifier(keypath) {
 		const path = keypath.split('.');
@@ -147,7 +173,15 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 		name: 'transform-jsx-to-htm',
 		inherits: jsx,
 		visitor: {
-			JSXElement(path) {
+			Program: {
+				exit(path, state) {
+					if (state.get('jsxElement') && importDeclaration) {
+						path.unshiftContainer('body', importDeclaration);
+					}
+				}
+			},
+
+			JSXElement(path, state) {
 				let quasisBefore = quasis.slice();
 				let expressionsBefore = expressions.slice();
 				let bufferBefore = buffer;
@@ -161,6 +195,8 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 				quasis = quasisBefore;
 				expressions = expressionsBefore;
 				buffer = bufferBefore;
+
+				state.set('jsxElement', true);
 			}
 		}
 	};
