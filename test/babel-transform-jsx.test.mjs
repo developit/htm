@@ -5,7 +5,7 @@ function compile(code, { plugins = [], ...options } = {}) {
 	return transform(code, {
 		babelrc: false,
 		configFile: false,
-		sourceType: 'script',
+		sourceType: 'module',
 		plugins: [
 			...plugins,
 			[transformJsxToHtmPlugin, options]
@@ -14,6 +14,50 @@ function compile(code, { plugins = [], ...options } = {}) {
 }
 
 describe('babel-plugin-transform-jsx-to-htm', () => {
+	describe('import', () => {
+		test('import shortcut', () => {
+			expect(
+				compile(`(<div />);`, { import: 'htm/preact' })
+			).toBe('import { html } from "htm/preact";\nhtml`<div/>`;');
+		});
+
+		test('import shortcut, dotted tag', () => {
+			expect(
+				compile(`(<div />);`, { tag: 'html.bound', import: 'htm/preact' })
+			).toBe('import { html } from "htm/preact";\nhtml.bound`<div/>`;');
+		});
+
+		test('named import', () => {
+			expect(
+				compile(`(<div />);`, { import: { module: 'htm/preact', export: '$html' } })
+			).toBe('import { $html as html } from "htm/preact";\nhtml`<div/>`;');
+		});
+
+		test('named import, dotted tag', () => {
+			expect(
+				compile(`(<div />);`, { tag: 'html.bound', import: { module: 'htm/preact', export: '$html' } })
+			).toBe('import { $html as html } from "htm/preact";\nhtml.bound`<div/>`;');
+		});
+
+		test('default import', () => {
+			expect(
+				compile(`(<div />);`, { import: { module: 'htm/preact', export: 'default' } })
+			).toBe('import html from "htm/preact";\nhtml`<div/>`;');
+		});
+
+		test('namespace import', () => {
+			expect(
+				compile(`(<div />);`, { import: { module: 'htm/preact', export: '*' } })
+			).toBe('import * as html from "htm/preact";\nhtml`<div/>`;');
+		});
+
+		test('no import without JSX', () => {
+			expect(
+				compile(`false;`, { import: 'htm/preact' })
+			).toBe('false;');
+		});
+	});
+
 	describe('elements and text', () => {
 		test('single named element', () => {
 			expect(
