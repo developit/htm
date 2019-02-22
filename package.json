@@ -64,7 +64,6 @@
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.1.6",
     "babel-jest": "^24.1.0",
-    "babel-plugin-jsx-pragmatic": "^1.0.2",
     "babel-preset-env": "^1.7.0",
     "eslint": "^5.2.0",
     "eslint-config-developit": "^1.1.1",
