@@ -28,6 +28,6 @@
 	"license": "Apache-2.0",
 	"homepage": "https://github.com/developit/htm/tree/master/packages/babel-plugin-transform-jsx-to-htm",
 	"devDependencies": {
-		"microbundle": "^0.10.0"
+		"microbundle": "^0.10.1"
 	}
 }

@@ -7,8 +7,8 @@
   "module": "dist/htm.mjs",
   "scripts": {
     "build": "npm run -s build:main && npm run -s build:mini && npm run -s build:preact && npm run -s build:babel && npm run -s build:babel-transform-jsx",
-    "build:main": "microbundle src/index.mjs -f es,umd --no-sourcemap --target web --define HTM_MODE=default && microbundle src/cjs.mjs -f iife --no-sourcemap --target web --define HTM_MODE=default",
-    "build:mini": "microbundle src/index.mjs -o ./mini/index.js -f es,umd --no-sourcemap --target web --define HTM_MODE=mini && microbundle src/cjs.mjs -o ./mini/index.js -f iife --no-sourcemap --target web --define HTM_MODE=mini",
+    "build:main": "microbundle src/index.mjs -f es,umd --no-sourcemap --target web && microbundle src/cjs.mjs -f iife --no-sourcemap --target web",
+    "build:mini": "microbundle src/index.mjs -o ./mini/index.js -f es,umd --no-sourcemap --target web --alias ./constants=./constants-mini && microbundle src/cjs.mjs -o ./mini/index.js -f iife --no-sourcemap --target web --alias ./constants=./constants-mini",
     "build:preact": "cd src/integrations/preact && npm run build",
     "build:babel": "cd packages/babel-plugin-htm && npm run build",
     "build:babel-transform-jsx": "cd packages/babel-plugin-transform-jsx-to-htm && npm run build",
@@ -73,7 +73,7 @@
     "eslint": "^5.2.0",
     "eslint-config-developit": "^1.1.1",
     "jest": "^24.1.0",
-    "microbundle": "^0.10.0",
+    "microbundle": "^0.10.1",
     "preact": "^8.4.2"
   },
   "dependencies": {},

@@ -32,6 +32,6 @@
 		"htm": "^2.0.0"
 	},
 	"devDependencies": {
-		"microbundle": "^0.10.0"
+		"microbundle": "^0.10.1"
 	}
 }
