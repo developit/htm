@@ -5,7 +5,7 @@ function compile(code, { plugins = [], ...options } = {}) {
 	return transform(code, {
 		babelrc: false,
 		configFile: false,
-		sourceType: 'script',
+		sourceType: 'module',
 		plugins: [
 			...plugins,
 			[transformJsxToHtmPlugin, options]
@@ -14,6 +14,50 @@ function compile(code, { plugins = [], ...options } = {}) {
 }
 
 describe('babel-plugin-transform-jsx-to-htm', () => {
+	describe('import', () => {
+		test('import shortcut', () => {
+			expect(
+				compile(`(<div />);`, { import: 'htm/preact' })
+			).toBe('import { html } from "htm/preact";\nhtml`<div/>`;');
+		});
+
+		test('import shortcut, dotted tag', () => {
+			expect(
+				compile(`(<div />);`, { tag: 'html.bound', import: 'htm/preact' })
+			).toBe('import { html } from "htm/preact";\nhtml.bound`<div/>`;');
+		});
+
+		test('named import', () => {
+			expect(
+				compile(`(<div />);`, { import: { module: 'htm/preact', export: '$html' } })
+			).toBe('import { $html as html } from "htm/preact";\nhtml`<div/>`;');
+		});
+
+		test('named import, dotted tag', () => {
+			expect(
+				compile(`(<div />);`, { tag: 'html.bound', import: { module: 'htm/preact', export: '$html' } })
+			).toBe('import { $html as html } from "htm/preact";\nhtml.bound`<div/>`;');
+		});
+
+		test('default import', () => {
+			expect(
+				compile(`(<div />);`, { import: { module: 'htm/preact', export: 'default' } })
+			).toBe('import html from "htm/preact";\nhtml`<div/>`;');
+		});
+
+		test('namespace import', () => {
+			expect(
+				compile(`(<div />);`, { import: { module: 'htm/preact', export: '*' } })
+			).toBe('import * as html from "htm/preact";\nhtml`<div/>`;');
+		});
+
+		test('no import without JSX', () => {
+			expect(
+				compile(`false;`, { import: 'htm/preact' })
+			).toBe('false;');
+		});
+	});
+
 	describe('elements and text', () => {
 		test('single named element', () => {
 			expect(
@@ -54,22 +98,6 @@ describe('babel-plugin-transform-jsx-to-htm', () => {
 			expect(
 				compile(`(<div>a&lt;b&lt;&lt;&lt;c</div>);`)
 			).toBe('html`<div>${"a<b<<<c"}</div>`;');
-		});
-	});
-
-	describe('options.html = true', () => {
-		test('use explicit end tags instead of self-closing', () => {
-			expect(
-				compile('(<div />);', { html: true })
-			).toBe('html`<div></div>`;');
-
-			expect(
-				compile('(<div a />);', { html: true })
-			).toBe('html`<div a></div>`;');
-
-			expect(
-				compile('(<a>b</a>);', { html: true })
-			).toBe('html`<a>b</a>`;');
 		});
 	});
 
@@ -157,26 +185,6 @@ describe('babel-plugin-transform-jsx-to-htm', () => {
 			expect(
 				compile(`(<div>{/* a comment */}</div>);`)
 			).toBe('html`<div/>`;');
-		});
-	});
-
-	describe('integration with babel-plugin-jsx-pragmatic', () => {
-		test('JSX is still identified and import added', () => {
-			expect(
-				compile('const Foo = props => <div>hello</div>;', {
-					tag: '$$html',
-					plugins: [
-						['babel-plugin-jsx-pragmatic', {
-							// module to import:
-							module: 'lit-html',
-							// the name of the export to use:
-							export: 'html',
-							// whatever you specified for the "tag" option:
-							import: '$$html'
-						}]
-					]
-				})
-			).toBe('import { html as $$html } from "lit-html";\n\nconst Foo = props => $$html`<div>hello</div>`;');
 		});
 	});
 });

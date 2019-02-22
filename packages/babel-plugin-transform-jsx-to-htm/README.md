@@ -1,6 +1,6 @@
 # babel-plugin-transform-jsx-to-htm
 
-This plugin converts JSX into Tagged Templates that work with things like [htm] and [lit-html].
+This plugin converts JSX into Tagged Templates that work with [htm].
 
 ```js
 // INPUT:
@@ -32,37 +32,34 @@ The following options are available:
 
 | Option | Type    | Default  | Description
 |--------|---------|----------|------------
-| `tag`  | String  | `"html"` | The "tag" function to prefix [Tagged Templates] with.<br> _Useful when [Auto-importing a tag function](#auto-importing-the-tag)._
-| `html` | Boolean | `false`  | `true` outputs HTML-like templates for use with [lit-html].<br> _The is default XML-like, with self-closing tags._
+| `tag`  | String  | `"html"` | The "tag" function to prefix [Tagged Templates] with.
+| `import`  | `false`\|String\|Object  | `false` | Auto-import a tag function, off by default.<br>_See [Auto-importing a tag function](#auto-importing-the-tag) for an example._
 
 Options are passed to a Babel plugin using a nested Array:
 
 ```js
 "plugins": [
   ["babel-plugin-transform-jsx-to-htm", {
-    "tag": "$$html",
-    "html": true
+    "tag": "$$html"
   }]
 ]
 ```
 
 ## Auto-importing the tag
 
-Want to automatically import `html` into any file that uses JSX?  It works the same as with JSX!
-Just use [babel-plugin-jsx-pragmatic]:
+Want to automatically import `html` into any file that uses JSX?
+Just use the `import` option:
 
 ```js
 "plugins": [
-  ["babel-plugin-jsx-pragmatic", {
-    // the module to import:
-    "module": "lit-html",
-    // a named export to use from that module:
-    "export": "html",
-    // what to call it locally: (should match your "tag" option)
-    "import": "$$html"
-  }],
   ["babel-plugin-transform-jsx-to-htm", {
-    "tag": "$$html"
+    "tag": "$$html",
+    "import": {
+      // the module to import:
+      "module": "htm/preact",
+      // a named export to use from that module:
+      "export": "html"
+    }
   }]
 ]
 ```
@@ -70,7 +67,7 @@ Just use [babel-plugin-jsx-pragmatic]:
 The above will produce files that look like:
 
 ```js
-import { html as $$html } from 'lit-html';
+import { html as $$html } from 'htm/preact';
 
 export default $$html`<h1>hello</h1>`
 ```
@@ -80,5 +77,3 @@ export default $$html`<h1>hello</h1>`
 Apache 2
 
 [htm]: https://github.com/developit/htm
-[lit-html]: https://github.com/polymer/lit-html
-[babel-plugin-jsx-pragmatic]: https://github.com/jmm/babel-plugin-jsx-pragmatic
