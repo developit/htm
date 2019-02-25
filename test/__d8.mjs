@@ -3,8 +3,6 @@
 const queue = [];
 let stack = [];
 let index = 0;
-// let currentName;
-// let prefix = '';
 
 async function process() {
 	const id = index++;
@@ -20,9 +18,7 @@ async function process() {
 
 const processors = {
 	async describe(name, fn, path) {
-		// stack.push(Array.from({ length: stack.length + 1 }).join('  ') + name);
 		stack.push(name);
-		// log('INFO', Array.from(path).fill('  ').join('') + name);
 		log('INFO', name);
 		await fn();
 		stack.pop();
@@ -42,18 +38,14 @@ const processors = {
 				.then(fn)
 				.then(() => calls || done())
 				.catch(err => {
-					// setTimeout(process);
-					// throw new Error(`\t${err.stack || err.message}`);
 					log('ERROR', `🚨  ${name}`);
 					log('ERROR', '\t' + String(err.stack || err.message || err));
-					// setTimeout(process);
 					resolve();
 				});
 		});
 		for (let i=0; i<logBuffer.length; i++) log(...logBuffer[i]);
 		logBuffer = undefined;
 		stack = stackBefore;
-		// process();
 	}
 };
 
