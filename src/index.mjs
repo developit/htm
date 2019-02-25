@@ -206,7 +206,7 @@ const getCacheKeyed = (statics) => {
 	return CACHE[key] || (CACHE[key] = build(statics));
 };
 
-const USE_MAP = typeof Map === 'function';
+const USE_MAP = !MINI && typeof Map === 'function';
 const CACHE = USE_MAP ? new Map() : {};
 const getCache = USE_MAP ? getCacheMap : getCacheKeyed;
 
