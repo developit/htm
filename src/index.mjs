@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-import { MINI } from './constants';
+import { MINI } from './constants.mjs';
 
 const TAG_SET = 1;
 const PROPS_SET = 2;
