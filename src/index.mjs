@@ -11,174 +11,208 @@
  * limitations under the License.
  */
 
-const CACHE = {};
+import { MINI } from './constants';
 
-const stringify = JSON.stringify;
+const TAG_SET = 1;
+const PROPS_SET = 2;
+const PROPS_ASSIGN = 3;
+const CHILD_RECURSE = 4;
+const CHILD_APPEND = 0;
 
-export default function html(statics) {
-	let key = '.';
-	for (let i=0; i<statics.length; i++) key += statics[i].length + ',' + statics[i];
-	const tpl = CACHE[key] || (CACHE[key] = build(statics));
-
-	// eslint-disable-next-line prefer-rest-params
-	return tpl(this, arguments);
-}
-
-const TAG_START = 60;
-const TAG_END = 62;
-const EQUALS = 61;
-const QUOTE_DOUBLE = 34;
-const QUOTE_SINGLE = 39;
-const TAB = 9;
-const NEWLINE = 10;
-const RETURN = 13;
-const SPACE = 32;
-const SLASH = 47;
-
-const MODE_WHITESPACE = 0;
+const MODE_SLASH = 0;
 const MODE_TEXT = 1;
-const MODE_TAGNAME = 9;
-const MODE_ATTRIBUTE = 13;
-const MODE_SKIP = 47;
+const MODE_WHITESPACE = 2;
+const MODE_TAGNAME = 3;
+const MODE_ATTRIBUTE = 4;
 
-/** Create a template function given strings from a tagged template. */
-const build = (statics) => {
-	let mode = MODE_WHITESPACE;
-	let out = 'return ';
+const evaluate = (h, current, fields, args) => {
+	for (let i = 1; i < current.length; i++) {
+		const field = current[i++];
+		const value = typeof field === 'number' ? fields[field] : field;
+
+		if (current[i] === TAG_SET) {
+			args[0] = value;
+		}
+		else if (current[i] === PROPS_SET) {
+			(args[1] = args[1] || {})[current[++i]] = value;
+		}
+		else if (current[i] === PROPS_ASSIGN) {
+			args[1] = Object.assign(args[1] || {}, value);
+		}
+		else if (current[i]) {
+			// code === CHILD_RECURSE
+			args.push(h.apply(null, evaluate(h, value, fields, ['', null])));
+		}
+		else {
+			// code === CHILD_APPEND
+			args.push(value);
+		}
+	}
+
+	return args;
+};
+
+const build = function(statics) {
+	const fields = arguments;
+	const h = this;
+
+	let mode = MODE_TEXT;
 	let buffer = '';
-	let field = '';
-	let hasChildren = 0;
-	let props = '';
-	let propsClose = '';
-	let spreadClose = '';
-	let quote = 0;
-	let slash, charCode, inTag, propName, propHasValue;
+	let quote = '';
+	let current = [0];
+	let char, propName;
 
-	const commit = () => {
-		if (!inTag) {
-			if (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g,''))) {
-				if (hasChildren++) out += ',';
-				out += field || stringify(buffer);
+	const commit = field => {
+		if (mode === MODE_TEXT && (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g,'')))) {
+			if (MINI) {
+				current.push(field ? fields[field] : buffer);
+			}
+			else {
+				current.push(field || buffer, CHILD_APPEND);
 			}
 		}
-		else if (mode === MODE_TAGNAME) {
-			if (hasChildren++) out += ',';
-			out += 'h(' + (field || stringify(buffer));
+		else if (mode === MODE_TAGNAME && (field || buffer)) {
+			if (MINI) {
+				current[1] = field ? fields[field] : buffer;
+			}
+			else {
+				current.push(field || buffer, TAG_SET);
+			}
 			mode = MODE_WHITESPACE;
 		}
-		else if (mode === MODE_ATTRIBUTE || (mode === MODE_WHITESPACE && buffer === '...')) {
-			if (mode === MODE_WHITESPACE) {
-				if (!spreadClose) {
-					spreadClose = ')';
-					if (!props) props = 'Object.assign({}';
-					else props = 'Object.assign(' + props;
-				}
-				props += propsClose + ',' + field;
-				propsClose = '';
+		else if (mode === MODE_WHITESPACE && buffer === '...' && field) {
+			if (MINI) {
+				current[2] = Object.assign(current[2] || {}, fields[field]);
 			}
-			else if (propName) {
-				if (!props) props += '{';
-				else props += ',' + (propsClose ? '' : '{');
-				propsClose = '}';
-				props += stringify(propName) + ':';
-				props += field || ((propHasValue || buffer) && stringify(buffer)) || 'true';
-				propName = '';
+			else {
+				current.push(field, PROPS_ASSIGN);
 			}
-			propHasValue = false;
 		}
-		else if (mode === MODE_WHITESPACE) {
-			mode = MODE_ATTRIBUTE;
-			// we're in an attribute name
-			propName = buffer;
-			buffer = field = '';
-			commit();
-			mode = MODE_WHITESPACE;
+		else if (mode === MODE_WHITESPACE && buffer && !field) {
+			if (MINI) {
+				(current[2] = current[2] || {})[buffer] = true;
+			}
+			else {
+				current.push(true, PROPS_SET, buffer);
+			}
 		}
-		buffer = field = '';
+		else if (mode === MODE_ATTRIBUTE && propName) {
+			if (MINI) {
+				(current[2] = current[2] || {})[propName] = field ? fields[field] : buffer;
+			}
+			else {
+				current.push(field || buffer, PROPS_SET, propName);
+			}
+			propName = '';
+		}
+		buffer = '';
 	};
 
 	for (let i=0; i<statics.length; i++) {
-		if (i > 0) {
-			if (!inTag) commit();
-			field = `$[${i}]`;
-			commit();
+		if (i) {
+			if (mode === MODE_TEXT) {
+				commit();
+			}
+			commit(i);
 		}
-		
-		for (let j=0; j<statics[i].length; j++) {
-			charCode = statics[i].charCodeAt(j);
 
-			if (!inTag) {
-				if (charCode === TAG_START) {
+		for (let j=0; j<statics[i].length; j++) {
+			char = statics[i][j];
+
+			if (mode === MODE_TEXT) {
+				if (char === '<') {
 					// commit buffer
 					commit();
-					inTag = 1;
-					spreadClose = propsClose = props = '';
-					slash = propHasValue = false;
+					if (MINI) {
+						current = [current, '', null];
+					}
+					else {
+						current = [current];
+					}
 					mode = MODE_TAGNAME;
-					continue;
 				}
+				else {
+					buffer += char;
+				}
+			}
+			else if (quote) {
+				if (char === quote) {
+					quote = '';
+				}
+				else {
+					buffer += char;
+				}
+			}
+			else if (char === '"' || char === "'") {
+				quote = char;
+			}
+			else if (char === '>') {
+				commit();
+				mode = MODE_TEXT;
+			}
+			else if (!mode) {
+				// Ignore everything until the tag ends
+			}
+			else if (char === '=') {
+				mode = MODE_ATTRIBUTE;
+				propName = buffer;
+				buffer = '';
+			}
+			else if (char === '/') {
+				commit();
+				if (mode === MODE_TAGNAME) {
+					current = current[0];
+				}
+				mode = current;
+				if (MINI) {
+					(current = current[0]).push(h.apply(null, mode.slice(1)));
+				}
+				else {
+					(current = current[0]).push(mode, CHILD_RECURSE);
+				}
+				mode = MODE_SLASH;
+			}
+			else if (char === ' ' || char === '\t' || char === '\n' || char === '\r') {
+				// <a disabled>
+				commit();
+				mode = MODE_WHITESPACE;
 			}
 			else {
-				if (charCode === QUOTE_SINGLE || charCode === QUOTE_DOUBLE) {
-					if (quote === charCode) {
-						quote = 0;
-						continue;
-					}
-					if (quote === 0) {
-						quote = charCode;
-						continue;
-					}
-				}
-				
-				if (quote === 0) {
-					switch (charCode) {
-						case TAG_END:
-							commit();
-							if (mode !== MODE_SKIP) {
-								if (!props) {
-									out += ',null';
-								}
-								else {
-									out += ',' + props + propsClose + spreadClose;
-								}
-							}
-							if (slash) {
-								out += ')';
-							}
-							inTag = 0;
-							props = '';
-							mode = MODE_TEXT;
-							continue;
-						case EQUALS:
-							mode = MODE_ATTRIBUTE;
-							propHasValue = true;
-							propName = buffer;
-							buffer = '';
-							continue;
-						case SLASH:
-							if (!slash) {
-								slash = true;
-								// </foo>
-								if (mode === MODE_TAGNAME && !buffer.trim()) {
-									buffer = field = '';
-									mode = MODE_SKIP;
-								}
-							}
-							continue;
-						case TAB:
-						case NEWLINE:
-						case RETURN:
-						case SPACE:
-							// <a disabled>
-							commit();
-							mode = MODE_WHITESPACE;
-							continue;
-					}
-				}
+				buffer += char;
 			}
-			buffer += statics[i].charAt(j);
 		}
 	}
 	commit();
-	return Function('h', '$', out);
+
+	if (MINI) {
+		return current.length > 2 ? current.slice(1) : current[1];
+	}
+	return current;
 };
+
+const getCacheMap = (statics) => {
+	let tpl = CACHE.get(statics);
+	if (!tpl) {
+		CACHE.set(statics, tpl = build(statics));
+	}
+	return tpl;
+};
+
+const getCacheKeyed = (statics) => {
+	let key = '';
+	for (let i = 0; i < statics.length; i++) {
+		key += statics[i].length + '-' + statics[i];
+	}
+	return CACHE[key] || (CACHE[key] = build(statics));
+};
+
+const USE_MAP = !MINI && typeof Map === 'function';
+const CACHE = USE_MAP ? new Map() : {};
+const getCache = USE_MAP ? getCacheMap : getCacheKeyed;
+
+const cached = function(statics) {
+	const res = evaluate(this, getCache(statics), arguments, []);
+	return res.length > 1 ? res : res[0];
+};
+
+export default MINI ? build : cached;
