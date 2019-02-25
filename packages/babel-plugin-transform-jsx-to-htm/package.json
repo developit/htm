@@ -1,9 +1,9 @@
 {
-	"name": "babel-plugin-htm",
-	"version": "2.0.0",
-	"description": "Babel plugin to compile htm's Tagged Template syntax to hyperscript or inline VNodes.",
-	"main": "dist/babel-plugin-htm.js",
-	"module": "dist/babel-plugin-htm.mjs",
+	"name": "babel-plugin-transform-jsx-to-htm",
+	"version": "1.0.0",
+	"description": "Babel plugin to compile JSX to Tagged Templates.",
+	"main": "dist/babel-plugin-transform-jsx-to-htm.js",
+	"module": "dist/babel-plugin-transform-jsx-to-htm.mjs",
 	"scripts": {
 		"build": "microbundle index.mjs -f es,cjs --target node --no-compress --no-sourcemap",
 		"prepare": "npm run build"
@@ -13,7 +13,6 @@
 	],
 	"repository": "developit/htm",
 	"keywords": [
-		"Hyperscript Tagged Markup",
 		"tagged template",
 		"template literals",
 		"html",
@@ -27,8 +26,9 @@
 	],
 	"author": "Jason Miller <jason@developit.ca>",
 	"license": "Apache-2.0",
-	"homepage": "https://github.com/developit/htm/tree/master/packages/babel-plugin-htm",
+	"homepage": "https://github.com/developit/htm/tree/master/packages/babel-plugin-transform-jsx-to-htm",
 	"dependencies": {
+		"@babel/plugin-syntax-jsx": "^7.2.0",
 		"htm": "^2.0.0"
 	},
 	"devDependencies": {

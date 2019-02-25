@@ -14,6 +14,8 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 	const useBuiltIns = options.useBuiltIns;
 	const inlineVNodes = options.monomorphic || pragma===false;
 
+	const symbol = Symbol();
+	
 	function dottedIdentifier(keypath) {
 		const path = keypath.split('.');
 		let out;
@@ -73,7 +75,26 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 		return t.callExpression(pragma, [tag, props].concat(children));
 	}
 	
+	function flatten(props, result = []) {
+		const { [symbol]: head, ...tail } = props;
+		if (head) head.forEach(obj => {
+			flatten(obj, result);
+		});
+		if (Object.keys(tail).length > 0) {
+			result.push(tail);
+		}
+		return result;
+	}
+	
 	function spreadNode(args, state) {
+		if (args.length > 0 && t.isNode(args[0])) {
+			args.unshift({});
+		}
+		
+		// 'Object.assign(x)', can be collapsed to 'x'.
+		if (args.length === 1) {
+			return propsNode(args[0]);
+		}
 		// 'Object.assign({}, x)', can be collapsed to 'x'.
 		if (args.length === 2 && !t.isNode(args[0]) && Object.keys(args[0]).length === 0) {
 			return propsNode(args[1]);
@@ -83,8 +104,6 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 	}
 	
 	function propsNode(props) {
-		if (props == null) return t.nullLiteral();
-
 		return t.isNode(props) ? props : t.objectExpression(
 			Object.keys(props).map(key => {
 				let value = props[key];
@@ -111,7 +130,7 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 			return t.isNode(child) ? child : transform(child, state);
 		}
 		const newTag = typeof tag === 'string' ? t.stringLiteral(tag) : tag;
-		const newProps = !Array.isArray(props) ? propsNode(props) : spreadNode(props, state);
+		const newProps = props ? spreadNode(flatten(props), state) : t.nullLiteral();
 		const newChildren = t.arrayExpression(children.map(childMapper));
 		return createVNode(newTag, newProps, newChildren);
 	}
@@ -125,7 +144,7 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 	function treeify(statics, expr) {
 		const assign = Object.assign;
 		try {
-			Object.assign = function(...objs) {	return objs; };
+			Object.assign = function(...objs) {	return { [symbol]: objs }; };
 			return html(statics, ...expr);
 		}
 		finally {
@@ -147,7 +166,10 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 					const expr = path.node.quasi.expressions;
 
 					const tree = treeify(statics, expr);
-					path.replaceWith(transform(tree, state));
+					const node = !Array.isArray(tree)
+						? transform(tree, state)
+						: t.arrayExpression(tree.map(root => transform(root, state)));
+					path.replaceWith(node);
 				}
 			}
 		}
