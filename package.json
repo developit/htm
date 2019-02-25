@@ -13,6 +13,7 @@
     "build:babel": "cd packages/babel-plugin-htm && npm run build",
     "build:babel-transform-jsx": "cd packages/babel-plugin-transform-jsx-to-htm && npm run build",
     "test": "eslint src/**/*.mjs test/**/*.mjs && npm run build && jest test",
+    "test:perf": "v8 test/__perftest.mjs",
     "release": "npm t && git commit -am \"$npm_package_version\" && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
   "files": [
