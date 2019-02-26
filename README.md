@@ -21,7 +21,7 @@ It uses standard JavaScript [Tagged Templates] and works in [all modern browsers
 
 🥚 **< 400 byte** `htm/mini` version
 
-🏅 **0 bytes** when compiled using [babel-plugin-htm]
+🏅 **0 bytes** if compiled using [babel-plugin-htm]
 
 
 ## Syntax: like JSX but also lit
