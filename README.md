@@ -15,11 +15,13 @@ It uses standard JavaScript [Tagged Templates] and works in [all modern browsers
 
 ## `htm` by the numbers:
 
-🐣 **< 700 bytes** when used directly in the browser
+🐣 **< 600 bytes** when used directly in the browser
 
 ⚛️ **< 500 bytes** when used with Preact _(thanks gzip 🌈)_
 
-🏅 **0 bytes** when compiled using [babel-plugin-htm]
+🥚 **< 400 byte** `htm/mini` version
+
+🏅 **0 bytes** if compiled using [babel-plugin-htm]
 
 
 ## Syntax: like JSX but also lit
@@ -42,6 +44,7 @@ Here's some ergonomic features you get for free that aren't present in JSX:
 - HTML's optional quotes: `<div class=foo>`
 - Component end-tags: `<${Footer}>footer content<//>`
 - Syntax highlighting and language support via the [lit-html VSCode extension] and [vim-jsx-pretty plugin].
+- Multiple root element (fragments): `<div /><div />`
 
 ## Installation
 
@@ -107,6 +110,28 @@ console.log( html`<h1 id=hello>Hello world!</h1>` );
 // }
 ```
 
+If the template has multiple element at the root level
+the output is an array of `h` results:
+
+```js
+console.log(html`
+  <h1 id=hello>Hello</h1>
+  <div class=world>World!</div>
+`);
+// [
+//   {
+//     type: 'h1',
+//     props: { id: 'hello' },
+//     children: ['Hello']
+//   },
+//   {
+//     type: 'div',
+//     props: { class: 'world' },
+//     children: ['world!']
+//   }
+// ]
+```
+
 ## Example
 
 Curious to see what it all looks like? Here's a working app!
@@ -140,7 +165,7 @@ It's a single HTML file, and there's no build or tooling. You can edit it with n
         `;
       }
     }
-		  
+
     const Header = ({ name }) => html`<h1>${name} List</h1>`
 
     const Footer = props => html`<footer ...${props} />`
@@ -213,7 +238,7 @@ The original goal for `htm` was to create a wrapper around Preact that felt natu
 
 This meant giving up JSX, and the closest alternative was [Tagged Templates]. So, I wrote this library to patch up the differences between the two as much as possible. As it turns out, the technique is framework-agnostic, so it should work great with most Virtual DOM libraries.
 
-As of 2.0.0, `htm` is stable, well-tested and ready for production use.
+As of 2.1.0, `htm` is stable, well-tested and ready for production use.
 
 [Tagged Templates]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates
 [lit-html]: https://github.com/Polymer/lit-html
