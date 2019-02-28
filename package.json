@@ -21,6 +21,7 @@
     "dist",
     "mini",
     "preact",
+    "react",
     "src"
   ],
   "eslintConfig": {
