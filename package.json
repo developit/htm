@@ -1,6 +1,6 @@
 {
   "name": "htm",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "The Tagged Template syntax for Virtual DOM. Only browser-compatible syntax.",
   "main": "dist/htm.js",
   "umd:main": "dist/htm.umd.js",
@@ -21,6 +21,7 @@
     "dist",
     "mini",
     "preact",
+    "react",
     "src"
   ],
   "eslintConfig": {
