@@ -22,8 +22,9 @@ const CHILD_APPEND = 0;
 const MODE_SLASH = 0;
 const MODE_TEXT = 1;
 const MODE_WHITESPACE = 2;
-const MODE_TAGNAME = 3;
-const MODE_ATTRIBUTE = 4;
+const MODE_ATTRIBUTE = 3;
+const MODE_TAGNAME = 4;
+const MODE_COMMENT = 5;
 
 const evaluate = (h, current, fields, args) => {
 	for (let i = 1; i < current.length; i++) {
@@ -135,6 +136,16 @@ const build = function(statics) {
 					buffer += char;
 				}
 			}
+			else if (mode === MODE_COMMENT) {
+				// Ignore everything until the last three characters are '-', '-' and '>'
+				if (buffer === '--' && char === '>') {
+					mode = MODE_TEXT;
+					buffer = '';
+				}
+				else {
+					buffer = char + buffer[0];
+				}
+			}
 			else if (quote) {
 				if (char === quote) {
 					quote = '';
@@ -179,6 +190,11 @@ const build = function(statics) {
 			}
 			else {
 				buffer += char;
+			}
+
+			if (mode === MODE_TAGNAME && buffer === '!--') {
+				mode = MODE_COMMENT;
+				current = current[0];
 			}
 		}
 	}
