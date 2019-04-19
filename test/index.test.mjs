@@ -182,4 +182,11 @@ describe('htm', () => {
 		html`<a ...${obj} b="1" />`;
 		expect(obj).toEqual({});
 	});
+
+	test('ignore HTML comments', () => {
+		expect(html`<a><!-- Hello, world! --></a>`).toEqual(h('a', null));
+		expect(html`<a><!-- Hello,\nworld! --></a>`).toEqual(h('a', null));
+		expect(html`<a><!-- ${'Hello, world!'} --></a>`).toEqual(h('a', null));
+		expect(html`<a><!--> Hello, world <!--></a>`).toEqual(h('a', null));
+	});
 });
