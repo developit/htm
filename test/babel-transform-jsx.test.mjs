@@ -101,6 +101,20 @@ describe('babel-plugin-transform-jsx-to-htm', () => {
 		});
 	});
 
+	describe('fragments', () => {
+		test('React.Fragment', () => {
+			expect(
+				compile(`<React.Fragment><div>Foo</div><div>Bar</div></React.Fragment>`)
+			).toBe('html`<div>Foo</div><div>Bar</div>`;');
+		});
+
+		test('short syntax', () => {
+			expect(
+				compile(`<><div>Foo</div><div>Bar</div></>`)
+			).toBe('html`<div>Foo</div><div>Bar</div>`;');
+		});
+	});
+
 	describe('props', () => {
 		test('static values', () => {
 			expect(
