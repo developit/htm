@@ -181,7 +181,7 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
     processChildren(node, name, isFragment);
 
 		if (isRoot) {
-			commit();
+			commit(true);
 			const template = t.templateLiteral(quasis, expressions);
 			const replacement = t.taggedTemplateExpression(tag, template);
 			path.replaceWith(replacement);
