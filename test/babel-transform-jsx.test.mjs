@@ -113,6 +113,12 @@ describe('babel-plugin-transform-jsx-to-htm', () => {
 				compile(`<><div>Foo</div><div>Bar</div></>`)
 			).toBe('html`<div>Foo</div><div>Bar</div>`;');
 		});
+
+		test('root expressions', () => {
+			expect(
+				compile(`<React.Fragment>{Foo}{Bar}</React.Fragment>`)
+			).toBe('html`${Foo}${Bar}`;');
+		});
 	});
 
 	describe('props', () => {
