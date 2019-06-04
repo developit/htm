@@ -144,7 +144,7 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 				}
 			}
 
-			if (name.match(/^[A-Z]/)) {
+			if (name.match(/^[_A-Z]/)) {
 				raw('</');
 				expr(t.identifier(name));
 				raw('>');
