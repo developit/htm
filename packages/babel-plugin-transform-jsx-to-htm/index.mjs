@@ -92,7 +92,7 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 		const open = node.openingElement;
 		const { name } = open.name;
 
-		if (name.match(/^[A-Z]/)) {
+		if (name.match(/^[_A-Z]/)) {
 			raw('<');
 			expr(t.identifier(name));
 		}
