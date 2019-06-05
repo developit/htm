@@ -86,24 +86,24 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 			cooked: buffer
 		}));
 		buffer = '';
-  }
-  
-  function getName(node) {
-    switch (node.type) {
-      case 'JSXMemberExpression':
-        return `${node.object.name}.${node.property.name}`
-    
-      default:
-        return node.name;
-    }
-  }
+	}
+	
+	function getName(node) {
+		switch (node.type) {
+			case 'JSXMemberExpression':
+				return `${node.object.name}.${node.property.name}`
+		
+			default:
+				return node.name;
+		}
+	}
 
-  function processChildren(node, name, isFragment) {
-    const children = t.react.buildChildren(node);
+	function processChildren(node, name, isFragment) {
+		const children = t.react.buildChildren(node);
 		if (children && children.length !== 0) {
-      if (!isFragment) {
-        raw('>');
-      }			
+			if (!isFragment) {
+				raw('>');
+			}			
 			for (let i = 0; i < children.length; i++) {
 				let child = children[i];
 				if (t.isStringLiteral(child)) {
@@ -118,67 +118,67 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 				}
 			}
 
-      if (!isFragment) {
-        if (name.match(/^[A-Z]/)) {
-          raw('</');
-          expr(t.identifier(name));
-          raw('>');
-        }
-        else {
-          raw('</');
-          raw(name);
-          raw('>');
-        }
-      }			
+			if (!isFragment) {
+				if (name.match(/^[A-Z]/)) {
+					raw('</');
+					expr(t.identifier(name));
+					raw('>');
+				}
+				else {
+					raw('</');
+					raw(name);
+					raw('>');
+				}
+			}			
 		}
 		else if (!isFragment) {
 			raw('/>');
-		}    
-  }
+		}
+	}
 
 	function processNode(node, path, isRoot) {
 		const open = node.openingElement;
-    const name = getName(open.name);
-    const isFragment = name === 'React.Fragment';
+		const name = getName(open.name);
+		const isFragment = name === 'React.Fragment';
 
-    if (!isFragment) {
-      if (name.match(/^[A-Z]/)) {
-        raw('<');
-        expr(t.identifier(name));
-      }
-      else {
-        raw('<');
-        raw(name);
-      }
-      
-      if (open.attributes) {
-        for (let i = 0; i < open.attributes.length; i++) {
-          const attr = open.attributes[i];
-          raw(' ');
-          if (t.isJSXSpreadAttribute(attr)) {
-            raw('...');
-            expr(attr.argument);
-            continue;
-          }
-          const { name, value } = attr;
-          raw(name.name);
-          if (value) {
-            raw('=');
-            if (value.expression) {
-              expr(value.expression);
-            }
-            else if (t.isStringLiteral(value)) {
-              escapePropValue(value);
-            }
-            else {
-              expr(value);
-            }
-          }
-        }
-      }      
-    }
+		if (!isFragment) {
+			if (name.match(/^[A-Z]/)) {
+				raw('<');
+				expr(t.identifier(name));
+			}
+			else {
+				raw('<');
+				raw(name);
+			}
+			
+			if (open.attributes) {
+				for (let i = 0; i < open.attributes.length; i++) {
+					const attr = open.attributes[i];
+					raw(' ');
+					if (t.isJSXSpreadAttribute(attr)) {
+						raw('...');
+						expr(attr.argument);
+						continue;
+					}
+					const { name, value } = attr;
+					raw(name.name);
+					if (value) {
+						raw('=');
+						if (value.expression) {
+							expr(value.expression);
+						}
+						else if (t.isStringLiteral(value)) {
+							escapePropValue(value);
+						}
+						else {
+							expr(value);
+						}
+					}
+				}
+			}
+		}
 
-    processChildren(node, name, isFragment);
+		processChildren(node, name, isFragment);
 
 		if (isRoot) {
 			commit(true);
@@ -216,9 +216,9 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 				buffer = bufferBefore;
 
 				state.set('jsxElement', true);
-      },
-      
-      JSXFragment(path, state) {
+			},
+			
+			JSXFragment(path, state) {
 				let quasisBefore = quasis.slice();
 				let expressionsBefore = expressions.slice();
 				let bufferBefore = buffer;
@@ -229,17 +229,17 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 
 				processChildren(path.node, '', true);
 
-        commit();
-        const template = t.templateLiteral(quasis, expressions);
-        const replacement = t.taggedTemplateExpression(tag, template);
-        path.replaceWith(replacement);
+				commit();
+				const template = t.templateLiteral(quasis, expressions);
+				const replacement = t.taggedTemplateExpression(tag, template);
+				path.replaceWith(replacement);
 
 				quasis = quasisBefore;
 				expressions = expressionsBefore;
-        buffer = bufferBefore;
-        
-        state.set('jsxElement', true);
-			}      
+				buffer = bufferBefore;
+				
+				state.set('jsxElement', true);
+			}
 		}
 	};
 }
