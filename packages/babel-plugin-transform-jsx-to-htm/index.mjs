@@ -188,6 +188,32 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 		}
 	}
 
+	function jsxVisitorHandler(path, state, isFragment) {
+		let quasisBefore = quasis.slice();
+		let expressionsBefore = expressions.slice();
+		let bufferBefore = buffer;
+	
+		buffer = '';
+		quasis.length = 0;
+		expressions.length = 0;
+	
+		if (isFragment) {
+			processChildren(path.node, '', true);
+			commit();
+			const template = t.templateLiteral(quasis, expressions);
+			const replacement = t.taggedTemplateExpression(tag, template);
+			path.replaceWith(replacement);
+		} else {
+			processNode(path.node, path, true);
+		}
+	
+		quasis = quasisBefore;
+		expressions = expressionsBefore;
+		buffer = bufferBefore;
+	
+		state.set('jsxElement', true);
+	}
+
 	return {
 		name: 'transform-jsx-to-htm',
 		inherits: jsx,
@@ -201,44 +227,11 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 			},
 
 			JSXElement(path, state) {
-				let quasisBefore = quasis.slice();
-				let expressionsBefore = expressions.slice();
-				let bufferBefore = buffer;
-
-				buffer = '';
-				quasis.length = 0;
-				expressions.length = 0;
-
-				processNode(path.node, path, true);
-
-				quasis = quasisBefore;
-				expressions = expressionsBefore;
-				buffer = bufferBefore;
-
-				state.set('jsxElement', true);
+				jsxVisitorHandler(path, state, false);
 			},
 			
 			JSXFragment(path, state) {
-				let quasisBefore = quasis.slice();
-				let expressionsBefore = expressions.slice();
-				let bufferBefore = buffer;
-
-				buffer = '';
-				quasis.length = 0;
-				expressions.length = 0;
-
-				processChildren(path.node, '', true);
-
-				commit();
-				const template = t.templateLiteral(quasis, expressions);
-				const replacement = t.taggedTemplateExpression(tag, template);
-				path.replaceWith(replacement);
-
-				quasis = quasisBefore;
-				expressions = expressionsBefore;
-				buffer = bufferBefore;
-				
-				state.set('jsxElement', true);
+				jsxVisitorHandler(path, state, true);
 			}
 		}
 	};
