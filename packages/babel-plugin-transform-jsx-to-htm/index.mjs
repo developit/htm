@@ -87,49 +87,23 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 		}));
 		buffer = '';
 	}
-
-	function processNode(node, path, isRoot) {
-		const open = node.openingElement;
-		const { name } = open.name;
-
-		if (name.match(/^[_A-Z]/)) {
-			raw('<');
-			expr(t.identifier(name));
+	
+	function getName(node) {
+		switch (node.type) {
+			case 'JSXMemberExpression':
+				return `${node.object.name}.${node.property.name}`
+		
+			default:
+				return node.name;
 		}
-		else {
-			raw('<');
-			raw(name);
-		}
+	}
 
-		if (open.attributes) {
-			for (let i = 0; i < open.attributes.length; i++) {
-				const attr = open.attributes[i];
-				raw(' ');
-				if (t.isJSXSpreadAttribute(attr)) {
-					raw('...');
-					expr(attr.argument);
-					continue;
-				}
-				const { name, value } = attr;
-				raw(name.name);
-				if (value) {
-					raw('=');
-					if (value.expression) {
-						expr(value.expression);
-					}
-					else if (t.isStringLiteral(value)) {
-						escapePropValue(value);
-					}
-					else {
-						expr(value);
-					}
-				}
-			}
-		}
-
+	function processChildren(node, name, isFragment) {
 		const children = t.react.buildChildren(node);
 		if (children && children.length !== 0) {
-			raw('>');
+			if (!isFragment) {
+				raw('>');
+			}			
 			for (let i = 0; i < children.length; i++) {
 				let child = children[i];
 				if (t.isStringLiteral(child)) {
@@ -144,27 +118,100 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 				}
 			}
 
-			if (name.match(/^[_A-Z]/)) {
-				raw('</');
-				expr(t.identifier(name));
-				raw('>');
-			}
-			else {
-				raw('</');
-				raw(name);
-				raw('>');
-			}
+			if (!isFragment) {
+				if (name.match(/^[$_A-Z]/)) {
+					raw('</');
+					expr(t.identifier(name));
+					raw('>');
+				}
+				else {
+					raw('</');
+					raw(name);
+					raw('>');
+				}
+			}			
 		}
-		else {
+		else if (!isFragment) {
 			raw('/>');
 		}
+	}
+
+	function processNode(node, path, isRoot) {
+		const open = node.openingElement;
+		const name = getName(open.name);
+		const isFragment = name === 'React.Fragment';
+
+		if (!isFragment) {
+			if (name.match(/^[$_A-Z]/)) {
+				raw('<');
+				expr(t.identifier(name));
+			}
+			else {
+				raw('<');
+				raw(name);
+			}
+			
+			if (open.attributes) {
+				for (let i = 0; i < open.attributes.length; i++) {
+					const attr = open.attributes[i];
+					raw(' ');
+					if (t.isJSXSpreadAttribute(attr)) {
+						raw('...');
+						expr(attr.argument);
+						continue;
+					}
+					const { name, value } = attr;
+					raw(name.name);
+					if (value) {
+						raw('=');
+						if (value.expression) {
+							expr(value.expression);
+						}
+						else if (t.isStringLiteral(value)) {
+							escapePropValue(value);
+						}
+						else {
+							expr(value);
+						}
+					}
+				}
+			}
+		}
+
+		processChildren(node, name, isFragment);
 
 		if (isRoot) {
-			commit();
+			commit(true);
 			const template = t.templateLiteral(quasis, expressions);
 			const replacement = t.taggedTemplateExpression(tag, template);
 			path.replaceWith(replacement);
 		}
+	}
+
+	function jsxVisitorHandler(path, state, isFragment) {
+		let quasisBefore = quasis.slice();
+		let expressionsBefore = expressions.slice();
+		let bufferBefore = buffer;
+	
+		buffer = '';
+		quasis.length = 0;
+		expressions.length = 0;
+	
+		if (isFragment) {
+			processChildren(path.node, '', true);
+			commit();
+			const template = t.templateLiteral(quasis, expressions);
+			const replacement = t.taggedTemplateExpression(tag, template);
+			path.replaceWith(replacement);
+		} else {
+			processNode(path.node, path, true);
+		}
+	
+		quasis = quasisBefore;
+		expressions = expressionsBefore;
+		buffer = bufferBefore;
+	
+		state.set('jsxElement', true);
 	}
 
 	return {
@@ -180,21 +227,11 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 			},
 
 			JSXElement(path, state) {
-				let quasisBefore = quasis.slice();
-				let expressionsBefore = expressions.slice();
-				let bufferBefore = buffer;
-
-				buffer = '';
-				quasis.length = 0;
-				expressions.length = 0;
-
-				processNode(path.node, path, true);
-
-				quasis = quasisBefore;
-				expressions = expressionsBefore;
-				buffer = bufferBefore;
-
-				state.set('jsxElement', true);
+				jsxVisitorHandler(path, state, false);
+			},
+			
+			JSXFragment(path, state) {
+				jsxVisitorHandler(path, state, true);
 			}
 		}
 	};
