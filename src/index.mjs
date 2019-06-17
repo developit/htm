@@ -13,17 +13,19 @@
 
 import { MINI } from './constants.mjs';
 
-const TAG_SET = 1;
-const PROPS_SET = 2;
-const PROPS_ASSIGN = 3;
-const CHILD_RECURSE = 4;
-const CHILD_APPEND = 0;
-
 const MODE_SLASH = 0;
 const MODE_TEXT = 1;
 const MODE_WHITESPACE = 2;
 const MODE_TAGNAME = 3;
-const MODE_ATTRIBUTE = 4;
+const MODE_PROP_SET = 4;
+const MODE_PROP_APPEND = 5;
+
+const TAG_SET = 1;
+const CHILD_APPEND = 0;
+const CHILD_RECURSE = 2;
+const PROPS_ASSIGN = 3;
+const PROP_SET = MODE_PROP_SET;
+const PROP_APPEND = MODE_PROP_APPEND;
 
 const evaluate = (h, current, fields, args) => {
 	for (let i = 1; i < current.length; i++) {
@@ -33,7 +35,10 @@ const evaluate = (h, current, fields, args) => {
 		if (current[i] === TAG_SET) {
 			args[0] = value;
 		}
-		else if (current[i] === PROPS_SET) {
+		else if (current[i] === PROP_APPEND) {
+			args[1][current[++i]] += (value + '');
+		}
+		else if (current[i] === PROP_SET) {
 			(args[1] = args[1] || {})[current[++i]] = value;
 		}
 		else if (current[i] === PROPS_ASSIGN) {
@@ -93,17 +98,27 @@ const build = function(statics) {
 				(current[2] = current[2] || {})[buffer] = true;
 			}
 			else {
-				current.push(true, PROPS_SET, buffer);
+				current.push(true, PROP_SET, buffer);
 			}
 		}
-		else if (mode === MODE_ATTRIBUTE && propName) {
-			if (MINI) {
-				(current[2] = current[2] || {})[propName] = field ? fields[field] : buffer;
+		else if (MINI && mode === MODE_PROP_SET) {
+			(current[2] = current[2] || {})[propName] = field ? buffer ? (buffer + fields[field]) : fields[field] : buffer;
+			mode = MODE_PROP_APPEND;
+		}
+		else if (MINI && mode == MODE_PROP_APPEND) {
+			if (buffer || field) {
+				current[2][propName] += field ? buffer + fields[field] : buffer;
 			}
-			else {
-				current.push(field || buffer, PROPS_SET, propName);
+		}
+		else if (!MINI && mode >= MODE_PROP_SET) {
+			if (buffer) {
+				current.push(buffer, mode, propName);
+				mode = MODE_PROP_APPEND;
 			}
-			propName = '';
+			if (field) {
+				current.push(field, mode, propName);
+			}
+			mode = MODE_PROP_APPEND;
 		}
 		buffer = '';
 	};
@@ -154,9 +169,12 @@ const build = function(statics) {
 				// Ignore everything until the tag ends
 			}
 			else if (char === '=') {
-				mode = MODE_ATTRIBUTE;
+				mode = MODE_PROP_SET;
 				propName = buffer;
 				buffer = '';
+				if (!MINI) {
+					current.push(buffer, mode, propName);
+				}
 			}
 			else if (char === '/') {
 				commit();
