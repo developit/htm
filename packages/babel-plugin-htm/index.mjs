@@ -1,4 +1,4 @@
-import htm from 'htm';
+import { build,	treeify } from '../../src/build.mjs';
 
 /**
  * @param {Babel} babel
@@ -14,8 +14,6 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 	const useBuiltIns = options.useBuiltIns;
 	const inlineVNodes = options.monomorphic || pragma===false;
 
-	const symbol = Symbol();
-	
 	function dottedIdentifier(keypath) {
 		const path = keypath.split('.');
 		let out;
@@ -33,8 +31,10 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 	}
   
 	function propertyName(key) {
-		if (key.match(/(^\d|[^a-z0-9_$])/i)) return t.stringLiteral(key);
-		return t.identifier(key);
+		if (t.isValidIdentifier(key)) {
+			return t.identifier(key);
+		}
+		return t.stringLiteral(key);
 	}
   
 	function stringValue(str) {
@@ -75,18 +75,10 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 		return t.callExpression(pragma, [tag, props].concat(children));
 	}
 	
-	function flatten(props, result = []) {
-		const { [symbol]: head, ...tail } = props;
-		if (head) head.forEach(obj => {
-			flatten(obj, result);
-		});
-		if (Object.keys(tail).length > 0) {
-			result.push(tail);
-		}
-		return result;
-	}
-	
 	function spreadNode(args, state) {
+		if (args.length === 0) {
+			return t.nullLiteral();
+		}
 		if (args.length > 0 && t.isNode(args[0])) {
 			args.unshift({});
 		}
@@ -103,24 +95,40 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 		return t.callExpression(helper, args.map(propsNode));
 	}
 	
+	function propValueNode(value) {
+		if (typeof value==='string') {
+			value = t.stringLiteral(value);
+		}
+		else if (typeof value==='boolean') {
+			value = t.booleanLiteral(value);
+		}
+		return value;
+	}
+
 	function propsNode(props) {
 		return t.isNode(props) ? props : t.objectExpression(
 			Object.keys(props).map(key => {
-				let value = props[key];
-				if (typeof value==='string') {
-					value = t.stringLiteral(value);
-				}
-				else if (typeof value==='boolean') {
-					value = t.booleanLiteral(value);
-				}
-				return t.objectProperty(propertyName(key), value);
+				const values = props[key];
+
+				let node = propValueNode(values[0]);
+				let isString = t.isStringLiteral(node);
+				values.slice(1).forEach(value => {
+					const prop = propValueNode(value);
+					if (!isString && !t.isStringLiteral(prop)) {
+						node = t.binaryExpression('+', node, t.stringLiteral(''));
+						isString = true;
+					}
+					node = t.binaryExpression('+', node, prop);
+				});
+
+				return t.objectProperty(propertyName(key), node);
 			})
 		);
 	}
 
 	function transform(node, state) {
 		if (node === undefined) return t.identifier('undefined');
-		if (node == null) return t.nullLiteral();
+		if (node === null) return t.nullLiteral();
 
 		const { tag, props, children } = node;
 		function childMapper(child) {
@@ -130,26 +138,9 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 			return t.isNode(child) ? child : transform(child, state);
 		}
 		const newTag = typeof tag === 'string' ? t.stringLiteral(tag) : tag;
-		const newProps = props ? spreadNode(flatten(props), state) : t.nullLiteral();
+		const newProps = spreadNode(props, state);
 		const newChildren = t.arrayExpression(children.map(childMapper));
 		return createVNode(newTag, newProps, newChildren);
-	}
-  
-	function h(tag, props, ...children) {
-		return { tag, props, children };
-	}
-	
-	const html = htm.bind(h);
-	
-	function treeify(statics, expr) {
-		const assign = Object.assign;
-		try {
-			Object.assign = function(...objs) {	return { [symbol]: objs }; };
-			return html(statics, ...expr);
-		}
-		finally {
-			Object.assign = assign;
-		}
 	}
 
 	// The tagged template tag function name we're looking for.
@@ -165,7 +156,7 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 					const statics = path.node.quasi.quasis.map(e => e.value.raw);
 					const expr = path.node.quasi.expressions;
 
-					const tree = treeify(statics, expr);
+					const tree = treeify(build(statics), expr);
 					const node = !Array.isArray(tree)
 						? transform(tree, state)
 						: t.arrayExpression(tree.map(root => transform(root, state)));
