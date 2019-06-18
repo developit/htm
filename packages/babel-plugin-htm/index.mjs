@@ -108,17 +108,14 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 	function propsNode(props) {
 		return t.isNode(props) ? props : t.objectExpression(
 			Object.keys(props).map(key => {
-				const values = props[key];
+				const values = props[key].map(propValueNode);
 
-				let node = propValueNode(values[0]);
-				let isString = t.isStringLiteral(node);
+				let node = values[0];
+				if (values.length > 1 && !t.isStringLiteral(node) && !t.isStringLiteral(values[1])) {
+					node = t.binaryExpression('+', t.stringLiteral(''), node);
+				}
 				values.slice(1).forEach(value => {
-					const prop = propValueNode(value);
-					if (!isString && !t.isStringLiteral(prop)) {
-						node = t.binaryExpression('+', node, t.stringLiteral(''));
-						isString = true;
-					}
-					node = t.binaryExpression('+', node, prop);
+					node = t.binaryExpression('+', node, value);
 				});
 
 				return t.objectProperty(propertyName(key), node);
