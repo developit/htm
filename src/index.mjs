@@ -190,15 +190,7 @@ const build = function(statics) {
 	return current;
 };
 
-const getCacheMap = (statics) => {
-	let tpl = CACHE.get(statics);
-	if (!tpl) {
-		CACHE.set(statics, tpl = build(statics));
-	}
-	return tpl;
-};
-
-const getCacheKeyed = (statics) => {
+const getCache = (statics) => {
 	let key = '';
 	for (let i = 0; i < statics.length; i++) {
 		key += statics[i].length + '-' + statics[i];
@@ -206,9 +198,7 @@ const getCacheKeyed = (statics) => {
 	return CACHE[key] || (CACHE[key] = build(statics));
 };
 
-const USE_MAP = !MINI && typeof Map === 'function';
-const CACHE = USE_MAP ? new Map() : {};
-const getCache = USE_MAP ? getCacheMap : getCacheKeyed;
+const CACHE = {};
 
 const cached = function(statics) {
 	const res = evaluate(this, getCache(statics), arguments, []);
