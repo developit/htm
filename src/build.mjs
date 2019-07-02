@@ -37,7 +37,7 @@ export const treeify = (built, fields) => {
 		for (let i = 1; i < built.length; i++) {
 			const field = built[i++];
 			const value = typeof field === 'number' ? fields[field - 1] : field;
-	
+
 			if (built[i] === TAG_SET) {
 				tag = value;
 			}
@@ -78,14 +78,14 @@ export const evaluate = (h, built, fields, args) => {
 		if (built[i] === TAG_SET) {
 			args[0] = value;
 		}
-		else if (built[i] === PROP_APPEND) {
-			args[1][built[++i]] += (value + '');
+		else if (built[i] === PROPS_ASSIGN) {
+			args[1] = Object.assign(args[1] || {}, value);
 		}
 		else if (built[i] === PROP_SET) {
 			(args[1] = args[1] || {})[built[++i]] = value;
 		}
-		else if (built[i] === PROPS_ASSIGN) {
-			args[1] = Object.assign(args[1] || {}, value);
+		else if (built[i] === PROP_APPEND) {
+			args[1][built[++i]] += (value + '');
 		}
 		else if (built[i]) {
 			// code === CHILD_RECURSE
@@ -148,20 +148,20 @@ export const build = function(statics) {
 			(current[2] = current[2] || {})[propName] = field ? buffer ? (buffer + fields[field]) : fields[field] : buffer;
 			mode = MODE_PROP_APPEND;
 		}
-		else if (MINI && mode == MODE_PROP_APPEND) {
+		else if (MINI && mode === MODE_PROP_APPEND) {
 			if (buffer || field) {
 				current[2][propName] += field ? buffer + fields[field] : buffer;
 			}
 		}
 		else if (!MINI && mode >= MODE_PROP_SET) {
-			if (buffer) {
+			if (buffer || (!field && mode === MODE_PROP_SET)) {
 				current.push(buffer, mode, propName);
 				mode = MODE_PROP_APPEND;
 			}
 			if (field) {
 				current.push(field, mode, propName);
+				mode = MODE_PROP_APPEND;
 			}
-			mode = MODE_PROP_APPEND;
 		}
 		buffer = '';
 	};
@@ -215,9 +215,6 @@ export const build = function(statics) {
 				mode = MODE_PROP_SET;
 				propName = buffer;
 				buffer = '';
-				if (!MINI) {
-					current.push(buffer, mode, propName);
-				}
 			}
 			else if (char === '/') {
 				commit();
