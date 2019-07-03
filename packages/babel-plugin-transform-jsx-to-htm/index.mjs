@@ -119,7 +119,7 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 			}
 
 			if (!isFragment) {
-				if (name.match(/^[A-Z]/)) {
+				if (name.match(/(^[$_A-Z]|\.)/)) {
 					raw('</');
 					expr(t.identifier(name));
 					raw('>');
@@ -142,7 +142,7 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 		const isFragment = name === 'React.Fragment';
 
 		if (!isFragment) {
-			if (name.match(/^[A-Z]/)) {
+			if (name.match(/(^[$_A-Z]|\.)/)) {
 				raw('<');
 				expr(t.identifier(name));
 			}
