@@ -91,7 +91,7 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 	function getName(node) {
 		switch (node.type) {
 			case 'JSXMemberExpression':
-				return `${node.object.name}.${node.property.name}`
+				return `${node.object.name}.${node.property.name}`;
 		
 			default:
 				return node.name;
@@ -103,7 +103,7 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 		if (children && children.length !== 0) {
 			if (!isFragment) {
 				raw('>');
-			}			
+			}
 			for (let i = 0; i < children.length; i++) {
 				let child = children[i];
 				if (t.isStringLiteral(child)) {
@@ -129,7 +129,7 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 					raw(name);
 					raw('>');
 				}
-			}			
+			}
 		}
 		else if (!isFragment) {
 			raw('/>');
@@ -203,7 +203,8 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 			const template = t.templateLiteral(quasis, expressions);
 			const replacement = t.taggedTemplateExpression(tag, template);
 			path.replaceWith(replacement);
-		} else {
+		}
+		else {
 			processNode(path.node, path, true);
 		}
 	
