@@ -79,6 +79,16 @@ describe('babel-plugin-transform-jsx-to-htm', () => {
 			).toBe('html`<${Foo}>a</${Foo}>`;');
 		});
 
+		test('dotted component element', () => {
+			expect(
+				compile('(<a.b.c />);')
+			).toBe('html`<${a.b.c}/>`;');
+
+			expect(
+				compile('(<a.b.c>a</a.b.c>);')
+			).toBe('html`<${a.b.c}>a</${a.b.c}>`;');
+		});
+
 		test('static text', () => {
 			expect(
 				compile(`(<div>Hello</div>);`)
