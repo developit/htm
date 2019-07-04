@@ -67,6 +67,22 @@ describe('babel-plugin-transform-jsx-to-htm', () => {
 			expect(
 				compile('(<div>a</div>);')
 			).toBe('html`<div>a</div>`;');
+			
+			expect(
+				compile('(<div$ />);')
+			).toBe('html`<div$/>`;');
+
+			expect(
+				compile('(<div$>a</div$>);')
+			).toBe('html`<div$>a</div$>`;');
+			
+			expect(
+				compile('(<div_ />);')
+			).toBe('html`<div_/>`;');
+
+			expect(
+				compile('(<div_>a</div_>);')
+			).toBe('html`<div_>a</div_>`;');
 		});
 
 		test('single component element', () => {
@@ -77,6 +93,48 @@ describe('babel-plugin-transform-jsx-to-htm', () => {
 			expect(
 				compile('(<Foo>a</Foo>);')
 			).toBe('html`<${Foo}>a</${Foo}>`;');
+
+			expect(
+				compile('(<$ />);')
+			).toBe('html`<${$}/>`;');
+
+			expect(
+				compile('(<$>a</$>);')
+			).toBe('html`<${$}>a</${$}>`;');
+			
+			expect(
+				compile('(<_ />);')
+			).toBe('html`<${_}/>`;');
+
+			expect(
+				compile('(<_>a</_>);')
+			).toBe('html`<${_}>a</${_}>`;');
+			
+			expect(
+				compile('(<_foo />);')
+			).toBe('html`<${_foo}/>`;');
+
+			expect(
+				compile('(<_foo>a</_foo>);')
+			).toBe('html`<${_foo}>a</${_foo}>`;');
+			
+			expect(
+				compile('(<$foo />);')
+			).toBe('html`<${$foo}/>`;');
+
+			expect(
+				compile('(<$foo>a</$foo>);')
+			).toBe('html`<${$foo}>a</${$foo}>`;');
+		});
+
+		test('dotted component element', () => {
+			expect(
+				compile('(<a.b.c />);')
+			).toBe('html`<${a.b.c}/>`;');
+
+			expect(
+				compile('(<a.b.c>a</a.b.c>);')
+			).toBe('html`<${a.b.c}>a</${a.b.c}>`;');
 		});
 
 		test('static text', () => {
