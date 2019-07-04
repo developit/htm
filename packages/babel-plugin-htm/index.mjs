@@ -7,11 +7,13 @@ import htm from 'htm';
  * @param {string} [options.tag=html]  The tagged template "tag" function name to process.
  * @param {boolean} [options.monomorphic=false]  Output monomorphic inline objects instead of using String literals.
  * @param {boolean} [options.useBuiltIns=false]  Use the native Object.assign instead of trying to polyfill it.
+ * @param {boolean} [options.useNativeSpread=false]  Use the native { ...a, ...b } syntax for prop spreads.
  * @param {boolean} [options.variableArity=true] If `false`, always passes exactly 3 arguments to the pragma function.
  */
 export default function htmBabelPlugin({ types: t }, options = {}) {
 	const pragma = options.pragma===false ? false : dottedIdentifier(options.pragma || 'h');
 	const useBuiltIns = options.useBuiltIns;
+	const useNativeSpread = options.useNativeSpread;
 	const inlineVNodes = options.monomorphic || pragma===false;
 
 	const symbol = Symbol();
@@ -31,7 +33,11 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 		const end = parts.pop() || '';
 		return new RegExp(parts.join('/'), end);
 	}
-  
+	
+	function propertyValue(valueOrNode) {
+		return t.isNode(valueOrNode) ? valueOrNode : t.valueToNode(valueOrNode);
+	}
+	
 	function propertyName(key) {
 		if (key.match(/(^\d|[^a-z0-9_$])/i)) return t.stringLiteral(key);
 		return t.identifier(key);
@@ -99,6 +105,23 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 		if (args.length === 2 && !t.isNode(args[0]) && Object.keys(args[0]).length === 0) {
 			return propsNode(args[1]);
 		}
+
+		if (useNativeSpread) {
+			const properties = [];
+			args.forEach(arg => {
+				if (t.isNode(arg)) {
+					properties.push(t.spreadElement(arg));
+				}
+				else {
+					Object.keys(arg).forEach(key => {
+						const value = arg[key];
+						properties.push(t.objectProperty(propertyName(key), propertyValue(value)));
+					});
+				}
+			});
+			return t.objectExpression(properties);
+		}
+		
 		const helper = useBuiltIns ? dottedIdentifier('Object.assign') : state.addHelper('extends');
 		return t.callExpression(helper, args.map(propsNode));
 	}
@@ -106,14 +129,8 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 	function propsNode(props) {
 		return t.isNode(props) ? props : t.objectExpression(
 			Object.keys(props).map(key => {
-				let value = props[key];
-				if (typeof value==='string') {
-					value = t.stringLiteral(value);
-				}
-				else if (typeof value==='boolean') {
-					value = t.booleanLiteral(value);
-				}
-				return t.objectProperty(propertyName(key), value);
+				const value = props[key];
+				return t.objectProperty(propertyName(key), propertyValue(value));
 			})
 		);
 	}
