@@ -222,7 +222,7 @@ describe('htm/babel', () => {
 					}]
 				]
 			}).code
-		).toBe(`h("a",{b:""+1+2+"3"+4});`);		
+		).toBe(`h("a",{b:""+1+2+"3"+4});`);
 	});
 
 	test('coerces props to strings only when needed', () => {
@@ -246,7 +246,7 @@ describe('htm/babel', () => {
 					}]
 				]
 			}).code
-		).toBe(`h("a",{b:"1"+2+"3"+4});`);		
+		).toBe(`h("a",{b:"1"+2+"3"+4});`);
 	});
 
 	describe('{variableArity:false}', () => {
