@@ -7,11 +7,13 @@ import { build,	treeify } from '../../src/build.mjs';
  * @param {string} [options.tag=html]  The tagged template "tag" function name to process.
  * @param {boolean} [options.monomorphic=false]  Output monomorphic inline objects instead of using String literals.
  * @param {boolean} [options.useBuiltIns=false]  Use the native Object.assign instead of trying to polyfill it.
+ * @param {boolean} [options.useNativeSpread=false]  Use the native { ...a, ...b } syntax for prop spreads.
  * @param {boolean} [options.variableArity=true] If `false`, always passes exactly 3 arguments to the pragma function.
  */
 export default function htmBabelPlugin({ types: t }, options = {}) {
 	const pragma = options.pragma===false ? false : dottedIdentifier(options.pragma || 'h');
 	const useBuiltIns = options.useBuiltIns;
+	const useNativeSpread = options.useNativeSpread;
 	const inlineVNodes = options.monomorphic || pragma===false;
 
 	function dottedIdentifier(keypath) {
@@ -29,14 +31,32 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 		const end = parts.pop() || '';
 		return new RegExp(parts.join('/'), end);
 	}
-  
+
 	function propertyName(key) {
 		if (t.isValidIdentifier(key)) {
 			return t.identifier(key);
 		}
 		return t.stringLiteral(key);
 	}
-  
+
+	function objectProperties(obj) {
+		return Object.keys(obj).map(key => {
+			const values = obj[key].map(valueOrNode =>
+				t.isNode(valueOrNode) ? valueOrNode : t.valueToNode(valueOrNode)
+			);
+
+			let node = values[0];
+			if (values.length > 1 && !t.isStringLiteral(node) && !t.isStringLiteral(values[1])) {
+				node = t.binaryExpression('+', t.stringLiteral(''), node);
+			}
+			values.slice(1).forEach(value => {
+				node = t.binaryExpression('+', node, value);
+			});
+
+			return t.objectProperty(propertyName(key), node);
+		});
+	}
+
 	function stringValue(str) {
 		if (options.monomorphic) {
 			return t.objectExpression([
@@ -91,36 +111,26 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 		if (args.length === 2 && !t.isNode(args[0]) && Object.keys(args[0]).length === 0) {
 			return propsNode(args[1]);
 		}
+
+		if (useNativeSpread) {
+			const properties = [];
+			args.forEach(arg => {
+				if (t.isNode(arg)) {
+					properties.push(t.spreadElement(arg));
+				}
+				else {
+					properties.push(...objectProperties(arg));
+				}
+			});
+			return t.objectExpression(properties);
+		}
+		
 		const helper = useBuiltIns ? dottedIdentifier('Object.assign') : state.addHelper('extends');
 		return t.callExpression(helper, args.map(propsNode));
 	}
 	
-	function propValueNode(value) {
-		if (typeof value==='string') {
-			value = t.stringLiteral(value);
-		}
-		else if (typeof value==='boolean') {
-			value = t.booleanLiteral(value);
-		}
-		return value;
-	}
-
 	function propsNode(props) {
-		return t.isNode(props) ? props : t.objectExpression(
-			Object.keys(props).map(key => {
-				const values = props[key].map(propValueNode);
-
-				let node = values[0];
-				if (values.length > 1 && !t.isStringLiteral(node) && !t.isStringLiteral(values[1])) {
-					node = t.binaryExpression('+', t.stringLiteral(''), node);
-				}
-				values.slice(1).forEach(value => {
-					node = t.binaryExpression('+', node, value);
-				});
-
-				return t.objectProperty(propertyName(key), node);
-			})
-		);
+		return t.isNode(props) ? props : t.objectExpression(objectProperties(props));
 	}
 
 	function transform(node, state) {

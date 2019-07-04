@@ -87,15 +87,25 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 		}));
 		buffer = '';
 	}
+
+	const FRAGMENT_EXPR = dottedIdentifier('React.Fragment');
+
+	function isFragmentName(node) {
+		return t.isNodesEquivalent(FRAGMENT_EXPR, node);
+	}
 	
-	function getName(node) {
-		switch (node.type) {
-			case 'JSXMemberExpression':
-				return `${node.object.name}.${node.property.name}`
-		
-			default:
-				return node.name;
+	function isComponentName(node) {
+		return !t.isIdentifier(node) || node.name.match(/^[$_A-Z]/);
+	}
+	
+	function getNameExpr(node) {
+		if (!t.isJSXMemberExpression(node)) {
+			return t.identifier(node.name);
 		}
+		return t.memberExpression(
+			getNameExpr(node.object),
+			t.identifier(node.property.name)
+		);
 	}
 
 	function processChildren(node, name, isFragment) {
@@ -103,7 +113,7 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 		if (children && children.length !== 0) {
 			if (!isFragment) {
 				raw('>');
-			}			
+			}
 			for (let i = 0; i < children.length; i++) {
 				let child = children[i];
 				if (t.isStringLiteral(child)) {
@@ -119,17 +129,17 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 			}
 
 			if (!isFragment) {
-				if (name.match(/(^[$_A-Z]|\.)/)) {
+				if (isComponentName(name)) {
 					raw('</');
-					expr(t.identifier(name));
+					expr(name);
 					raw('>');
 				}
 				else {
 					raw('</');
-					raw(name);
+					raw(name.name);
 					raw('>');
 				}
-			}			
+			}
 		}
 		else if (!isFragment) {
 			raw('/>');
@@ -138,17 +148,17 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 
 	function processNode(node, path, isRoot) {
 		const open = node.openingElement;
-		const name = getName(open.name);
-		const isFragment = name === 'React.Fragment';
-
+		const name = getNameExpr(open.name);
+		const isFragment = isFragmentName(name);
+		
 		if (!isFragment) {
-			if (name.match(/(^[$_A-Z]|\.)/)) {
+			if (isComponentName(name)) {
 				raw('<');
-				expr(t.identifier(name));
+				expr(name);
 			}
 			else {
 				raw('<');
-				raw(name);
+				raw(name.name);
 			}
 			
 			if (open.attributes) {
@@ -198,12 +208,13 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 		expressions.length = 0;
 	
 		if (isFragment) {
-			processChildren(path.node, '', true);
+			processChildren(path.node, null, true);
 			commit();
 			const template = t.templateLiteral(quasis, expressions);
 			const replacement = t.taggedTemplateExpression(tag, template);
 			path.replaceWith(replacement);
-		} else {
+		}
+		else {
 			processNode(path.node, path, true);
 		}
 	
