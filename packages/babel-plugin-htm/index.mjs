@@ -1,4 +1,4 @@
-import { build,	treeify } from '../../src/build.mjs';
+import { build, treeify } from '../../src/build.mjs';
 
 /**
  * @param {Babel} babel
