@@ -57,6 +57,10 @@ describe('htm', () => {
 		expect(html`<a href="" foo="" />`).toEqual({ tag: 'a', props: { href: '', foo: '' }, children: [] });
 	});
 
+	test('single prop with empty name', () => {
+		expect(html`<a ""="foo" />`).toEqual({ tag: 'a', props: { '': 'foo' }, children: [] });
+	});
+
 	test('single prop with static value', () => {
 		expect(html`<a href="/hello" />`).toEqual({ tag: 'a', props: { href: '/hello' }, children: [] });
 	});
@@ -78,8 +82,10 @@ describe('htm', () => {
 		expect(html`<a href=${'foo'} onClick=${onClick} />`).toEqual({ tag: 'a', props: { href: 'foo', onClick }, children: [] });
 	});
 
-	test('prop with quoted dynamic value ignores static parts', () => {
-		expect(html`<a href="before${'foo'}after" a="b" />`).toEqual({ tag: 'a', props: { href: 'foo', a: 'b' }, children: [] });
+	test('prop with multiple static and dynamic values get concatenated as strings', () => {
+		expect(html`<a href="before${'foo'}after" />`).toEqual({ tag: 'a', props: { href: 'beforefooafter' }, children: [] });
+		expect(html`<a href=${1}${1} />`).toEqual({ tag: 'a', props: { href: '11' }, children: [] });
+		expect(html`<a href=${1}between${1} />`).toEqual({ tag: 'a', props: { href: '1between1' }, children: [] });
 	});
 
 	test('spread props', () => {

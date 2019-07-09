@@ -46,6 +46,17 @@ describe('htm/babel', () => {
 				]
 			}).code
 		).toBe(`h("a",Object.assign({b:2},{c:3}),"d: ",4);`);
+		
+		expect(
+			transform('html`<a b=${2} ...${{ c: 3 }}>d: ${4}</a>`;', {
+				...options,
+				plugins: [
+					[htmBabelPlugin, {
+						useNativeSpread: true
+					}]
+				]
+			}).code
+		).toBe(`h("a",{b:2,...{c:3}},"d: ",4);`);
 	});
 
 	test('spread a single variable', () => {
@@ -54,6 +65,17 @@ describe('htm/babel', () => {
 				...options,
 				plugins: [
 					htmBabelPlugin
+				]
+			}).code
+		).toBe(`h("a",foo);`);
+		
+		expect(
+			transform('html`<a ...${foo}></a>`;', {
+				...options,
+				plugins: [
+					[htmBabelPlugin, {
+						useNativeSpread: true
+					}]
 				]
 			}).code
 		).toBe(`h("a",foo);`);
@@ -70,6 +92,17 @@ describe('htm/babel', () => {
 				]
 			}).code
 		).toBe(`h("a",Object.assign({},foo,bar));`);
+		
+		expect(
+			transform('html`<a ...${foo} ...${bar}></a>`;', {
+				...options,
+				plugins: [
+					[htmBabelPlugin, {
+						useNativeSpread: true
+					}]
+				]
+			}).code
+		).toBe(`h("a",{...foo,...bar});`);
 	});
 
 	test('property followed by a spread', () => {
@@ -83,6 +116,17 @@ describe('htm/babel', () => {
 				]
 			}).code
 		).toBe(`h("a",Object.assign({b:"1"},foo));`);
+		
+		expect(
+			transform('html`<a b="1" ...${foo}></a>`;', {
+				...options,
+				plugins: [
+					[htmBabelPlugin, {
+						useNativeSpread: true
+					}]
+				]
+			}).code
+		).toBe(`h("a",{b:"1",...foo});`);
 	});
 
 	test('spread followed by a property', () => {
@@ -96,6 +140,17 @@ describe('htm/babel', () => {
 				]
 			}).code
 		).toBe(`h("a",Object.assign({},foo,{b:"1"}));`);
+		
+		expect(
+			transform('html`<a ...${foo} b="1"></a>`;', {
+				...options,
+				plugins: [
+					[htmBabelPlugin, {
+						useNativeSpread: true
+					}]
+				]
+			}).code
+		).toBe(`h("a",{...foo,b:"1"});`);
 	});
 
 	test('mix-and-match spreads', () => {
@@ -109,6 +164,89 @@ describe('htm/babel', () => {
 				]
 			}).code
 		).toBe(`h("a",Object.assign({b:"1"},foo,{c:2},{d:3}));`);
+		
+		expect(
+			transform('html`<a b="1" ...${foo} c=${2} ...${{d:3}}></a>`;', {
+				...options,
+				plugins: [
+					[htmBabelPlugin, {
+						useNativeSpread: true
+					}]
+				]
+			}).code
+		).toBe(`h("a",{b:"1",...foo,c:2,...{d:3}});`);
+	});
+
+	test('mix-and-match dynamic and static values', () => {
+		expect(
+			transform('html`<a b="1${2}${3}"></a>`;', {
+				...options,
+				plugins: [
+					[htmBabelPlugin, {
+						useBuiltIns: true
+					}]
+				]
+			}).code
+		).toBe(`h("a",{b:"1"+2+3});`);
+
+		expect(
+			transform('html`<a b="1${2}${3}"></a>`;', {
+				...options,
+				plugins: [
+					[htmBabelPlugin, {
+						useNativeSpread: true
+					}]
+				]
+			}).code
+		).toBe(`h("a",{b:"1"+2+3});`);
+	});
+
+	test('coerces props to strings when needed', () => {
+		expect(
+			transform('html`<a b=\'${1}${2}${"3"}${4}\'></a>`;', {
+				...options,
+				plugins: [
+					[htmBabelPlugin, {
+						useBuiltIns: true
+					}]
+				]
+			}).code
+		).toBe(`h("a",{b:""+1+2+"3"+4});`);
+
+		expect(
+			transform('html`<a b=\'${1}${2}${"3"}${4}\'></a>`;', {
+				...options,
+				plugins: [
+					[htmBabelPlugin, {
+						useNativeSpread: true
+					}]
+				]
+			}).code
+		).toBe(`h("a",{b:""+1+2+"3"+4});`);
+	});
+
+	test('coerces props to strings only when needed', () => {
+		expect(
+			transform('html`<a b=\'${"1"}${2}${"3"}${4}\'></a>`;', {
+				...options,
+				plugins: [
+					[htmBabelPlugin, {
+						useBuiltIns: true
+					}]
+				]
+			}).code
+		).toBe(`h("a",{b:"1"+2+"3"+4});`);
+
+		expect(
+			transform('html`<a b=\'${"1"}${2}${"3"}${4}\'></a>`;', {
+				...options,
+				plugins: [
+					[htmBabelPlugin, {
+						useNativeSpread: true
+					}]
+				]
+			}).code
+		).toBe(`h("a",{b:"1"+2+"3"+4});`);
 	});
 
 	describe('{variableArity:false}', () => {

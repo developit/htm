@@ -3,9 +3,8 @@
 	"version": "1.0.0",
 	"description": "Babel plugin to compile JSX to Tagged Templates.",
 	"main": "dist/babel-plugin-transform-jsx-to-htm.js",
-	"module": "dist/babel-plugin-transform-jsx-to-htm.mjs",
 	"scripts": {
-		"build": "microbundle index.mjs -f es,cjs --target node --no-compress --no-sourcemap",
+		"build": "microbundle index.mjs -f cjs --target node --no-compress --no-sourcemap",
 		"prepare": "npm run build"
 	},
 	"files": [
