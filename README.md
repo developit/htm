@@ -89,7 +89,7 @@ ReactDOM.render(html`<a href="/">Hello!</a>`, document.body);
 
 ### Advanced Usage
 
-Since `htm` is a generic library, so we need to tell it what to "compile" our templates to.
+Since `htm` is a generic library, we need to tell it what to "compile" our templates to.
 You can bind `htm` to any function of the form `h(type, props, ...children)` _([hyperscript])_.
 This function can return anything - `htm` never looks at the return value.
 
