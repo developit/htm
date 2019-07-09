@@ -70,18 +70,38 @@ import { html, render } from 'https://unpkg.com/htm/preact/standalone.mjs'
 
 ## Usage
 
-Since `htm` is a generic library, we need to tell it what to "compile" our templates to.
-
-The target should be a function of the form `h(type, props, ...children)` _([hyperscript])_, and can return anything.
+If you're using Preact or React, we've included off-the-shelf bindings to make your life easier.
+They also have the added benefit of sharing a template cache across all modules.
 
 ```js
-// this is our hyperscript function. for now, it just returns a description object.
+import { render } from 'preact'; 
+import { html } from 'htm/preact';
+render(html`<a href="/">Hello!</a>`, document.body);
+```
+
+Similarly, for React:
+
+```js
+import ReactDOM from 'react-dom'; 
+import { html } from 'htm/react';
+ReactDOM.render(html`<a href="/">Hello!</a>`, document.body);
+```
+
+### Advanced Usage
+
+Since `htm` is a generic library, we need to tell it what to "compile" our templates to.
+You can bind `htm` to any function of the form `h(type, props, ...children)` _([hyperscript])_.
+This function can return anything - `htm` never looks at the return value.
+
+Here's an example `h()` function that returns tree nodes:
+
+```js
 function h(type, props, ...children) {
   return { type, props, children };
 }
 ```
 
-To use that `h()` function, we need to create our own `html` tag function by binding `htm` to our `h()` function:
+To use our custom `h()` function, we need to create our own `html` tag function by binding `htm` to our `h()` function:
 
 ```js
 import htm from 'htm';
