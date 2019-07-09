@@ -145,25 +145,28 @@ export const build = function(statics) {
 				current.push(true, PROP_SET, buffer);
 			}
 		}
-		else if (MINI && mode === MODE_PROP_SET) {
-			(current[2] = current[2] || {})[propName] = field ? buffer ? (buffer + fields[field]) : fields[field] : buffer;
-			mode = MODE_PROP_APPEND;
-		}
-		else if (MINI && mode === MODE_PROP_APPEND) {
-			if (buffer || field) {
-				current[2][propName] += field ? buffer + fields[field] : buffer;
+		else if (mode >= MODE_PROP_SET) {
+			if (MINI) {
+				if (mode === MODE_PROP_SET) {
+					(current[2] = current[2] || {})[propName] = field ? buffer ? (buffer + fields[field]) : fields[field] : buffer;
+					mode = MODE_PROP_APPEND;
+				}
+				else if (field || buffer) {
+					current[2][propName] += field ? buffer + fields[field] : buffer;
+				}
+			}
+			else {
+				if (buffer || (!field && mode === MODE_PROP_SET)) {
+					current.push(buffer, mode, propName);
+					mode = MODE_PROP_APPEND;
+				}
+				if (field) {
+					current.push(field, mode, propName);
+					mode = MODE_PROP_APPEND;
+				}
 			}
 		}
-		else if (!MINI && mode >= MODE_PROP_SET) {
-			if (buffer || (!field && mode === MODE_PROP_SET)) {
-				current.push(buffer, mode, propName);
-				mode = MODE_PROP_APPEND;
-			}
-			if (field) {
-				current.push(field, mode, propName);
-				mode = MODE_PROP_APPEND;
-			}
-		}
+
 		buffer = '';
 	};
 
