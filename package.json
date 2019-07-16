@@ -78,9 +78,5 @@
     "microbundle": "^0.10.1",
     "preact": "^8.4.2",
     "react": "^16.8.3"
-  },
-  "dependencies": {},
-  "peerDependencies": {
-    "preact": "*"
   }
 }
