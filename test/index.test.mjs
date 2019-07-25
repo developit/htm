@@ -119,6 +119,13 @@ describe('htm', () => {
 		expect(html`<a><//>`).toEqual({ tag: 'a', props: null, children: [] });
 	});
 
+	test('non-element roots', () => {
+		expect(html`foo`).toEqual('foo');
+		expect(html`${1}`).toEqual(1);
+		expect(html`foo${1}`).toEqual(['foo', 1]);
+		expect(html`foo${1}bar`).toEqual(['foo', 1, 'bar']);
+	});
+
 	test('text child', () => {
 		expect(html`<a>foo</a>`).toEqual({ tag: 'a', props: null, children: ['foo'] });
 		expect(html`<a>foo bar</a>`).toEqual({ tag: 'a', props: null, children: ['foo bar'] });
@@ -182,7 +189,7 @@ describe('htm', () => {
 		expect(html`<a>${''}9aaaaaaaaa${''}</a>`).not.toEqual(html`<a>${''}0${''}aaaaaaaaa${''}</a>`);
 		expect(html`<a>${''}0${''}aaaaaaaa${''}</a>`).not.toEqual(html`<a>${''}.8aaaaaaaa${''}</a>`);
 	});
-	
+
 	test('do not mutate spread variables', () => {
 		const obj = {};
 		html`<a ...${obj} b="1" />`;

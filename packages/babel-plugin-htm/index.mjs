@@ -134,19 +134,14 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 	}
 
 	function transform(node, state) {
-		if (node === undefined) return t.identifier('undefined');
-		if (node === null) return t.nullLiteral();
+		if (t.isNode(node)) return node;
+		if (typeof node === 'string') return stringValue(node);
+		if (typeof node === 'undefined') return t.identifier('undefined');
 
 		const { tag, props, children } = node;
-		function childMapper(child) {
-			if (typeof child==='string') {
-				return stringValue(child);
-			}
-			return t.isNode(child) ? child : transform(child, state);
-		}
 		const newTag = typeof tag === 'string' ? t.stringLiteral(tag) : tag;
 		const newProps = spreadNode(props, state);
-		const newChildren = t.arrayExpression(children.map(childMapper));
+		const newChildren = t.arrayExpression(children.map(child => transform(child, state)));
 		return createVNode(newTag, newProps, newChildren);
 	}
 
