@@ -4,8 +4,9 @@ const MODE_SLASH = 0;
 const MODE_TEXT = 1;
 const MODE_WHITESPACE = 2;
 const MODE_TAGNAME = 3;
-const MODE_PROP_SET = 4;
-const MODE_PROP_APPEND = 5;
+const MODE_COMMENT = 4;
+const MODE_PROP_SET = 5;
+const MODE_PROP_APPEND = 6;
 
 const TAG_SET = 1;
 const CHILD_APPEND = 0;
@@ -144,25 +145,28 @@ export const build = function(statics) {
 				current.push(true, PROP_SET, buffer);
 			}
 		}
-		else if (MINI && mode === MODE_PROP_SET) {
-			(current[2] = current[2] || {})[propName] = field ? buffer ? (buffer + fields[field]) : fields[field] : buffer;
-			mode = MODE_PROP_APPEND;
-		}
-		else if (MINI && mode === MODE_PROP_APPEND) {
-			if (buffer || field) {
-				current[2][propName] += field ? buffer + fields[field] : buffer;
+		else if (mode >= MODE_PROP_SET) {
+			if (MINI) {
+				if (mode === MODE_PROP_SET) {
+					(current[2] = current[2] || {})[propName] = field ? buffer ? (buffer + fields[field]) : fields[field] : buffer;
+					mode = MODE_PROP_APPEND;
+				}
+				else if (field || buffer) {
+					current[2][propName] += field ? buffer + fields[field] : buffer;
+				}
+			}
+			else {
+				if (buffer || (!field && mode === MODE_PROP_SET)) {
+					current.push(buffer, mode, propName);
+					mode = MODE_PROP_APPEND;
+				}
+				if (field) {
+					current.push(field, mode, propName);
+					mode = MODE_PROP_APPEND;
+				}
 			}
 		}
-		else if (!MINI && mode >= MODE_PROP_SET) {
-			if (buffer || (!field && mode === MODE_PROP_SET)) {
-				current.push(buffer, mode, propName);
-				mode = MODE_PROP_APPEND;
-			}
-			if (field) {
-				current.push(field, mode, propName);
-				mode = MODE_PROP_APPEND;
-			}
-		}
+
 		buffer = '';
 	};
 
@@ -191,6 +195,16 @@ export const build = function(statics) {
 				}
 				else {
 					buffer += char;
+				}
+			}
+			else if (mode === MODE_COMMENT) {
+				// Ignore everything until the last three characters are '-', '-' and '>'
+				if (buffer === '--' && char === '>') {
+					mode = MODE_TEXT;
+					buffer = '';
+				}
+				else {
+					buffer = char + buffer[0];
 				}
 			}
 			else if (quote) {
@@ -237,6 +251,11 @@ export const build = function(statics) {
 			}
 			else {
 				buffer += char;
+			}
+
+			if (mode === MODE_TAGNAME && buffer === '!--') {
+				mode = MODE_COMMENT;
+				current = current[0];
 			}
 		}
 	}
