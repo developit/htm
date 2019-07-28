@@ -45,6 +45,10 @@ By default, `babel-plugin-htm` will process all Tagged Templates with a tag func
 
 `babel-plugin-htm` transforms prop spreads (`<a ...${b}>`) into `Object.assign()` calls. For browser support reasons, Babel's standard `_extends` helper is used by default. To use native `Object.assign` directly, pass `{useBuiltIns:true}`.
 
+### `useNativeSpread=false`
+
+`babel-plugin-htm` transforms prop spreads (`<a ...${b} x=y>`) into `{ ...b, x: 'y' }` object spread syntax. For browser support reasons, Babel's standard `_extends` helper is used by default. To use object spread syntax, pass `{useNativeSpread:true}`. This option takes precedence over the `useBuiltIns` option.
+
 ### `variableArity=true`
 
 By default, `babel-plugin-htm` transpiles to the same output as JSX would, which assumes a target function of the form `h(type, props, ...children)`. If, for the purposes of optimization or simplification, you would like all calls to `h()` to be passed exactly 3 arguments, specify `{variableArity:false}` in your Babel config:
