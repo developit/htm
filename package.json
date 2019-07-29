@@ -1,6 +1,6 @@
 {
   "name": "htm",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "The Tagged Template syntax for Virtual DOM. Only browser-compatible syntax.",
   "main": "dist/htm.js",
   "umd:main": "dist/htm.umd.js",
