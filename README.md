@@ -19,7 +19,7 @@ It uses standard JavaScript [Tagged Templates] and works in [all modern browsers
 
 ⚛️ **< 500 bytes** when used with Preact _(thanks gzip 🌈)_
 
-🥚 **< 400 byte** `htm/mini` version
+🥚 **< 420 byte** `htm/mini` version
 
 🏅 **0 bytes** if compiled using [babel-plugin-htm]
 
@@ -45,6 +45,7 @@ Here's some ergonomic features you get for free that aren't present in JSX:
 - Component end-tags: `<${Footer}>footer content<//>`
 - Syntax highlighting and language support via the [lit-html VSCode extension] and [vim-jsx-pretty plugin].
 - Multiple root element (fragments): `<div /><div />`
+- Support for HTML-style comments: `<div><!-- comment --></div>`
 
 ## Installation
 
