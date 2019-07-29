@@ -19,7 +19,7 @@ It uses standard JavaScript [Tagged Templates] and works in [all modern browsers
 
 ⚛️ **< 500 bytes** when used with Preact _(thanks gzip 🌈)_
 
-🥚 **< 420 byte** `htm/mini` version
+🥚 **< 450 byte** `htm/mini` version
 
 🏅 **0 bytes** if compiled using [babel-plugin-htm]
 

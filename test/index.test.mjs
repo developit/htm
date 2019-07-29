@@ -77,6 +77,17 @@ describe('htm', () => {
 		expect(html`<a href=${'foo'} />`).toEqual({ tag: 'a', props: { href: 'foo' }, children: [] });
 	});
 
+	test('slash in the middle of tag name or property name self-closes the element', () => {
+		expect(html`<ab/ba prop=value>`).toEqual({ tag: 'ab', props: null, children: [] });
+		expect(html`<abba pr/op=value>`).toEqual({ tag: 'abba', props: { pr: true }, children: [] });
+	});
+
+	test('slash in a property value does not self-closes the element, unless followed by >', () => {
+		expect(html`<abba prop=val/ue><//>`).toEqual({ tag: 'abba', props: { prop: 'val/ue' }, children: [] });
+		expect(html`<abba prop=value/>`).toEqual({ tag: 'abba', props: { prop: 'value' }, children: [] });
+		expect(html`<abba prop=value/ ><//>`).toEqual({ tag: 'abba', props: { prop: 'value/' }, children: [] });
+	});
+
 	test('two props with dynamic values', () => {
 		function onClick(e) { }
 		expect(html`<a href=${'foo'} onClick=${onClick} />`).toEqual({ tag: 'a', props: { href: 'foo', onClick }, children: [] });
@@ -86,6 +97,8 @@ describe('htm', () => {
 		expect(html`<a href="before${'foo'}after" />`).toEqual({ tag: 'a', props: { href: 'beforefooafter' }, children: [] });
 		expect(html`<a href=${1}${1} />`).toEqual({ tag: 'a', props: { href: '11' }, children: [] });
 		expect(html`<a href=${1}between${1} />`).toEqual({ tag: 'a', props: { href: '1between1' }, children: [] });
+		expect(html`<a href=/before/${'foo'}/after />`).toEqual({ tag: 'a', props: { href: '/before/foo/after' }, children: [] });
+		expect(html`<a href=/before/${'foo'}/>`).toEqual({ tag: 'a', props: { href: '/before/foo' }, children: [] });
 	});
 
 	test('spread props', () => {
