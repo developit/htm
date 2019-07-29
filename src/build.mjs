@@ -73,22 +73,23 @@ export const treeify = (built, fields) => {
 
 export const evaluate = (h, built, fields, args) => {
 	for (let i = 1; i < built.length; i++) {
-		const field = built[i++];
+		const field = built[i];
 		const value = typeof field === 'number' ? fields[field] : field;
+		const type = built[++i];
 
-		if (built[i] === TAG_SET) {
+		if (type === TAG_SET) {
 			args[0] = value;
 		}
-		else if (built[i] === PROPS_ASSIGN) {
+		else if (type === PROPS_ASSIGN) {
 			args[1] = Object.assign(args[1] || {}, value);
 		}
-		else if (built[i] === PROP_SET) {
+		else if (type === PROP_SET) {
 			(args[1] = args[1] || {})[built[++i]] = value;
 		}
-		else if (built[i] === PROP_APPEND) {
+		else if (type === PROP_APPEND) {
 			args[1][built[++i]] += (value + '');
 		}
-		else if (built[i]) {
+		else if (type) {
 			// code === CHILD_RECURSE
 			args.push(h.apply(null, evaluate(h, value, fields, ['', null])));
 		}
@@ -178,7 +179,7 @@ export const build = function(statics) {
 			commit(i);
 		}
 
-		for (let j=0; j<statics[i].length; j++) {
+		for (let j=0; j<statics[i].length;j++) {
 			char = statics[i][j];
 
 			if (mode === MODE_TEXT) {
@@ -230,7 +231,7 @@ export const build = function(statics) {
 				propName = buffer;
 				buffer = '';
 			}
-			else if (char === '/') {
+			else if (char === '/' && (mode < MODE_PROP_SET || statics[i][j+1] === '>')) {
 				commit();
 				if (mode === MODE_TAGNAME) {
 					current = current[0];
