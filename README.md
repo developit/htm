@@ -66,7 +66,7 @@ const html = htm.bind(React.createElement);
 
 ```js
 // just want htm + preact in a single file? there's a highly-optimized version of that:
-import { html, render } from 'https://unpkg.com/htm/preact/standalone.mjs'
+import { html, render } from 'https://unpkg.com/htm/preact/standalone.module.js'
 ```
 
 ## Usage
@@ -164,7 +164,7 @@ It's a single HTML file, and there's no build or tooling. You can edit it with n
 <html lang="en">
   <title>htm Demo</title>
   <script type="module">
-    import { html, Component, render } from 'https://unpkg.com/htm/preact/standalone.mjs';
+    import { html, Component, render } from 'https://unpkg.com/htm/preact/standalone.module.js';
 
     class App extends Component {
       addTodo() {
