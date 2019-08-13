@@ -111,7 +111,7 @@ export const evaluate = (h, built, fields, args) => {
 			args.push(h.apply(childStaticFlags, value));
 			// Zero out `staticFlags`'s second-to-lowest bit if the whole subtree rooted
 			// at the child (including the child) isn't static.
-			staticFlags &= (childStaticFlags & (childStaticFlags << 1)) | 1;
+			staticFlags &= ((childStaticFlags + 1) >> 1) | 1;
 		}
 		else {
 			// type === CHILD_APPEND
