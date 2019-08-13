@@ -75,22 +75,22 @@ let childStaticFlags;
 export const evaluate = (h, built, fields, args) => {
 	// Bitflags tracking whether the element itself or the element + its descendants are static.
 	// In this case "static" means that the element's tag or props do not contain dynamic values.
-	// The lowest bit is set => the element itself is static (descendants may or may not be).
-	// The second-to-lowest bit is set => the element + its descendants are all static.
-	let staticFlags = 0b11;
+	// The lowest bit is set
+	// 		=> the element itself is static (descendants may or may not be).
+	// The second-to-lowest bit is set
+	// 		=> all element's descendants are all static	(the element itself may or may not be)
+	// An empty set of descendants is considered static.
+	let staticFlags = 0b11, value;
 
 	for (let i = 1; i < built.length; i++) {
-		const type = built[i++];
-		// If there is a dynamic field involved then set `staticFlags` to zero - with one exception:
-		// when type === CHILD_APPEND we can preserve the lowest bit.
-		// Luckily CHILD_APPEND === 0, so `staticFlags &= !type` works as a shorthand for:
-		// 		if (type === CHILD_APPEND) {
-		//			staticFlags |= 0b01;
-		//		}
-		// 		else {
-		//			staticFlags = 0b00;
-		//		}
-		let value = typeof built[i] === 'number' ? (staticFlags &= !type, fields[built[i]]) : built[i];
+		// The `+` annotation below seems to boost performance at least on v8 7.8.5.
+		const type = +built[i];
+
+		// If there is a dynamic field involved then set the lowest bit to zero, except
+		// when type === CHILD_APPEND we zero the second-to-lowest bit.
+		// As it happens CHILD_APPEND === 0, so `0b10 >> !type` works as a shorthand for
+		// `type === CHILD_APPEND ? 0b10 : 0b01`.
+		value = typeof built[++i] === 'number' ? (staticFlags &= (0b10 >> !type), fields[built[i]]) : built[i];
 
 		if (type === TAG_SET) {
 			args[0] = value;
@@ -104,14 +104,13 @@ export const evaluate = (h, built, fields, args) => {
 		else if (type === PROP_APPEND) {
 			args[1][built[++i]] += (value + '');
 		}
-		else if (type) {
-			// type === CHILD_RECURSE
+		else if (type === CHILD_RECURSE) {
 			// After this call childStaticFlags contain the staticFlags for the child.
 			value = evaluate(h, value, fields, ['', null]);
 			args.push(h.apply(childStaticFlags, value));
-			// Zero out `staticFlags`'s second-to-lowest bit if the subtree rooted at
-			// the child isn't static.
-			staticFlags &= childStaticFlags | 1;
+			// Zero out `staticFlags`'s second-to-lowest bit if the whole subtree rooted
+			// at the child (including the child) isn't static.
+			staticFlags &= (childStaticFlags & (childStaticFlags << 1)) | 1;
 		}
 		else {
 			// type === CHILD_APPEND

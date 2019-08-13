@@ -24,16 +24,16 @@ describe('htm statics tracking', () => {
 		expect(html`<div>${'a'}</div>`).toEqual([1, 'a']);
 		expect(html`<div x=1 />`).toEqual([3]);
 		expect(html`<div x=1>${'a'}</div>`).toEqual([1, 'a']);
-		expect(html`<div x=${1} />`).toEqual([0]);
+		expect(html`<div x=${1} />`).toEqual([2]);
 		expect(html`<div x=${1}>${'a'}</div>`).toEqual([0, 'a']);
 	});
 
 	test('dynamic root, static descendants', () => {
-		expect(html`<div x=${1}><a><b /></a></div>`).toEqual([0, [3, [3]]]);
+		expect(html`<div x=${1}><a><b /></a></div>`).toEqual([2, [3, [3]]]);
 	});
 
 	test('mixed static + dynamic descendants', () => {
-		expect(html`<div><a x=1 /><a x=${1}/></div>`).toEqual([1, [3], [0]]);
-		expect(html`<div><a><b x=1 /></a><a><b x=${1}/></a></div>`).toEqual([1, [3, [3]], [1, [0]]]);
+		expect(html`<div><a x=1 /><a x=${1} /></div>`).toEqual([1, [3], [2]]);
+		expect(html`<div><a><b x=1 /></a><a><b x=${1}/></a></div>`).toEqual([1, [3, [3]], [1, [2]]]);
 	});
 });
