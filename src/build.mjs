@@ -36,30 +36,31 @@ export const treeify = (built, fields) => {
 		const children = [];
 
 		for (let i = 1; i < built.length; i++) {
-			const field = built[i++];
+			const type = built[i++];
+			const field = built[i];
 			const value = typeof field === 'number' ? fields[field - 1] : field;
 
-			if (built[i] === TAG_SET) {
+			if (type === TAG_SET) {
 				tag = value;
 			}
-			else if (built[i] === PROPS_ASSIGN) {
+			else if (type === PROPS_ASSIGN) {
 				props.push(value);
 				currentProps = null;
 			}
-			else if (built[i] === PROP_SET) {
+			else if (type === PROP_SET) {
 				if (!currentProps) {
 					currentProps = Object.create(null);
 					props.push(currentProps);
 				}
 				currentProps[built[++i]] = [value];
 			}
-			else if (built[i] === PROP_APPEND) {
+			else if (type === PROP_APPEND) {
 				currentProps[built[++i]].push(value);
 			}
-			else if (built[i] === CHILD_RECURSE) {
+			else if (type === CHILD_RECURSE) {
 				children.push(_treeify(value));
 			}
-			else if (built[i] === CHILD_APPEND) {
+			else if (type === CHILD_APPEND) {
 				children.push(value);
 			}
 		}
