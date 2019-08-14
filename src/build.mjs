@@ -8,10 +8,10 @@ const MODE_COMMENT = 4;
 const MODE_PROP_SET = 5;
 const MODE_PROP_APPEND = 6;
 
-const TAG_SET = 1;
 const CHILD_APPEND = 0;
 const CHILD_RECURSE = 2;
-const PROPS_ASSIGN = 3;
+const TAG_SET = 3;
+const PROPS_ASSIGN = 4;
 const PROP_SET = MODE_PROP_SET;
 const PROP_APPEND = MODE_PROP_APPEND;
 
@@ -37,8 +37,7 @@ export const treeify = (built, fields) => {
 
 		for (let i = 1; i < built.length; i++) {
 			const type = built[i++];
-			const field = built[i];
-			const value = typeof field === 'number' ? fields[field - 1] : field;
+			const value = built[i] ? fields[built[i++]-1] : built[++i];
 
 			if (type === TAG_SET) {
 				tag = value;
@@ -71,27 +70,20 @@ export const treeify = (built, fields) => {
 	return children.length > 1 ? children : children[0];
 };
 
-let childStaticFlags;
+export const evaluate = (h, built, fields, cacheStaticParts, args) => {
+	let tmp;
 
-export const evaluate = (h, built, fields, args) => {
-	// Bitflags tracking whether the element itself or the element + its descendants are static.
-	// In this case "static" means that the element's tag or props do not contain dynamic values.
-	// The lowest bit is set
-	// 		=> the element itself is static (descendants may or may not be).
-	// The second-to-lowest bit is set
-	// 		=> all element's descendants are all static	(the element itself may or may not be)
-	// An empty set of descendants is considered static.
-	let staticFlags = 0b11, value;
+	// `build()` used the first element of the operation list as
+	// temporary workspace. Now that `build()` is done we can use
+	// that space to track whether the current element is "dynamic"
+	// (i.e. it or any of its descendants depend on dynamic values).
+	built[0] = 0;
 
 	for (let i = 1; i < built.length; i++) {
-		// The `+` annotation below seems to boost performance at least on v8 7.8.5.
-		const type = +built[i];
+		const type = built[i++];
 
-		// If there is a dynamic field involved then set the lowest bit to zero, except
-		// when type === CHILD_APPEND we zero the second-to-lowest bit.
-		// As it happens CHILD_APPEND === 0, so `0b10 >> !type` works as a shorthand for
-		// `type === CHILD_APPEND ? 0b10 : 0b01`.
-		value = typeof built[++i] === 'number' ? (staticFlags &= (0b10 >> !type), fields[built[i]]) : built[i];
+		// Set `built[0]` to truthy if this element depends on a dynamic value.
+		const value = built[i] ? fields[built[0] = built[i++]] : built[++i];
 
 		if (type === TAG_SET) {
 			args[0] = value;
@@ -105,13 +97,26 @@ export const evaluate = (h, built, fields, args) => {
 		else if (type === PROP_APPEND) {
 			args[1][built[++i]] += (value + '');
 		}
-		else if (type === CHILD_RECURSE) {
-			// After this call childStaticFlags contain the staticFlags for the child.
-			value = evaluate(h, value, fields, ['', null]);
-			args.push(h.apply(childStaticFlags, value));
-			// Zero out `staticFlags`'s second-to-lowest bit if the whole subtree rooted
-			// at the child (including the child) isn't static.
-			staticFlags &= ((childStaticFlags + 1) >> 1) | 1;
+		else if (type) {
+			// type === CHILD_RECURSE
+			tmp = h.apply(0, evaluate(h, value, fields, cacheStaticParts, ['', null]));
+			args.push(tmp);
+
+			if (cacheStaticParts) {
+				if (value[0]) {
+					// If the child element is dynamic then the current element is also.
+					built[0] = 1;
+				}
+				else {
+					// Rewrite the operation list in-place if the child element is static.
+					// The currently evaluated piece `CHILD_RECURSE, 0, [...]` becomes
+					// `CHILD_APPEND, 0, tmp`.
+					// Essentially the operation list gets optimized for potential future
+					// re-evaluations.
+					built[i-2] = CHILD_APPEND;
+					built[i] = tmp;
+				}
+			}
 		}
 		else {
 			// type === CHILD_APPEND
@@ -119,9 +124,6 @@ export const evaluate = (h, built, fields, args) => {
 		}
 	}
 
-	// Pass the element's flags up the call chain so we can use it to
-	// figure whether its (potential) parent element's all descendants are static.
-	childStaticFlags = staticFlags;
 	return args;
 };
 
@@ -141,7 +143,7 @@ export const build = function(statics) {
 				current.push(field ? fields[field] : buffer);
 			}
 			else {
-				current.push(CHILD_APPEND, field || buffer);
+				current.push(CHILD_APPEND, field, buffer);
 			}
 		}
 		else if (mode === MODE_TAGNAME && (field || buffer)) {
@@ -149,7 +151,7 @@ export const build = function(statics) {
 				current[1] = field ? fields[field] : buffer;
 			}
 			else {
-				current.push(TAG_SET, field || buffer);
+				current.push(TAG_SET, field, buffer);
 			}
 			mode = MODE_WHITESPACE;
 		}
@@ -158,7 +160,7 @@ export const build = function(statics) {
 				current[2] = Object.assign(current[2] || {}, fields[field]);
 			}
 			else {
-				current.push(PROPS_ASSIGN, field);
+				current.push(PROPS_ASSIGN, field, 0);
 			}
 		}
 		else if (mode === MODE_WHITESPACE && buffer && !field) {
@@ -166,7 +168,7 @@ export const build = function(statics) {
 				(current[2] = current[2] || {})[buffer] = true;
 			}
 			else {
-				current.push(PROP_SET, true, buffer);
+				current.push(PROP_SET, 0, true, buffer);
 			}
 		}
 		else if (mode >= MODE_PROP_SET) {
@@ -181,11 +183,11 @@ export const build = function(statics) {
 			}
 			else {
 				if (buffer || (!field && mode === MODE_PROP_SET)) {
-					current.push(mode, buffer, propName);
+					current.push(mode, 0, buffer, propName);
 					mode = MODE_PROP_APPEND;
 				}
 				if (field) {
-					current.push(mode, field, propName);
+					current.push(mode, field, 0, propName);
 					mode = MODE_PROP_APPEND;
 				}
 			}
@@ -264,7 +266,7 @@ export const build = function(statics) {
 					(current = current[0]).push(h.apply(null, mode.slice(1)));
 				}
 				else {
-					(current = current[0]).push(CHILD_RECURSE, mode);
+					(current = current[0]).push(CHILD_RECURSE, 0, mode);
 				}
 				mode = MODE_SLASH;
 			}

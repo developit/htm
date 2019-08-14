@@ -14,7 +14,7 @@
 import htm from '../src/index.mjs';
 
 const h = (tag, props, ...children) => ({ tag, props, children });
-const html = htm.bind(h);
+const html = htm(h);
 
 describe('performance', () => {
 	test('creation', () => {

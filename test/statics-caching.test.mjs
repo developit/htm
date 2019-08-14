@@ -11,13 +11,18 @@
  * limitations under the License.
  */
 
-import { h, Component, render as preactRender } from 'preact';
-import htm from '../../index.mjs';
+import htm from '../src/index.mjs';
 
-function render(tree, parent) {
-	preactRender(tree, parent, parent.firstElementChild);
-}
+const h = (tag, props, ...children) => ({ tag, props, children });
+const html = htm(h, true);
 
-const html = htm(h);
-
-export { h, html, render, Component };
+describe('htm', () => {
+	test('caching', () => {
+		const x = () => html`<div>a</div>`;
+		const a = x();
+		const b = x();
+		expect(a).toEqual({ tag: 'div', props: null, children: ['a'] });
+		expect(b).toEqual({ tag: 'div', props: null, children: ['a'] });
+		expect(a).toBe(b);
+	});
+});

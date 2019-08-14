@@ -18,6 +18,6 @@ function render(tree, parent) {
 	preactRender(tree, parent, parent.firstElementChild);
 }
 
-const html = htm.bind(h);
+const html = htm(h);
 
 export { h, html, render, Component };

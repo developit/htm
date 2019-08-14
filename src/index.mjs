@@ -14,29 +14,29 @@
 import { MINI } from './constants.mjs';
 import { build, evaluate } from './build.mjs';
 
-const getCacheMap = (statics) => {
-	let tpl = CACHE.get(statics);
-	if (!tpl) {
-		CACHE.set(statics, tpl = build(statics));
-	}
-	return tpl;
+export default MINI ? (h => build.bind(h)) : (h, cache) => {
+	const getCacheMap = (statics) => {
+		let tpl = CACHE.get(statics);
+		if (!tpl) {
+			CACHE.set(statics, tpl = build(statics));
+		}
+		return tpl;
+	};
+
+	const getCacheKeyed = (statics) => {
+		let key = '';
+		for (let i = 0; i < statics.length; i++) {
+			key += statics[i].length + '-' + statics[i];
+		}
+		return CACHE[key] || (CACHE[key] = build(statics));
+	};
+
+	const USE_MAP = !MINI && typeof Map === 'function';
+	const CACHE = USE_MAP ? new Map() : {};
+	const getCache = USE_MAP ? getCacheMap : getCacheKeyed;
+
+	return function(statics) {
+		const res = evaluate(h, getCache(statics), arguments, cache, []);
+		return res.length > 1 ? res : res[0];
+	};
 };
-
-const getCacheKeyed = (statics) => {
-	let key = '';
-	for (let i = 0; i < statics.length; i++) {
-		key += statics[i].length + '-' + statics[i];
-	}
-	return CACHE[key] || (CACHE[key] = build(statics));
-};
-
-const USE_MAP = !MINI && typeof Map === 'function';
-const CACHE = USE_MAP ? new Map() : {};
-const getCache = USE_MAP ? getCacheMap : getCacheKeyed;
-
-const cached = function(statics) {
-	const res = evaluate(this, getCache(statics), arguments, []);
-	return res.length > 1 ? res : res[0];
-};
-
-export default MINI ? build : cached;
