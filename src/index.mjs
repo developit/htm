@@ -14,7 +14,9 @@
 import { MINI } from './constants.mjs';
 import { build, evaluate } from './build.mjs';
 
-export default MINI ? (h => build.bind(h)) : (h, cache) => {
+const mini = h => build.bind(h);
+
+const regular = h => {
 	const getCacheMap = (statics) => {
 		let tpl = CACHE.get(statics);
 		if (!tpl) {
@@ -31,12 +33,14 @@ export default MINI ? (h => build.bind(h)) : (h, cache) => {
 		return CACHE[key] || (CACHE[key] = build(statics));
 	};
 
-	const USE_MAP = !MINI && typeof Map === 'function';
+	const USE_MAP = typeof Map === 'function';
 	const CACHE = USE_MAP ? new Map() : {};
 	const getCache = USE_MAP ? getCacheMap : getCacheKeyed;
 
 	return function(statics) {
-		const res = evaluate(h, getCache(statics), arguments, cache, []);
+		const res = evaluate(h, getCache(statics), arguments, []);
 		return res.length > 1 ? res : res[0];
 	};
 };
+
+export default MINI ? mini : regular;

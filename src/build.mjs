@@ -70,7 +70,7 @@ export const treeify = (built, fields) => {
 	return children.length > 1 ? children : children[0];
 };
 
-export const evaluate = (h, built, fields, cacheStaticParts, args) => {
+export const evaluate = (h, built, fields, args) => {
 	let tmp;
 
 	// `build()` used the first element of the operation list as
@@ -99,23 +99,21 @@ export const evaluate = (h, built, fields, cacheStaticParts, args) => {
 		}
 		else if (type) {
 			// type === CHILD_RECURSE
-			tmp = h.apply(0, evaluate(h, value, fields, cacheStaticParts, ['', null]));
+			tmp = h.apply(0, evaluate(h, value, fields, ['', null]));
 			args.push(tmp);
 
-			if (cacheStaticParts) {
-				if (value[0]) {
-					// If the child element is dynamic then the current element is also.
-					built[0] = 1;
-				}
-				else {
-					// Rewrite the operation list in-place if the child element is static.
-					// The currently evaluated piece `CHILD_RECURSE, 0, [...]` becomes
-					// `CHILD_APPEND, 0, tmp`.
-					// Essentially the operation list gets optimized for potential future
-					// re-evaluations.
-					built[i-2] = CHILD_APPEND;
-					built[i] = tmp;
-				}
+			if (value[0]) {
+				// If the child element is dynamic, then so is the current element.
+				built[0] = 1;
+			}
+			else {
+				// Rewrite the operation list in-place if the child element is static.
+				// The currently evaluated piece `CHILD_RECURSE, 0, [...]` becomes
+				// `CHILD_APPEND, 0, tmp`.
+				// Essentially the operation list gets optimized for potential future
+				// re-evaluations.
+				built[i-2] = CHILD_APPEND;
+				built[i] = tmp;
 			}
 		}
 		else {
