@@ -253,6 +253,13 @@ console.log(html`
 // }
 ```
 
+## Demos & Examples
+
+- [Canadian Holidays](https://github.com/pcraig3/hols): A full app using HTM and Server-Side Rendering
+- [HTM SSR Example](https://github.com/timarney/htm-ssr-demo): Shows how to do SSR with HTM
+- [HTM + Preact SSR Demo](https://gist.github.com/developit/699c8d8f180a1e4eed58167f9c6711be)
+- [HTM + vhtml SSR Demo](https://gist.github.com/developit/ff925c3995b4a129b6b977bf7cd12ebd)
+
 ## Project Status
 
 The original goal for `htm` was to create a wrapper around Preact that felt natural for use untranspiled in the browser. I wanted to use Virtual DOM, but I wanted to eschew build tooling and use ES Modules directly.
