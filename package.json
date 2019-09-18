@@ -7,8 +7,8 @@
   "module": "dist/htm.module.js",
   "scripts": {
     "build": "npm run -s build:main && npm run -s build:mini && npm run -s build:preact && npm run -s build:react && npm run -s build:babel && npm run -s build:babel-transform-jsx && npm run -s build:mjsalias",
-    "build:main": "microbundle src/index.mjs -f es,umd --no-sourcemap --target web && microbundle src/cjs.mjs -f iife --no-sourcemap --target web",
-    "build:mini": "microbundle src/index.mjs -o ./mini/index.js -f es,umd --no-sourcemap --target web --alias ./constants.mjs=./constants-mini.mjs && microbundle src/cjs.mjs -o ./mini/index.js -f iife --no-sourcemap --target web --alias ./constants.mjs=./constants-mini.mjs",
+    "build:main": "microbundle src/index.mjs -f es,umd --no-sourcemap --target web && microbundle src/cjs.mjs -f iife --no-sourcemap --target web && cp src/index.d.ts dist",
+    "build:mini": "microbundle src/index.mjs -o ./mini/index.js -f es,umd --no-sourcemap --target web --alias ./constants.mjs=./constants-mini.mjs && microbundle src/cjs.mjs -o ./mini/index.js -f iife --no-sourcemap --target web --alias ./constants.mjs=./constants-mini.mjs && cp src/index.d.ts mini",
     "build:preact": "cd src/integrations/preact && npm run build",
     "build:react": "cd src/integrations/react && npm run build",
     "build:babel": "cd packages/babel-plugin-htm && npm run build",
