@@ -11,12 +11,8 @@
  * limitations under the License.
  */
 
-import { h, Component, render as preactRender } from 'preact';
+import { h, Component, render } from 'preact';
 import htm from 'htm';
-
-function render(tree, parent) {
-	preactRender(tree, parent, parent.firstElementChild);
-}
 
 const html = htm.bind(h);
 

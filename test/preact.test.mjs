@@ -83,7 +83,7 @@ describe('htm/preact', () => {
 		scratch.innerHTML = '';
 
 		render(html`<div is-before="blah" ...${props} />`, scratch);
-		expect(scratch.innerHTML).toBe(`<div is-before="blah" a="1" b="2" c="3"></div>`);
+		expect(scratch.innerHTML).toBe(`<div a="1" b="2" c="3" is-before="blah"></div>`);
 		scratch.innerHTML = '';
 
 		render(html`<div ...${props} is-after />`, scratch);
@@ -92,7 +92,7 @@ describe('htm/preact', () => {
 		scratch.innerHTML = '';
 
 		render(html`<div is-before ...${props} is-after="blah" />`, scratch);
-		expect(scratch.innerHTML).toBe(`<div is-before="true" a="1" b="2" c="3" is-after="blah"></div>`);
+		expect(scratch.innerHTML).toBe(`<div a="1" b="2" c="3" is-after="blah" is-before="true"></div>`);
 		scratch.innerHTML = '';
 
 		render(html`<div ...${props} ...${other} />`, scratch);
