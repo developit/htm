@@ -14,29 +14,15 @@
 import { MINI } from './constants.mjs';
 import { build, evaluate } from './build.mjs';
 
-const getCacheMap = (statics) => {
-	let tpl = CACHE.get(statics);
-	if (!tpl) {
-		CACHE.set(statics, tpl = build(statics));
-	}
-	return tpl;
-};
-
-const getCacheKeyed = (statics) => {
-	let key = '';
-	for (let i = 0; i < statics.length; i++) {
-		key += statics[i].length + '-' + statics[i];
-	}
-	return CACHE[key] || (CACHE[key] = build(statics));
-};
-
-const USE_MAP = !MINI && typeof Map === 'function';
-const CACHE = USE_MAP ? new Map() : {};
-const getCache = USE_MAP ? getCacheMap : getCacheKeyed;
+const CACHE = new Map();
 
 const cached = function(statics) {
-	const res = evaluate(this, getCache(statics), arguments, []);
-	return res.length > 1 ? res : res[0];
+	let tmp = CACHE.get(statics);
+	if (!tmp) {
+		CACHE.set(statics, tmp = build(statics));
+	}
+	tmp = evaluate(this, tmp, arguments, []);
+	return tmp.length > 1 ? tmp : tmp[0];
 };
 
 export default MINI ? build : cached;
