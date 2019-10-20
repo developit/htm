@@ -7,11 +7,14 @@ A Babel plugin that compiles [htm] syntax to hyperscript, React.createElement, o
 Basic usage:
 
 ```js
-[
-  ["htm", {
-    "pragma": "React.createElement"
-  }]
-]
+// In your babel config
+{
+  presets: [
+    ["htm", {
+      "pragma": "React.createElement"
+    }]
+  ]
+}
 ```
 
 ```js
