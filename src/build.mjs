@@ -183,19 +183,23 @@ export const build = function(statics) {
 			char = statics[i][j];
 
 			if (mode === MODE_TEXT) {
-				if (char === '<') {
-					// commit buffer
-					commit();
+				// Boost text mode
+				let idx = statics[i].indexOf('<', j)
+				if (idx < 0) {
+					buffer = statics[i].slice(j)
+					j = statics[i].length
+				}
+				else {
+					buffer = statics[i].slice(j, idx)
+					j = idx
+					commit()
 					if (MINI) {
 						current = [current, '', null];
 					}
 					else {
 						current = [current];
 					}
-					mode = MODE_TAGNAME;
-				}
-				else {
-					buffer += char;
+					mode = MODE_TAGNAME
 				}
 			}
 			else if (mode === MODE_COMMENT) {
