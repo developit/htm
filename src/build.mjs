@@ -184,22 +184,22 @@ export const build = function(statics) {
 
 			if (mode === MODE_TEXT) {
 				// Boost text mode
-				let idx = statics[i].indexOf('<', j)
+				let idx = statics[i].indexOf('<', j);
 				if (idx < 0) {
-					buffer = statics[i].slice(j)
-					j = statics[i].length
+					buffer = statics[i].slice(j);
+					j = statics[i].length;
 				}
 				else {
-					buffer = statics[i].slice(j, idx)
-					j = idx
-					commit()
+					buffer = statics[i].slice(j, idx);
+					j = idx;
+					commit();
 					if (MINI) {
 						current = [current, '', null];
 					}
 					else {
 						current = [current];
 					}
-					mode = MODE_TAGNAME
+					mode = MODE_TAGNAME;
 				}
 			}
 			else if (mode === MODE_COMMENT) {
