@@ -14,17 +14,16 @@
 import { MINI } from './constants.mjs';
 import { build, evaluate } from './build.mjs';
 
-const regular = h => {
-	const cache = new Map();
+const CACHES = new Map();
 
-	return function(statics) {
-		let tmp = cache.get(statics);
-		if (!tmp) {
-			cache.set(statics, tmp = build(statics));
-		}
-		tmp = evaluate(h, tmp, arguments, []);
-		return tmp.length > 1 ? tmp : tmp[0];
-	};
+const regular = function(statics) {
+	let tmp = CACHES.get(this);
+	if (!tmp) {
+		tmp = new Map();
+		CACHES.set(this, tmp);
+	}
+	tmp = evaluate(this, tmp.get(statics) || (tmp.set(statics, tmp = build(statics)), tmp), arguments, []);
+	return tmp.length > 1 ? tmp : tmp[0];
 };
 
-export default MINI ? build : { bind: regular };
+export default MINI ? build : regular;
