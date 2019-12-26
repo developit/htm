@@ -43,6 +43,78 @@ By default, `babel-plugin-htm` will process all Tagged Templates with a tag func
 ]}
 ```
 
+### `import=false` _(experimental)_
+
+Auto-import the pragma function, off by default.
+
+#### `false` (default)
+
+Don't auto-import anything.
+
+#### `String`
+
+Import the `pragma` like `import {<pragma>} from '<import>'`.
+
+With Babel config:
+```js
+"plugins": [
+  ["babel-plugin-htm", {
+    "tag": "$$html",
+    "import": "preact"
+  }]
+]
+```
+
+```js
+import { html as $$html } from 'htm/preact';
+
+export default $$html`<div id="foo">hello ${you}</div>`
+```
+
+The above will produce files that look like:
+
+```js
+import { h } from 'preact';
+import { html as $$html } from 'htm/preact';
+
+export default h("div", { id: "foo" }, "hello ", you)
+```
+
+#### `{module: String, export: String}`
+
+Import the `pragma` like `import {<import.export> as <pragma>} from '<import.module>'`.
+
+With Babel config:
+```js
+"plugins": [
+  ["babel-plugin-htm", {
+    "pragma": "React.createElement",
+    "tag": "$$html",
+    "import": {
+      // the module to import:
+      "module": "react",
+      // a named export to use from that module:
+      "export": "default"
+    }
+  }]
+]
+```
+
+```js
+import { html as $$html } from 'htm/react';
+
+export default $$html`<div id="foo">hello ${you}</div>`
+```
+
+The above will produce files that look like:
+
+```js
+import React from 'react';
+import { html as $$html } from 'htm/react';
+
+export default React.createElement("div", { id: "foo" }, "hello ", you)
+```
+
 ### `useBuiltIns=false`
 
 `babel-plugin-htm` transforms prop spreads (`<a ...${b}>`) into `Object.assign()` calls. For browser support reasons, Babel's standard `_extends` helper is used by default. To use native `Object.assign` directly, pass `{useBuiltIns:true}`.

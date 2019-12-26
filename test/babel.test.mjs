@@ -46,7 +46,7 @@ describe('htm/babel', () => {
 				]
 			}).code
 		).toBe(`h("a",Object.assign({b:2},{c:3}),"d: ",4);`);
-		
+
 		expect(
 			transform('html`<a b=${2} ...${{ c: 3 }}>d: ${4}</a>`;', {
 				...options,
@@ -68,7 +68,7 @@ describe('htm/babel', () => {
 				]
 			}).code
 		).toBe(`h("a",foo);`);
-		
+
 		expect(
 			transform('html`<a ...${foo}></a>`;', {
 				...options,
@@ -92,7 +92,7 @@ describe('htm/babel', () => {
 				]
 			}).code
 		).toBe(`h("a",Object.assign({},foo,bar));`);
-		
+
 		expect(
 			transform('html`<a ...${foo} ...${bar}></a>`;', {
 				...options,
@@ -116,7 +116,7 @@ describe('htm/babel', () => {
 				]
 			}).code
 		).toBe(`h("a",Object.assign({b:"1"},foo));`);
-		
+
 		expect(
 			transform('html`<a b="1" ...${foo}></a>`;', {
 				...options,
@@ -140,7 +140,7 @@ describe('htm/babel', () => {
 				]
 			}).code
 		).toBe(`h("a",Object.assign({},foo,{b:"1"}));`);
-		
+
 		expect(
 			transform('html`<a ...${foo} b="1"></a>`;', {
 				...options,
@@ -164,7 +164,7 @@ describe('htm/babel', () => {
 				]
 			}).code
 		).toBe(`h("a",Object.assign({b:"1"},foo,{c:2},{d:3}));`);
-		
+
 		expect(
 			transform('html`<a b="1" ...${foo} c=${2} ...${{d:3}}></a>`;', {
 				...options,
@@ -304,6 +304,125 @@ describe('htm/babel', () => {
 					]
 				}).code
 			).toBe(`var name="world",vnode={type:1,tag:"div",props:{id:"hello"},children:[{type:3,tag:null,props:null,children:null,text:"hello, "},name],text:null};`);
+		});
+	});
+
+	describe('{import:"preact"}', () => {
+		test('should do nothing when pragma=false', () => {
+			expect(
+				transform('var name="world",vnode=html`<div id=hello>hello, ${name}</div>`;', {
+					...options,
+					plugins: [
+						[htmBabelPlugin, {
+							pragma: false,
+							import: 'preact'
+						}]
+					]
+				}).code
+			).toBe(`var name="world",vnode={tag:"div",props:{id:"hello"},children:["hello, ",name]};`);
+		});
+		test('should do nothing when tag is not used', () => {
+			expect(
+				transform('console.log("hi");', {
+					...options,
+					plugins: [
+						[htmBabelPlugin, {
+							import: 'preact'
+						}]
+					]
+				}).code
+			).toBe(`console.log("hi");`);
+		});
+		test('should add import', () => {
+			expect(
+				transform('html`<div id=hello>hello</div>`;', {
+					...options,
+					plugins: [
+						[htmBabelPlugin, {
+							import: 'preact'
+						}]
+					]
+				}).code
+			).toBe(`import{h}from"preact";h("div",{id:"hello"},"hello");`);
+		});
+		test('should add import for pragma', () => {
+			expect(
+				transform('html`<div id=hello>hello</div>`;', {
+					...options,
+					plugins: [
+						[htmBabelPlugin, {
+							pragma: 'createElement',
+							import: 'react'
+						}]
+					]
+				}).code
+			).toBe(`import{createElement}from"react";createElement("div",{id:"hello"},"hello");`);
+		});
+	});
+
+	describe('{import:Object}', () => {
+		test('should add import', () => {
+			expect(
+				transform('html`<div id=hello>hello</div>`;', {
+					...options,
+					plugins: [
+						[htmBabelPlugin, {
+							import: {
+								module: 'preact',
+								export: 'h'
+							}
+						}]
+					]
+				}).code
+			).toBe(`import{h}from"preact";h("div",{id:"hello"},"hello");`);
+		});
+		test('should add import as pragma', () => {
+			expect(
+				transform('html`<div id=hello>hello</div>`;', {
+					...options,
+					plugins: [
+						[htmBabelPlugin, {
+							pragma: 'hh',
+							import: {
+								module: 'preact',
+								export: 'h'
+							}
+						}]
+					]
+				}).code
+			).toBe(`import{h as hh}from"preact";hh("div",{id:"hello"},"hello");`);
+		});
+		test('should add import default', () => {
+			expect(
+				transform('html`<div id=hello>hello</div>`;', {
+					...options,
+					plugins: [
+						[htmBabelPlugin, {
+							pragma: 'React.createElement',
+							import: {
+								module: 'react',
+								export: 'default'
+							}
+						}]
+					]
+				}).code
+			).toBe(`import React from"react";React.createElement("div",{id:"hello"},"hello");`);
+		});
+		test('should add import *', () => {
+			expect(
+				transform('html`<div id=hello>hello</div>`;', {
+					...options,
+					plugins: [
+						[htmBabelPlugin, {
+							pragma: 'Preact.h',
+							import: {
+								module: 'preact',
+								export: '*'
+							}
+						}]
+					]
+				}).code
+			).toBe(`import*as Preact from"preact";Preact.h("div",{id:"hello"},"hello");`);
 		});
 	});
 
