@@ -17,12 +17,23 @@ const h = (tag, props, ...children) => ({ tag, props, children });
 const html = htm.bind(h);
 
 describe('htm', () => {
-	test('caching', () => {
+	test('should cache static subtrees', () => {
 		const x = () => html`<div>a</div>`;
 		const a = x();
 		const b = x();
 		expect(a).toEqual({ tag: 'div', props: null, children: ['a'] });
 		expect(b).toEqual({ tag: 'div', props: null, children: ['a'] });
 		expect(a).toBe(b);
+	});
+
+	test('should have a different cache for each h', () => {
+		let tmp = htm.bind(() => 1);
+		const x = () => tmp`<div>a</div>`;
+		const a = x();
+		tmp = htm.bind(() => 2);
+		const b = x();
+
+		expect(a).toBe(1);
+		expect(b).toBe(2);
 	});
 });
