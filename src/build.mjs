@@ -8,10 +8,10 @@ const MODE_COMMENT = 4;
 const MODE_PROP_SET = 5;
 const MODE_PROP_APPEND = 6;
 
-const TAG_SET = 1;
 const CHILD_APPEND = 0;
 const CHILD_RECURSE = 2;
-const PROPS_ASSIGN = 3;
+const TAG_SET = 3;
+const PROPS_ASSIGN = 4;
 const PROP_SET = MODE_PROP_SET;
 const PROP_APPEND = MODE_PROP_APPEND;
 
@@ -36,30 +36,30 @@ export const treeify = (built, fields) => {
 		const children = [];
 
 		for (let i = 1; i < built.length; i++) {
-			const field = built[i++];
-			const value = typeof field === 'number' ? fields[field - 1] : field;
+			const type = built[i++];
+			const value = built[i] ? fields[built[i++]-1] : built[++i];
 
-			if (built[i] === TAG_SET) {
+			if (type === TAG_SET) {
 				tag = value;
 			}
-			else if (built[i] === PROPS_ASSIGN) {
+			else if (type === PROPS_ASSIGN) {
 				props.push(value);
 				currentProps = null;
 			}
-			else if (built[i] === PROP_SET) {
+			else if (type === PROP_SET) {
 				if (!currentProps) {
 					currentProps = Object.create(null);
 					props.push(currentProps);
 				}
 				currentProps[built[++i]] = [value];
 			}
-			else if (built[i] === PROP_APPEND) {
+			else if (type === PROP_APPEND) {
 				currentProps[built[++i]].push(value);
 			}
-			else if (built[i] === CHILD_RECURSE) {
+			else if (type === CHILD_RECURSE) {
 				children.push(_treeify(value));
 			}
-			else if (built[i] === CHILD_APPEND) {
+			else if (type === CHILD_APPEND) {
 				children.push(value);
 			}
 		}
@@ -70,12 +70,20 @@ export const treeify = (built, fields) => {
 	return children.length > 1 ? children : children[0];
 };
 
-
 export const evaluate = (h, built, fields, args) => {
+	let tmp;
+
+	// `build()` used the first element of the operation list as
+	// temporary workspace. Now that `build()` is done we can use
+	// that space to track whether the current element is "dynamic"
+	// (i.e. it or any of its descendants depend on dynamic values).
+	built[0] = 0;
+
 	for (let i = 1; i < built.length; i++) {
-		const field = built[i];
-		const value = typeof field === 'number' ? fields[field] : field;
-		const type = built[++i];
+		const type = built[i++];
+
+		// Set `built[0]` to truthy if this element depends on a dynamic value.
+		const value = built[i] ? fields[built[0] = built[i++]] : built[++i];
 
 		if (type === TAG_SET) {
 			args[0] = value;
@@ -90,11 +98,26 @@ export const evaluate = (h, built, fields, args) => {
 			args[1][built[++i]] += (value + '');
 		}
 		else if (type) {
-			// code === CHILD_RECURSE
-			args.push(h.apply(null, evaluate(h, value, fields, ['', null])));
+			// type === CHILD_RECURSE
+			tmp = h.apply(0, evaluate(h, value, fields, ['', null]));
+			args.push(tmp);
+
+			if (value[0]) {
+				// If the child element is dynamic, then so is the current element.
+				built[0] = 1;
+			}
+			else {
+				// Rewrite the operation list in-place if the child element is static.
+				// The currently evaluated piece `CHILD_RECURSE, 0, [...]` becomes
+				// `CHILD_APPEND, 0, tmp`.
+				// Essentially the operation list gets optimized for potential future
+				// re-evaluations.
+				built[i-2] = CHILD_APPEND;
+				built[i] = tmp;
+			}
 		}
 		else {
-			// code === CHILD_APPEND
+			// type === CHILD_APPEND
 			args.push(value);
 		}
 	}
@@ -118,7 +141,7 @@ export const build = function(statics) {
 				current.push(field ? fields[field] : buffer);
 			}
 			else {
-				current.push(field || buffer, CHILD_APPEND);
+				current.push(CHILD_APPEND, field, buffer);
 			}
 		}
 		else if (mode === MODE_TAGNAME && (field || buffer)) {
@@ -126,7 +149,7 @@ export const build = function(statics) {
 				current[1] = field ? fields[field] : buffer;
 			}
 			else {
-				current.push(field || buffer, TAG_SET);
+				current.push(TAG_SET, field, buffer);
 			}
 			mode = MODE_WHITESPACE;
 		}
@@ -135,7 +158,7 @@ export const build = function(statics) {
 				current[2] = Object.assign(current[2] || {}, fields[field]);
 			}
 			else {
-				current.push(field, PROPS_ASSIGN);
+				current.push(PROPS_ASSIGN, field, 0);
 			}
 		}
 		else if (mode === MODE_WHITESPACE && buffer && !field) {
@@ -143,7 +166,7 @@ export const build = function(statics) {
 				(current[2] = current[2] || {})[buffer] = true;
 			}
 			else {
-				current.push(true, PROP_SET, buffer);
+				current.push(PROP_SET, 0, true, buffer);
 			}
 		}
 		else if (mode >= MODE_PROP_SET) {
@@ -158,11 +181,11 @@ export const build = function(statics) {
 			}
 			else {
 				if (buffer || (!field && mode === MODE_PROP_SET)) {
-					current.push(buffer, mode, propName);
+					current.push(mode, 0, buffer, propName);
 					mode = MODE_PROP_APPEND;
 				}
 				if (field) {
-					current.push(field, mode, propName);
+					current.push(mode, field, 0, propName);
 					mode = MODE_PROP_APPEND;
 				}
 			}
@@ -241,7 +264,7 @@ export const build = function(statics) {
 					(current = current[0]).push(h.apply(null, mode.slice(1)));
 				}
 				else {
-					(current = current[0]).push(mode, CHILD_RECURSE);
+					(current = current[0]).push(CHILD_RECURSE, 0, mode);
 				}
 				mode = MODE_SLASH;
 			}

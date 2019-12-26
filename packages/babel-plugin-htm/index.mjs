@@ -5,16 +5,42 @@ import { build, treeify } from '../../src/build.mjs';
  * @param {object} options
  * @param {string} [options.pragma=h]  JSX/hyperscript pragma.
  * @param {string} [options.tag=html]  The tagged template "tag" function name to process.
+ * @param {string | boolean | object} [options.import=false]  Import the tag automatically
  * @param {boolean} [options.monomorphic=false]  Output monomorphic inline objects instead of using String literals.
  * @param {boolean} [options.useBuiltIns=false]  Use the native Object.assign instead of trying to polyfill it.
  * @param {boolean} [options.useNativeSpread=false]  Use the native { ...a, ...b } syntax for prop spreads.
  * @param {boolean} [options.variableArity=true] If `false`, always passes exactly 3 arguments to the pragma function.
  */
 export default function htmBabelPlugin({ types: t }, options = {}) {
-	const pragma = options.pragma===false ? false : dottedIdentifier(options.pragma || 'h');
+	const pragmaString = options.pragma===false ? false : options.pragma || 'h';
+	const pragma = pragmaString===false ? false : dottedIdentifier(pragmaString);
 	const useBuiltIns = options.useBuiltIns;
 	const useNativeSpread = options.useNativeSpread;
 	const inlineVNodes = options.monomorphic || pragma===false;
+	const importDeclaration = pragmaImport(options.import || false);
+
+	function pragmaImport(imp) {
+		if (pragmaString === false || imp === false) {
+			return null;
+		}
+		const pragmaRoot = t.identifier(pragmaString.split('.')[0]);
+		const { module, export: export_ } = typeof imp !== 'string' ? imp : {
+			module: imp,
+			export: null
+		};
+
+		let specifier;
+		if (export_ === '*') {
+			specifier = t.importNamespaceSpecifier(pragmaRoot);
+		}
+		else if (export_ === 'default') {
+			specifier = t.importDefaultSpecifier(pragmaRoot);
+		}
+		else {
+			specifier = t.importSpecifier(pragmaRoot, export_ ? t.identifier(export_) : pragmaRoot);
+		}
+		return t.importDeclaration([specifier], t.stringLiteral(module));
+	}
 
 	function dottedIdentifier(keypath) {
 		const path = keypath.split('.');
@@ -69,7 +95,7 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 		}
 		return t.stringLiteral(str);
 	}
-  
+
 	function createVNode(tag, props, children) {
 		// Never pass children=[[]].
 		if (children.elements.length === 1 && t.isArrayExpression(children.elements[0]) && children.elements[0].elements.length === 0) {
@@ -94,7 +120,7 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 
 		return t.callExpression(pragma, [tag, props].concat(children));
 	}
-	
+
 	function spreadNode(args, state) {
 		if (args.length === 0) {
 			return t.nullLiteral();
@@ -102,7 +128,7 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 		if (args.length > 0 && t.isNode(args[0])) {
 			args.unshift({});
 		}
-		
+
 		// 'Object.assign(x)', can be collapsed to 'x'.
 		if (args.length === 1) {
 			return propsNode(args[0]);
@@ -124,11 +150,11 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 			});
 			return t.objectExpression(properties);
 		}
-		
+
 		const helper = useBuiltIns ? dottedIdentifier('Object.assign') : state.addHelper('extends');
 		return t.callExpression(helper, args.map(propsNode));
 	}
-	
+
 	function propsNode(props) {
 		return t.isNode(props) ? props : t.objectExpression(objectProperties(props));
 	}
@@ -152,6 +178,13 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 	return {
 		name: 'htm',
 		visitor: {
+			Program: {
+				exit(path, state) {
+					if (state.get('hasHtm') && importDeclaration) {
+						path.unshiftContainer('body', importDeclaration);
+					}
+				},
+			},
 			TaggedTemplateExpression(path, state) {
 				const tag = path.node.tag.name;
 				if (htmlName[0]==='/' ? patternStringToRegExp(htmlName).test(tag) : tag === htmlName) {
@@ -163,6 +196,7 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 						? transform(tree, state)
 						: t.arrayExpression(tree.map(root => transform(root, state)));
 					path.replaceWith(node);
+					state.set('hasHtm', true);
 				}
 			}
 		}

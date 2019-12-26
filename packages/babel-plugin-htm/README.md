@@ -4,14 +4,16 @@ A Babel plugin that compiles [htm] syntax to hyperscript, React.createElement, o
 
 ## Usage
 
-Basic usage:
+In your Babel configuration (`.babelrc`, `babel.config.js`, `"babel"` field in package.json, etc), add the plugin:
 
 ```js
-[
-  ["htm", {
-    "pragma": "React.createElement"
-  }]
-]
+{
+  "plugins": [
+    ["htm", {
+      "pragma": "React.createElement"
+    }]
+  ]
+}
 ```
 
 ```js
@@ -39,6 +41,78 @@ By default, `babel-plugin-htm` will process all Tagged Templates with a tag func
     "tag": "myCustomHtmlFunction"
   }]
 ]}
+```
+
+### `import=false` _(experimental)_
+
+Auto-import the pragma function, off by default.
+
+#### `false` (default)
+
+Don't auto-import anything.
+
+#### `String`
+
+Import the `pragma` like `import {<pragma>} from '<import>'`.
+
+With Babel config:
+```js
+"plugins": [
+  ["babel-plugin-htm", {
+    "tag": "$$html",
+    "import": "preact"
+  }]
+]
+```
+
+```js
+import { html as $$html } from 'htm/preact';
+
+export default $$html`<div id="foo">hello ${you}</div>`
+```
+
+The above will produce files that look like:
+
+```js
+import { h } from 'preact';
+import { html as $$html } from 'htm/preact';
+
+export default h("div", { id: "foo" }, "hello ", you)
+```
+
+#### `{module: String, export: String}`
+
+Import the `pragma` like `import {<import.export> as <pragma>} from '<import.module>'`.
+
+With Babel config:
+```js
+"plugins": [
+  ["babel-plugin-htm", {
+    "pragma": "React.createElement",
+    "tag": "$$html",
+    "import": {
+      // the module to import:
+      "module": "react",
+      // a named export to use from that module:
+      "export": "default"
+    }
+  }]
+]
+```
+
+```js
+import { html as $$html } from 'htm/react';
+
+export default $$html`<div id="foo">hello ${you}</div>`
+```
+
+The above will produce files that look like:
+
+```js
+import React from 'react';
+import { html as $$html } from 'htm/react';
+
+export default React.createElement("div", { id: "foo" }, "hello ", you)
 ```
 
 ### `useBuiltIns=false`
