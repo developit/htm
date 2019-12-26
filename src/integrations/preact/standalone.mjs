@@ -12,6 +12,7 @@
  */
 
 import { h, Component, render as preactRender } from 'preact';
+import { useState, useReducer, useEffect, useLayoutEffect, useRef, useImperativeHandle, useMemo, useCallback, useContext, useDebugValue } from 'preact/hooks';
 import htm from '../../index.mjs';
 
 function render(tree, parent) {
@@ -20,4 +21,4 @@ function render(tree, parent) {
 
 const html = htm.bind(h);
 
-export { h, html, render, Component };
+export { h, html, render, Component, useState, useReducer, useEffect, useLayoutEffect, useRef, useImperativeHandle, useMemo, useCallback, useContext, useDebugValue };
