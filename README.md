@@ -75,7 +75,7 @@ If you're using Preact or React, we've included off-the-shelf bindings to make y
 They also have the added benefit of sharing a template cache across all modules.
 
 ```js
-import { render } from 'preact'; 
+import { render } from 'preact';
 import { html } from 'htm/preact';
 render(html`<a href="/">Hello!</a>`, document.body);
 ```
@@ -83,7 +83,7 @@ render(html`<a href="/">Hello!</a>`, document.body);
 Similarly, for React:
 
 ```js
-import ReactDOM from 'react-dom'; 
+import ReactDOM from 'react-dom';
 import { html } from 'htm/react';
 ReactDOM.render(html`<a href="/">Hello!</a>`, document.body);
 ```
@@ -264,9 +264,9 @@ console.log(html`
 
 The original goal for `htm` was to create a wrapper around Preact that felt natural for use untranspiled in the browser. I wanted to use Virtual DOM, but I wanted to eschew build tooling and use ES Modules directly.
 
-This meant giving up JSX, and the closest alternative was [Tagged Templates]. So, I wrote this library to patch up the differences between the two as much as possible. As it turns out, the technique is framework-agnostic, so it should work great with most Virtual DOM libraries.
+ This meant giving up JSX, and the closest alternative was [Tagged Templates]. So, I wrote this library to patch up the differences between the two as much as possible. The technique turns out to be framework-agnostic, so it should work great with any library or renderer that works with JSX.
 
-As of 2.1.0, `htm` is stable, well-tested and ready for production use.
+`htm` is stable, fast, well-tested and ready for production use.
 
 [Tagged Templates]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates
 [lit-html]: https://github.com/Polymer/lit-html
