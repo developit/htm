@@ -264,7 +264,7 @@ console.log(html`
 
 The original goal for `htm` was to create a wrapper around Preact that felt natural for use untranspiled in the browser. I wanted to use Virtual DOM, but I wanted to eschew build tooling and use ES Modules directly.
 
-This meant giving up JSX, and the closest alternative was [Tagged Templates]. So, I wrote this library to patch up the differences between the two as much as possible. As it turns out, the technique is framework-agnostic, so it should work great with most Virtual DOM libraries.
+ This meant giving up JSX, and the closest alternative was [Tagged Templates]. So, I wrote this library to patch up the differences between the two as much as possible. The technique turns out to be framework-agnostic, so it should work great with any library or renderer that works with JSX.
 
 `htm` is stable, fast, well-tested and ready for production use.
 
