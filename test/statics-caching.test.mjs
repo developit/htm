@@ -36,4 +36,57 @@ describe('htm', () => {
 		expect(a).toBe(1);
 		expect(b).toBe(2);
 	});
+
+	describe('`this` in the h function', () => {
+		const html = htm.bind(function() {
+			return this;
+		});
+
+		test('stays the same for each call site)', () => {
+			const x = () => html`<div>a</div>`;
+			const a = x();
+			const b = x();
+			expect(a).toBe(b);
+		});
+
+		test('is different for each call site', () => {
+			const a = html`<div>a</div>`;
+			const b = html`<div>a</div>`;
+			expect(a).not.toBe(b);
+		});
+
+		test('is specific to each h function', () => {
+			let tmp = htm.bind(function() { return this; });
+			const x = () => tmp`<div>a</div>`;
+			const a = x();
+			tmp = htm.bind(function() { return this; });
+			const b = x();
+			expect(a).not.toBe(b);
+		});
+	});
+
+	describe('`this[0]` in the h function contains the staticness bits', () => {
+		const html = htm.bind(function() {
+			return this[0];
+		});
+
+		test('should be 0 for static subtrees', () => {
+			expect(html`<div></div>`).toBe(0);
+			expect(html`<div>a</div>`).toBe(0);
+			expect(html`<div><a /></div>`).toBe(0);
+		});
+
+		test('should be 2 for static nodes with some dynamic children', () => {
+			expect(html`<div>${'a'}<b /></div>`).toBe(2);
+			expect(html`<div><a y=${2} /><b /></div>`).toBe(2);
+		});
+
+		test('should be 1 for dynamic nodes with all static children', () => {
+			expect(html`<div x=${1}><a /><b /></div>`).toBe(1);
+		});
+
+		test('should be 3 for dynamic nodes with some dynamic children', () => {
+			expect(html`<div x=${1}><a y=${2} /><b /></div>`).toBe(3);
+		});
+	});
 });
