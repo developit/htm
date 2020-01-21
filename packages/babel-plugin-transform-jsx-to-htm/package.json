@@ -1,6 +1,6 @@
 {
 	"name": "babel-plugin-transform-jsx-to-htm",
-	"version": "1.1.0",
+	"version": "2.0.0",
 	"description": "Babel plugin to compile JSX to Tagged Templates.",
 	"main": "dist/babel-plugin-transform-jsx-to-htm.js",
 	"scripts": {
@@ -32,7 +32,7 @@
 	"homepage": "https://github.com/developit/htm/tree/master/packages/babel-plugin-transform-jsx-to-htm",
 	"dependencies": {
 		"@babel/plugin-syntax-jsx": "^7.2.0",
-		"htm": "^2.2.0"
+		"htm": "^3.0.0"
 	},
 	"devDependencies": {
 		"microbundle": "^0.10.1"
