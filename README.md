@@ -266,7 +266,7 @@ The original goal for `htm` was to create a wrapper around Preact that felt natu
 
 This meant giving up JSX, and the closest alternative was [Tagged Templates]. So, I wrote this library to patch up the differences between the two as much as possible. As it turns out, the technique is framework-agnostic, so it should work great with most Virtual DOM libraries.
 
-As of 3.0.0, `htm` is stable, well-tested and ready for production use.
+`htm` is stable, fast, well-tested and ready for production use.
 
 [Tagged Templates]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates
 [lit-html]: https://github.com/Polymer/lit-html
