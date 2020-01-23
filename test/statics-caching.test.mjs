@@ -89,4 +89,25 @@ describe('htm', () => {
 			expect(html`<div x=${1}><a y=${2} /><b /></div>`).toBe(3);
 		});
 	});
+
+	describe('the h function should be able to modify `this[0]`', () => {
+		test('should be able to force subtrees to be static', () => {
+			function wrapH(h) {
+				return function(type, props, ...children) {
+					if (props['@static']) {
+						this[0] &= ~3;
+					}
+					return h(type, props, ...children);
+				};
+			}
+
+			const html = htm.bind(wrapH(h));
+			const x = () => html`<div @static>${'a'}</div>`;
+			const a = x();
+			const b = x();
+			expect(a).toEqual({ tag: 'div', props: { '@static': true }, children: ['a'] });
+			expect(b).toEqual({ tag: 'div', props: { '@static': true }, children: ['a'] });
+			expect(a).toBe(b);
+		});
+	});
 });
