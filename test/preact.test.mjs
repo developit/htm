@@ -61,8 +61,12 @@ describe('htm/preact', () => {
 		document.querySelector('button').click();
 		document.querySelector('button').click();
 		setTimeout(() => {
-			expect(scratch.innerHTML).toBe(fullHtml.replace('jason', 'tom').replace(/\b0\b/g, '2'));
-			done();
+			try {
+				expect(scratch.innerHTML).toBe(fullHtml.replace('jason', 'tom').replace(/\b0\b/g, '2'));
+			}
+			finally {
+				done();
+			}
 		});
 	});
 
