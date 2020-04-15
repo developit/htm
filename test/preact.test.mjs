@@ -13,6 +13,8 @@
 
 import { html, Component, render } from 'htm/preact';
 
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 describe('htm/preact', () => {
 	const scratch = document.createElement('div');
 	document.body.appendChild(scratch);
@@ -57,17 +59,11 @@ describe('htm/preact', () => {
 		expect(scratch.innerHTML).toBe(fullHtml.replace('jason', 'tom'));
 	});
 
-	test('state update re-renders', done => {
+	test('state update re-renders', async () => {
 		document.querySelector('button').click();
 		document.querySelector('button').click();
-		setTimeout(() => {
-			try {
-				expect(scratch.innerHTML).toBe(fullHtml.replace('jason', 'tom').replace(/\b0\b/g, '2'));
-			}
-			finally {
-				done();
-			}
-		});
+		await sleep(1);
+		expect(scratch.innerHTML).toBe(fullHtml.replace('jason', 'tom').replace(/\b0\b/g, '2'));
 	});
 
 	test('preserves case', () => {
