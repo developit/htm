@@ -11,13 +11,9 @@
  * limitations under the License.
  */
 
-import { h, Component, createContext, render as preactRender } from 'preact';
+import { h, Component, createContext, render } from 'preact';
 import { useState, useReducer, useEffect, useLayoutEffect, useRef, useImperativeHandle, useMemo, useCallback, useContext, useDebugValue } from 'preact/hooks';
 import htm from '../../index.mjs';
-
-function render(tree, parent) {
-	preactRender(tree, parent, parent.firstElementChild);
-}
 
 const html = htm.bind(h);
 
