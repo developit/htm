@@ -6,6 +6,39 @@
   "umd:main": "dist/htm.umd.js",
   "module": "dist/htm.module.js",
   "types": "dist/htm.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/htm.mjs",
+      "require": "./dist/htm.js",
+      "browser": "./dist/htm.module.js",
+      "umd": "./dist/htm.umd.js"
+    },
+    "./": "./",
+    "./preact": {
+      "import": "./preact/index.mjs",
+      "require": "./preact/index.js",
+      "browser": "./preact/index.module.js",
+      "umd": "./preact/index.umd.js"
+    },
+    "./preact/standalone": {
+      "import": "./preact/standalone.mjs",
+      "require": "./preact/standalone.js",
+      "browser": "./preact/standalone.module.js",
+      "umd": "./preact/standalone.umd.js"
+    },
+    "./react": {
+      "import": "./react/index.mjs",
+      "require": "./react/index.js",
+      "browser": "./react/index.module.js",
+      "umd": "./react/index.umd.js"
+    },
+    "./mini": {
+      "import": "./mini/index.mjs",
+      "require": "./mini/index.js",
+      "browser": "./mini/index.module.js",
+      "umd": "./mini/index.umd.js"
+    }
+  },
   "scripts": {
     "build": "npm run -s build:main && npm run -s build:mini && npm run -s build:preact && npm run -s build:react && npm run -s build:babel && npm run -s build:babel-transform-jsx && npm run -s build:mjsalias",
     "build:main": "microbundle src/index.mjs -f es,umd --no-sourcemap --target web && microbundle src/cjs.mjs -f iife --no-sourcemap --target web && cp src/index.d.ts dist/htm.d.ts",
