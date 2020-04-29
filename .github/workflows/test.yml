@@ -1,5 +1,7 @@
 name: Unit Tests
-on: [pull_request]
+
+on: [pull_request, push]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,5 +17,5 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - name: Install
       run: npm install
-    - name: Build & Test
+    - name: Build and Test
       run: npm test
