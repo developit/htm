@@ -7,15 +7,19 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        # Change the condition for ESM Dist Test below when changing this.
         node-version: [10.x, 12.x, 14.x]
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: Install
-      run: npm install
-    - name: Build and Test
-      run: npm test
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install
+        run: npm install
+      - name: Build and Test
+        run: npm test
+      - if: matrix.node-version == '14.x'
+        name: ESM Dist Test
+        run: npm run test:dist

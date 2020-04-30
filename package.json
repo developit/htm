@@ -48,8 +48,9 @@
     "build:babel": "cd packages/babel-plugin-htm && npm run build",
     "build:babel-transform-jsx": "cd packages/babel-plugin-transform-jsx-to-htm && npm run build",
     "build:mjsalias": "cp dist/htm.module.js dist/htm.mjs && cp mini/index.module.js mini/index.mjs && cp preact/index.module.js preact/index.mjs && cp preact/standalone.module.js preact/standalone.mjs && cp react/index.module.js react/index.mjs",
-    "test": "eslint src/**/*.mjs test/**/*.mjs && npm run build && jest test",
+    "test": "eslint src/**/*.mjs test/**/*.mjs --ignore-path .gitignore && npm run build && jest test",
     "test:perf": "v8 test/__perftest.mjs",
+    "test:dist": "npm pack && mv htm*.tgz test/fixtures/esm/htm.tgz && cd test/fixtures/esm && npm install && node index.js",
     "release": "npm t && git commit -am \"$npm_package_version\" && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
   "files": [
