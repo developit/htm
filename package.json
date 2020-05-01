@@ -6,6 +6,39 @@
   "umd:main": "dist/htm.umd.js",
   "module": "dist/htm.module.js",
   "types": "dist/htm.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/htm.mjs",
+      "require": "./dist/htm.js",
+      "browser": "./dist/htm.module.js",
+      "umd": "./dist/htm.umd.js"
+    },
+    "./": "./",
+    "./preact": {
+      "import": "./preact/index.mjs",
+      "require": "./preact/index.js",
+      "browser": "./preact/index.module.js",
+      "umd": "./preact/index.umd.js"
+    },
+    "./preact/standalone": {
+      "import": "./preact/standalone.mjs",
+      "require": "./preact/standalone.js",
+      "browser": "./preact/standalone.module.js",
+      "umd": "./preact/standalone.umd.js"
+    },
+    "./react": {
+      "import": "./react/index.mjs",
+      "require": "./react/index.js",
+      "browser": "./react/index.module.js",
+      "umd": "./react/index.umd.js"
+    },
+    "./mini": {
+      "import": "./mini/index.mjs",
+      "require": "./mini/index.js",
+      "browser": "./mini/index.module.js",
+      "umd": "./mini/index.umd.js"
+    }
+  },
   "scripts": {
     "build": "npm run -s build:main && npm run -s build:mini && npm run -s build:preact && npm run -s build:react && npm run -s build:babel && npm run -s build:babel-transform-jsx && npm run -s build:mjsalias",
     "build:main": "microbundle src/index.mjs -f es,umd --no-sourcemap --target web && microbundle src/cjs.mjs -f iife --no-sourcemap --target web && cp src/index.d.ts dist/htm.d.ts",
@@ -15,8 +48,9 @@
     "build:babel": "cd packages/babel-plugin-htm && npm run build",
     "build:babel-transform-jsx": "cd packages/babel-plugin-transform-jsx-to-htm && npm run build",
     "build:mjsalias": "cp dist/htm.module.js dist/htm.mjs && cp mini/index.module.js mini/index.mjs && cp preact/index.module.js preact/index.mjs && cp preact/standalone.module.js preact/standalone.mjs && cp react/index.module.js react/index.mjs",
-    "test": "eslint src/**/*.mjs test/**/*.mjs && npm run build && jest test",
+    "test": "eslint src/**/*.mjs test/**/*.mjs --ignore-path .gitignore && npm run build && jest test",
     "test:perf": "v8 test/__perftest.mjs",
+    "test:dist": "npm pack && mv htm*.tgz test/fixtures/esm/htm.tgz && cd test/fixtures/esm && npm install && node index.js",
     "release": "npm t && git commit -am \"$npm_package_version\" && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
   "files": [

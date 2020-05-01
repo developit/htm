@@ -1,0 +1,10 @@
+{
+  "name": "htm_dist_test",
+  "type": "module",
+  "private": true,
+  "description": "A package to test importing htm as ES modules in Node",
+  "dependencies": {
+    "htm": "file:htm.tgz",
+    "preact": "^10.4.1"
+  }
+}
