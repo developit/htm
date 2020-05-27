@@ -231,13 +231,8 @@ export const build = function(statics) {
 					buffer = char + buffer[0];
 				}
 			}
-			else if (quote) {
-				if (char === quote) {
-					quote = '';
-				}
-				else {
-					buffer += char;
-				}
+			else if (char === quote) {
+				quote = '';
 			}
 			else if (char === '"' || char === "'") {
 				quote = char;
