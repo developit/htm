@@ -19,13 +19,13 @@ const PROP_APPEND = MODE_PROP_APPEND;
 // convenient to analyze and transform (e.g. Babel plugins).
 // For example:
 // 	treeify(
-//		build'<div href="1${a}" ...${b}><${x} /></div>`,
+//		build`<div href="1${a}" ...${b}><${x} /></div>`,
 //		[X, Y, Z]
 //	)
 // returns:
 // 	{
 // 		tag: 'div',
-//		props: [ { href: ["1", X] },	Y ],
+//		props: [ { href: ["1", X] }, Y ],
 // 		children: [ { tag: Z, props: [], children: [] } ]
 // 	}
 export const treeify = (built, fields) => {
