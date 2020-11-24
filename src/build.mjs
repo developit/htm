@@ -260,11 +260,14 @@ export const build = function(statics) {
 					current = current[0];
 				}
 				mode = current;
+				current = mode[0];
+				mode[0] = [];
+
 				if (MINI) {
-					(current = current[0]).push(h.apply(null, mode.slice(1)));
+					current.push(h.apply(null, mode.slice(1)));
 				}
 				else {
-					(current = current[0]).push(CHILD_RECURSE, 0, mode);
+					current.push(CHILD_RECURSE, 0, mode);
 				}
 				mode = MODE_SLASH;
 			}
