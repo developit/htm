@@ -4,7 +4,7 @@ import jsx from '@babel/plugin-syntax-jsx';
  * @param {Babel} babel
  * @param {object} [options]
  * @param {string} [options.tag='html']  The tagged template "tag" function name to produce.
- * @param {boolean} [options.terse=false]  Collapse whitespace and use `<//>` for closing component tags
+ * @param {boolean} [options.terse=false]  Use `<//>` for closing component tags
  * @param {string | boolean | object} [options.import=false]  Import the tag automatically
  */
 export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
@@ -119,9 +119,7 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 			for (let i = 0; i < children.length; i++) {
 				let child = children[i];
 				if (t.isStringLiteral(child)) {
-					let value = child.value;
-					if (terse) value = value.replace(/\n+/g, ' ');
-					escapeText(value);
+					escapeText(child.value);
 				}
 				else if (t.isJSXElement(child)) {
 					processNode(child);
