@@ -28,9 +28,9 @@ It uses standard JavaScript [Tagged Templates] and works in [all modern browsers
 
 The syntax you write when using HTM is as close as possible to JSX:
 
-- Spread props: `<div ...${props}>`
+- Spread props: `<div ...${props}>` instead of `<div {...props}>`
 - Self-closing tags: `<div />`
-- Components: `<${Foo}>` _(where `Foo` is a component reference)_
+- Components: `<${Foo}>` instead of `<Foo>` _(where `Foo` is a component reference)_
 - Boolean attributes: `<div draggable />`
 
 
@@ -152,6 +152,14 @@ console.log(html`
 //   }
 // ]
 ```
+
+### Caching
+
+The default build of `htm` caches template strings, which means that it can return the same Javascript object at multiple points in the tree. If you don't want this behaviour, you have three options:
+
+* Change your `h` function to copy nodes when needed.
+* Add the code `this[0] = 3;` at the beginning of your `h` function, which disables caching of created elements.
+* Use `htm/mini`, which disables caching by default.
 
 ## Example
 
