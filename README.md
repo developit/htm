@@ -28,7 +28,7 @@ It uses standard JavaScript [Tagged Templates] and works in [all modern browsers
 
 The syntax you write when using HTM is as close as possible to JSX:
 
-- Spread props: `<div ...${props}>` instead of `<div ...{props}>`
+- Spread props: `<div ...${props}>` instead of `<div {...props}>`
 - Self-closing tags: `<div />`
 - Components: `<${Foo}>` instead of `<Foo>` _(where `Foo` is a component reference)_
 - Boolean attributes: `<div draggable />`
