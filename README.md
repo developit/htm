@@ -153,6 +153,14 @@ console.log(html`
 // ]
 ```
 
+### Caching
+
+The default build of `htm` caches template strings, which means that it can return the same Javascript object at multiple points in the tree. If you don't want this behaviour, you have three options:
+
+* Change your `h` function to copy nodes when needed.
+* Add the code `this[0] = 3;` at the beginning of your `h` function, which disables caching of created elements.
+* Use `htm/mini`, which disables caching by default.
+
 ## Example
 
 Curious to see what it all looks like? Here's a working app!
