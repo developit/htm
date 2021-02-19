@@ -48,15 +48,16 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 
 	let quasis = [];
 	let expressions = [];
-	let buffer = '';
 
 	function expr(value) {
-		commit(true);
 		expressions.push(value);
+		quasis.push(t.templateElement({	raw: '', cooked: '' }));
 	}
 
 	function raw(str) {
-		buffer += str;
+		const last = quasis[quasis.length - 1];
+		last.value.raw += str;
+		last.value.cooked += str;
 	}
 
 	function escapeText(text) {
@@ -79,15 +80,6 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 		}
 
 		return expr(t.stringLiteral(node.value));
-	}
-
-	function commit(force) {
-		if (!buffer && !force) return;
-		quasis.push(t.templateElement({
-			raw: buffer,
-			cooked: buffer
-		}));
-		buffer = '';
 	}
 
 	const FRAGMENT_EXPR = dottedIdentifier('React.Fragment');
@@ -197,7 +189,6 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 		processChildren(node, name, isFragment);
 
 		if (isRoot) {
-			commit(true);
 			const template = t.templateLiteral(quasis, expressions);
 			const replacement = t.taggedTemplateExpression(tag, template);
 			path.replaceWith(replacement);
@@ -205,17 +196,14 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 	}
 
 	function jsxVisitorHandler(path, state, isFragment) {
-		let quasisBefore = quasis.slice();
-		let expressionsBefore = expressions.slice();
-		let bufferBefore = buffer;
+		let quasisBefore = quasis;
+		let expressionsBefore = expressions;
 	
-		buffer = '';
-		quasis.length = 0;
-		expressions.length = 0;
+		quasis = [t.templateElement({	raw: '', cooked: '' })];
+		expressions = [];
 	
 		if (isFragment) {
 			processChildren(path.node, null, true);
-			commit();
 			const template = t.templateLiteral(quasis, expressions);
 			const replacement = t.taggedTemplateExpression(tag, template);
 			path.replaceWith(replacement);
@@ -226,7 +214,6 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 	
 		quasis = quasisBefore;
 		expressions = expressionsBefore;
-		buffer = bufferBefore;
 	
 		state.set('jsxElement', true);
 	}
