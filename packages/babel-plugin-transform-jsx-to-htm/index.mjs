@@ -51,7 +51,7 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 
 	function expr(value) {
 		expressions.push(value);
-		quasis.push(t.templateElement({	raw: '', cooked: '' }));
+		quasis.push(t.templateElement({ raw: '', cooked: '' }));
 	}
 
 	function raw(str) {
@@ -199,7 +199,7 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 		let quasisBefore = quasis;
 		let expressionsBefore = expressions;
 	
-		quasis = [t.templateElement({	raw: '', cooked: '' })];
+		quasis = [t.templateElement({ raw: '', cooked: '' })];
 		expressions = [];
 	
 		if (isFragment) {
