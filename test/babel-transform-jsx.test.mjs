@@ -177,6 +177,12 @@ describe('babel-plugin-transform-jsx-to-htm', () => {
 				compile(`<React.Fragment>{Foo}{Bar}</React.Fragment>`)
 			).toBe('html`${Foo}${Bar}`;');
 		});
+
+		test('short syntax fragments should not crash due to TemplateLiteral quasi/expression unbalance', () => {
+			expect(
+				compile(`<><Foo />{Bar}</>`)
+			).toBe('html`<${Foo}/>${Bar}`;');
+		});		
 	});
 
 	describe('props', () => {
