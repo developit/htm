@@ -182,7 +182,7 @@ describe('babel-plugin-transform-jsx-to-htm', () => {
 			expect(
 				compile(`<><Foo />{Bar}</>`)
 			).toBe('html`<${Foo}/>${Bar}`;');
-		});		
+		});
 	});
 
 	describe('props', () => {
