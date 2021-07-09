@@ -185,7 +185,7 @@ It's a single HTML file, and there's no build or tooling. You can edit it with n
             <${Header} name="ToDo's (${page})" />
             <ul>
               ${todos.map(todo => html`
-                <li key="${todo}">${todo}</li>
+                <li key=${todo}>${todo}</li>
               `)}
             </ul>
             <button onClick=${() => this.addTodo()}>Add Todo</button>
