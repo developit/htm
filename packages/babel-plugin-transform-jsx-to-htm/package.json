@@ -1,6 +1,6 @@
 {
 	"name": "babel-plugin-transform-jsx-to-htm",
-	"version": "2.0.0",
+	"version": "2.2.0",
 	"description": "Babel plugin to compile JSX to Tagged Templates.",
 	"main": "dist/babel-plugin-transform-jsx-to-htm.js",
 	"scripts": {
