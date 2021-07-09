@@ -13,6 +13,7 @@
       "import": "./dist/htm.mjs",
       "require": "./dist/htm.js"
     },
+    "./": "./",
     "./preact": {
       "browser": "./preact/index.module.js",
       "umd": "./preact/index.umd.js",
@@ -36,8 +37,7 @@
       "umd": "./mini/index.umd.js",
       "import": "./mini/index.mjs",
       "require": "./mini/index.js"
-    },
-    "./": "./"
+    }
   },
   "scripts": {
     "build": "npm run -s build:main && npm run -s build:mini && npm run -s build:preact && npm run -s build:react && npm run -s build:babel && npm run -s build:babel-transform-jsx && npm run -s build:mjsalias",
