@@ -137,6 +137,26 @@ describe('babel-plugin-transform-jsx-to-htm', () => {
 			).toBe('html`<${a.b.c}>a</${a.b.c}>`;');
 		});
 
+		test('namespaced element names', () => {
+			expect(
+				compile('(<a:b/>);')
+			).toBe('html`<a:b/>`;');
+
+			expect(
+				compile('(<a:b><x:y/></a:b>);')
+			).toBe('html`<a:b><x:y/></a:b>`;');
+		});
+
+		test('namespaced attributes', () => {
+			expect(
+				compile('(<a b:c="d"/>);')
+			).toBe('html`<a b:c="d"/>`;');
+
+			expect(
+				compile('(<a b:c="d" e:f={1} g>h</a>);')
+			).toBe('html`<a b:c="d" e:f=${1} g>h</a>`;');
+		});
+
 		test('static text', () => {
 			expect(
 				compile(`(<div>Hello</div>);`)
