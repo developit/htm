@@ -89,10 +89,14 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 	}
 	
 	function isComponentName(node) {
+		if (t.isJSXNamespacedName(node)) return false;
 		return !t.isIdentifier(node) || node.name.match(/^[$_A-Z]/);
 	}
 	
 	function getNameExpr(node) {
+		if (t.isJSXNamespacedName(node)) {
+			return t.identifier(node.namespace.name + ':' + node.name.name);
+		}
 		if (!t.isJSXMemberExpression(node)) {
 			return t.identifier(node.name);
 		}
@@ -169,7 +173,12 @@ export default function jsxToHtmBabelPlugin({ types: t }, options = {}) {
 						continue;
 					}
 					const { name, value } = attr;
-					raw(name.name);
+					if (t.isJSXNamespacedName(name)) {
+						raw(name.namespace.name + ':' + name.name.name);
+					}
+					else {
+						raw(name.name);
+					}
 					if (value) {
 						raw('=');
 						if (value.expression) {

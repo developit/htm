@@ -13,7 +13,6 @@
       "import": "./dist/htm.mjs",
       "require": "./dist/htm.js"
     },
-    "./": "./",
     "./preact": {
       "browser": "./preact/index.module.js",
       "umd": "./preact/index.umd.js",
@@ -37,7 +36,8 @@
       "umd": "./mini/index.umd.js",
       "import": "./mini/index.mjs",
       "require": "./mini/index.js"
-    }
+    },
+    "./": "./"
   },
   "scripts": {
     "build": "npm run -s build:main && npm run -s build:mini && npm run -s build:preact && npm run -s build:react && npm run -s build:babel && npm run -s build:babel-transform-jsx && npm run -s build:mjsalias",
@@ -106,6 +106,7 @@
   "devDependencies": {
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.1.6",
+    "@types/jest": "^26.0.24",
     "babel-jest": "^24.1.0",
     "babel-preset-env": "^1.7.0",
     "eslint": "^5.2.0",
