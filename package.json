@@ -37,7 +37,8 @@
       "require": "./mini/index.js",
       "browser": "./mini/index.module.js",
       "umd": "./mini/index.umd.js"
-    }
+    },
+    "./": "./"
   },
   "scripts": {
     "build": "npm run -s build:main && npm run -s build:mini && npm run -s build:preact && npm run -s build:react && npm run -s build:babel && npm run -s build:babel-transform-jsx && npm run -s build:mjsalias",
