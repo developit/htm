@@ -26,7 +26,7 @@ describe('htm', () => {
 		expect(html`<div/>`).toEqual({ tag: 'div', props: null, children: [] });
 		expect(html`<span />`).toEqual({ tag: 'span', props: null, children: [] });
 	});
-	
+
 	test('multiple root elements', () => {
 		expect(html`<a /><b></b><c><//>`).toEqual([
 			{ tag: 'a', props: null, children: [] },
@@ -64,7 +64,7 @@ describe('htm', () => {
 	test('single prop with static value', () => {
 		expect(html`<a href="/hello" />`).toEqual({ tag: 'a', props: { href: '/hello' }, children: [] });
 	});
-	
+
 	test('single prop with static value followed by a single boolean prop', () => {
 		expect(html`<a href="/hello" b />`).toEqual({ tag: 'a', props: { href: '/hello', b: true }, children: [] });
 	});
@@ -115,7 +115,7 @@ describe('htm', () => {
 	test('multiple spread props in one element', () => {
 		expect(html`<a ...${{ foo: 'bar' }} ...${{ quux: 'baz' }} />`).toEqual({ tag: 'a', props: { foo: 'bar', quux: 'baz' }, children: [] });
 	});
-  
+
 	test('mixed spread + static props', () => {
 		expect(html`<a b ...${{ foo: 'bar' }} />`).toEqual({ tag: 'a', props: { b: true, foo: 'bar' }, children: [] });
 		expect(html`<a b c ...${{ foo: 'bar' }} />`).toEqual({ tag: 'a', props: { b: true, c: true, foo: 'bar' }, children: [] });
@@ -185,17 +185,17 @@ describe('htm', () => {
 	test('hyphens (-) are allowed in attribute names', () => {
 		expect(html`<a b-c></a>`).toEqual(h('a', { 'b-c': true }));
 	});
-	
+
 	test('NUL characters are allowed in attribute values', () => {
 		expect(html`<a b="\0"></a>`).toEqual(h('a', { b: '\0' }));
 		expect(html`<a b="\0" c=${'foo'}></a>`).toEqual(h('a', { b: '\0', c: 'foo' }));
 	});
-	
+
 	test('NUL characters are allowed in text', () => {
 		expect(html`<a>\0</a>`).toEqual(h('a', null, '\0'));
 		expect(html`<a>\0${'foo'}</a>`).toEqual(h('a', null, '\0', 'foo'));
 	});
-	
+
 	test('cache key should be unique', () => {
 		html`<a b="${'foo'}" />`;
 		expect(html`<a b="\0" />`).toEqual(h('a', { b: '\0' }));
@@ -214,5 +214,11 @@ describe('htm', () => {
 		expect(html`<a><!-- Hello,\nworld! --></a>`).toEqual(h('a', null));
 		expect(html`<a><!-- ${'Hello, world!'} --></a>`).toEqual(h('a', null));
 		expect(html`<a><!--> Hello, world <!--></a>`).toEqual(h('a', null));
+	});
+
+	test('unclosed tag', () => {
+		expect(() => {
+			html`<div<div></div></div>`;
+		}).not.toThrow();
 	});
 });
