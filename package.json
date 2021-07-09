@@ -8,37 +8,36 @@
   "types": "dist/htm.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/htm.mjs",
-      "require": "./dist/htm.js",
       "browser": "./dist/htm.module.js",
-      "umd": "./dist/htm.umd.js"
+      "umd": "./dist/htm.umd.js",
+      "import": "./dist/htm.mjs",
+      "require": "./dist/htm.js"
     },
     "./": "./",
     "./preact": {
-      "import": "./preact/index.mjs",
-      "require": "./preact/index.js",
       "browser": "./preact/index.module.js",
-      "umd": "./preact/index.umd.js"
+      "umd": "./preact/index.umd.js",
+      "import": "./preact/index.mjs",
+      "require": "./preact/index.js"
     },
     "./preact/standalone": {
-      "import": "./preact/standalone.mjs",
-      "require": "./preact/standalone.js",
       "browser": "./preact/standalone.module.js",
-      "umd": "./preact/standalone.umd.js"
+      "umd": "./preact/standalone.umd.js",
+      "import": "./preact/standalone.mjs",
+      "require": "./preact/standalone.js"
     },
     "./react": {
-      "import": "./react/index.mjs",
-      "require": "./react/index.js",
       "browser": "./react/index.module.js",
-      "umd": "./react/index.umd.js"
+      "umd": "./react/index.umd.js",
+      "import": "./react/index.mjs",
+      "require": "./react/index.js"
     },
     "./mini": {
-      "import": "./mini/index.mjs",
-      "require": "./mini/index.js",
       "browser": "./mini/index.module.js",
-      "umd": "./mini/index.umd.js"
-    },
-    "./": "./"
+      "umd": "./mini/index.umd.js",
+      "import": "./mini/index.mjs",
+      "require": "./mini/index.js"
+    }
   },
   "scripts": {
     "build": "npm run -s build:main && npm run -s build:mini && npm run -s build:preact && npm run -s build:react && npm run -s build:babel && npm run -s build:babel-transform-jsx && npm run -s build:mjsalias",
