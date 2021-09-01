@@ -215,4 +215,34 @@ describe('htm', () => {
 		expect(html`<a><!-- ${'Hello, world!'} --></a>`).toEqual(h('a', null));
 		expect(html`<a><!--> Hello, world <!--></a>`).toEqual(h('a', null));
 	});
+
+	test('ignore JS single line comments', () => {
+		expect(html`<div
+			// comment
+			id="foo" />`).toEqual(h('div', { id: 'foo' }));
+		expect(html`<div id="foo"
+			// comment
+			/>`).toEqual(h('div', { id: 'foo' }));
+		expect(html`<div id="foo" //comment
+			/>`).toEqual(h('div', { id: 'foo' }));
+
+		// False positives
+		expect(html`<div id="// foo"
+			/>`).toEqual(h('div', { id: '// foo' }));
+		expect(html`<div>// no comment</div>`).toEqual(h('div', null, '// no comment'));
+	});
+
+	test('ignore JS multi line comments', () => {
+		expect(html`<div
+			/* comment */
+			id="foo" />`).toEqual(h('div', { id: 'foo' }));
+		expect(html`<div id="foo"
+			/* comment */
+			/>`).toEqual(h('div', { id: 'foo' }));
+		expect(html`<div id="foo" /* comment */ />`).toEqual(h('div', { id: 'foo' }));
+
+		// False positives
+		expect(html`<div id="/* foo */" />`).toEqual(h('div', { id: '/* foo */' }));
+		expect(html`<div>/*foo*/</div>`).toEqual(h('div', null, '/*foo*/'));
+	});
 });

@@ -5,8 +5,10 @@ const MODE_TEXT = 1;
 const MODE_WHITESPACE = 2;
 const MODE_TAGNAME = 3;
 const MODE_COMMENT = 4;
-const MODE_PROP_SET = 5;
-const MODE_PROP_APPEND = 6;
+const MODE_COMMENT_SINGLE = 5;
+const MODE_COMMENT_MULTI = 6;
+const MODE_PROP_SET = 7;
+const MODE_PROP_APPEND = 8;
 
 const CHILD_APPEND = 0;
 const CHILD_RECURSE = 2;
@@ -219,6 +221,26 @@ export const build = function(statics) {
 				}
 				else {
 					buffer += char;
+				}
+			}
+			else if (mode === MODE_WHITESPACE && char === '/' && statics[i][j+1] === '/') {
+				mode = MODE_COMMENT_SINGLE;
+			}
+			else if (mode === MODE_WHITESPACE && char === '/' && statics[i][j+1] === '*') {
+				mode = MODE_COMMENT_MULTI;
+			}
+			else if (mode === MODE_COMMENT_SINGLE) {
+				// Ignore everything until newline
+				if (char === '\n' || char === '\r') {
+					mode = MODE_WHITESPACE;
+					buffer = '';
+				}
+			}
+			else if (mode === MODE_COMMENT_MULTI) {
+				if (char === '*' && statics[i][j+1] === '/') {
+					mode = MODE_WHITESPACE;
+					buffer = '';
+					j++;
 				}
 			}
 			else if (mode === MODE_COMMENT) {
