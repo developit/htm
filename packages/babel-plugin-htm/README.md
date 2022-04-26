@@ -60,7 +60,7 @@ With Babel config:
 "plugins": [
   ["babel-plugin-htm", {
     "tag": "$$html",
-    "import": "preact"
+    "import": "htm/preact"
   }]
 ]
 ```
