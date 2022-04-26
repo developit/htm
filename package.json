@@ -8,7 +8,7 @@
   "types": "dist/htm.d.ts",
   "exports": {
     ".": {
-      "types": "./src/index.d.ts",
+      "types": "./dist/htm.d.ts",
       "browser": "./dist/htm.module.js",
       "umd": "./dist/htm.umd.js",
       "import": "./dist/htm.mjs",
