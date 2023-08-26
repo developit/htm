@@ -11,10 +11,10 @@
  * limitations under the License.
  */
 
-import { h, Component, createContext, createRef, render } from 'preact';
+import { h, Component, Fragment, createContext, createRef, render } from 'preact';
 import { useState, useReducer, useEffect, useLayoutEffect, useRef, useImperativeHandle, useMemo, useCallback, useContext, useDebugValue, useErrorBoundary } from 'preact/hooks';
 import htm from '../../index.mjs';
 
 const html = htm.bind(h);
 
-export { h, html, render, Component, createContext, createRef, useState, useReducer, useEffect, useLayoutEffect, useRef, useImperativeHandle, useMemo, useCallback, useContext, useDebugValue, useErrorBoundary };
+export { h, html, render, Component, Fragment, createContext, createRef, useState, useReducer, useEffect, useLayoutEffect, useRef, useImperativeHandle, useMemo, useCallback, useContext, useDebugValue, useErrorBoundary };
