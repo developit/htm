@@ -69,6 +69,10 @@ const html = htm.bind(React.createElement);
 import { html, render } from 'https://unpkg.com/htm/preact/standalone.module.js'
 ```
 
+### Editor Integration 
+- **VSCode** - [lit-html](https://marketplace.visualstudio.com/items?itemName=bierner.lit-html) can be used to provide basic syntax highlighting
+- **Formatting** - Setup Prettier on your editor to help with formatting
+
 ## Usage
 
 If you're using Preact or React, we've included off-the-shelf bindings to make your life easier.
