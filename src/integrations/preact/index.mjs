@@ -13,6 +13,7 @@
 
 import { h, Component, render } from 'preact';
 import htm from 'htm';
+export * from 'preact/hooks';
 
 const html = htm.bind(h);
 
